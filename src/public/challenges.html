@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retos - WacoPro Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .challenges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .challenge-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; position: relative; overflow: hidden; transition: all 0.2s; }
+    .challenge-card:hover { border-color: rgba(0,243,255,0.25); }
+    .challenge-card.joined { border-color: rgba(16,185,129,0.3); }
+    .challenge-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); }
+    .challenge-card.joined::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .ch-type { font-size: 0.6rem; font-family: 'Orbitron', sans-serif; color: rgba(255,255,255,0.35); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+    .ch-name { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 0.35rem; }
+    .ch-desc { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 1.5; margin-bottom: 0.875rem; }
+    .ch-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .ch-meta-item { font-size: 0.65rem; color: rgba(255,255,255,0.35); font-family: 'Orbitron', sans-serif; display: flex; align-items: center; gap: 0.25rem; }
+    .ch-progress-wrap { margin-bottom: 0.875rem; }
+    .ch-progress-label { display: flex; justify-content: space-between; font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-bottom: 0.3rem; }
+    .ch-progress-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; }
+    .ch-progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); transition: width 0.6s ease; }
+    .ch-actions { display: flex; gap: 0.5rem; }
+    .difficulty-badge { padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.58rem; font-family: 'Orbitron', sans-serif; }
+    .diff-easy { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .diff-medium { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+    .diff-hard { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .leaderboard-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 8px; margin-bottom: 0.3rem; }
+    .leaderboard-row:nth-child(1) { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.15); }
+    .leaderboard-row:nth-child(2) { background: rgba(156,163,175,0.06); border: 1px solid rgba(156,163,175,0.1); }
+    .leaderboard-row:nth-child(3) { background: rgba(180,120,60,0.06); border: 1px solid rgba(180,120,60,0.1); }
+    .lb-rank { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; width: 24px; text-align: center; }
+    .lb-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue)); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+    .lb-name { flex: 1; font-size: 0.8rem; color: rgba(255,255,255,0.8); }
+    .lb-score { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--neon-blue); }
+    .tab-bar { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .tab-btn { padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.4); font-family: 'Orbitron', sans-serif; font-size: 0.65rem; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: rgba(0,243,255,0.1); border-color: var(--neon-blue); color: var(--neon-blue); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-box { background: #0f0f1a; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto; }
+    .modal-title { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: var(--neon-blue); margin-bottom: 1rem; }
+    .my-stats { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .my-stat { flex: 1; min-width: 100px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 0.875rem; text-align: center; }
+    .my-stat .val { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; color: var(--neon-purple); }
+    .my-stat .lbl { font-size: 0.62rem; color: rgba(255,255,255,0.35); margin-top: 0.25rem; text-transform: uppercase; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <nav class="dash-nav">
+    <div class="dash-nav-inner">
+      <a href="/dashboard.html" class="nav-brand">
+        <div class="nav-brand-icon">W</div>
+        <span class="nav-brand-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">DASHBOARD</a>
+        <a href="/analytics.html" class="nav-link">ANALÍTICAS</a>
+        <a href="/social-feed.html" class="nav-link">SOCIAL</a>
+        <a href="/profile.html" class="nav-link">PERFIL</a>
+      </div>
+      <div class="nav-right">
+        <span class="nav-user-name" id="navUserName">...</span>
+        <button type="button" class="btn-logout" onclick="logout()">SALIR</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <aside class="dash-sidebar">
+      <div class="sidebar-card">
+        <p class="sidebar-section-title">HERRAMIENTAS</p>
+        <ul class="sidebar-nav">
+          <li><a href="/dashboard.html" class="sidebar-nav-link">📊 Dashboard</a></li>
+          <li><a href="/analytics.html" class="sidebar-nav-link">📈 Analíticas</a></li>
+          <li><a href="/social-feed.html" class="sidebar-nav-link">🌐 Social</a></li>
+          <li><a href="/workout-builder.html" class="sidebar-nav-link">🏗️ Constructor</a></li>
+          <li><a href="/meal-planner.html" class="sidebar-nav-link">🥗 Plan Nutricional</a></li>
+          <li><a href="/challenges.html" class="sidebar-nav-link active">🏆 Retos</a></li>
+        </ul>
+      </div>
+
+      <!-- My stats -->
+      <div class="sidebar-card" style="margin-top:1rem;">
+        <p class="sidebar-section-title">MIS LOGROS</p>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;">
+            <span style="color:rgba(255,255,255,0.5);">Retos completados</span>
+            <span style="color:var(--neon-blue);font-family:'Orbitron',sans-serif;" id="sideCompletedCount">0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;">
+            <span style="color:rgba(255,255,255,0.5);">Retos activos</span>
+            <span style="color:var(--neon-purple);font-family:'Orbitron',sans-serif;" id="sideActiveCount">0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;">
+            <span style="color:rgba(255,255,255,0.5);">Puntos totales</span>
+            <span style="color:#f59e0b;font-family:'Orbitron',sans-serif;" id="sideTotalPoints">0</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h1 class="page-title">Retos</h1>
+          <p class="page-subtitle">Desafíos para superar tus límites</p>
+        </div>
+        <button type="button" class="btn-neon" onclick="showCreateChallenge()">+ CREAR RETO</button>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button type="button" class="tab-btn active" onclick="setTab(this,'all')">Todos</button>
+        <button type="button" class="tab-btn" onclick="setTab(this,'my')">Mis Retos</button>
+        <button type="button" class="tab-btn" onclick="setTab(this,'completed')">Completados</button>
+      </div>
+
+      <!-- Challenges grid -->
+      <div class="challenges-grid" id="challengesGrid">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="dash-card" style="margin-top:1.5rem;">
+        <div class="card-header" style="margin-bottom:0.875rem;">
+          <span class="card-title">🏆 RANKING GLOBAL</span>
+        </div>
+        <div id="leaderboardList">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create challenge modal -->
+  <div id="createModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeCreateChallenge()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-title">CREAR NUEVO RETO</div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.875rem;">
+        <div class="form-group" style="margin:0;"><label class="form-label">NOMBRE DEL RETO</label><input type="text" id="cName" class="form-input" placeholder="Ej: 30 días de plancha"></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">DESCRIPCIÓN</label><textarea id="cDesc" class="form-input" rows="2" placeholder="Describe el objetivo del reto..."></textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+          <div class="form-group" style="margin:0;"><label class="form-label">TIPO</label>
+            <select id="cType" class="form-input">
+              <option value="workout">💪 Entrenamiento</option>
+              <option value="nutrition">🥗 Nutrición</option>
+              <option value="hybrid">⚡ Híbrido</option>
+              <option value="hydration">💧 Hidratación</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;"><label class="form-label">DIFICULTAD</label>
+            <select id="cDiff" class="form-input">
+              <option value="easy">Fácil</option>
+              <option value="medium" selected>Medio</option>
+              <option value="hard">Difícil</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;"><label class="form-label">DURACIÓN (días)</label><input type="number" id="cDuration" class="form-input" placeholder="30" min="1" max="365"></div>
+          <div class="form-group" style="margin:0;"><label class="form-label">PUNTOS</label><input type="number" id="cPoints" class="form-input" placeholder="100" min="10"></div>
+        </div>
+        <div class="form-group" style="margin:0;"><label class="form-label">META / OBJETIVO</label><input type="text" id="cGoal" class="form-input" placeholder="Ej: Completar 30 sesiones de entrenamiento"></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="button" class="btn-neon" onclick="saveChallenge()" style="font-size:0.7rem;">CREAR RETO</button>
+        <button type="button" onclick="closeCreateChallenge()" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);border-radius:6px;padding:0.4rem 0.875rem;font-size:0.7rem;cursor:pointer;">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress modal -->
+  <div id="progressModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeProgressModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-title" id="progressModalTitle">ACTUALIZAR PROGRESO</div>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:1rem;" id="progressModalGoal"></p>
+      <div class="form-group"><label class="form-label">PROGRESO (%)</label>
+        <input type="range" id="progressRange" min="0" max="100" value="0" oninput="document.getElementById('progressVal').textContent=this.value+'%'" style="width:100%;accent-color:var(--neon-blue);">
+        <div style="text-align:center;font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--neon-blue);margin-top:0.5rem;" id="progressVal">0%</div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button type="button" class="btn-neon" onclick="saveProgress()" style="font-size:0.7rem;">GUARDAR</button>
+        <button type="button" onclick="closeProgressModal()" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);border-radius:6px;padding:0.4rem 0.875rem;font-size:0.7rem;cursor:pointer;">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    if (!requireAuth()) { /* redirected */ }
+
+    const TYPE_ICONS = { workout:'💪', nutrition:'🥗', hybrid:'⚡', hydration:'💧' };
+    const DIFF_LABELS = { easy:'Fácil', medium:'Medio', hard:'Difícil' };
+    let currentTab = 'all';
+    let selectedProgressId = null;
+
+    function getChallenges() { return JSON.parse(localStorage.getItem('waco_challenges') || JSON.stringify(DEFAULT_CHALLENGES)); }
+    function saveChallenges(c) { localStorage.setItem('waco_challenges', JSON.stringify(c)); }
+    function getMyJoined() { return JSON.parse(localStorage.getItem('waco_joined_challenges') || '{}'); }
+    function saveMyJoined(j) { localStorage.setItem('waco_joined_challenges', JSON.stringify(j)); }
+
+    const DEFAULT_CHALLENGES = [
+      { id:'c1', name:'30 Días de Entrenamiento', desc:'Entrena al menos 30 minutos cada día durante un mes completo.', type:'workout', diff:'medium', duration:30, goal:'Completar 30 sesiones de mínimo 30 min', points:500, participants:128, createdBy:'WacoPro' },
+      { id:'c2', name:'Semana Sin Azúcar', desc:'Elimina el azúcar añadida de tu dieta durante 7 días.', type:'nutrition', diff:'hard', duration:7, goal:'0 azúcares añadidos durante 7 días', points:200, participants:64, createdBy:'WacoPro' },
+      { id:'c3', name:'Hidratación Perfecta', desc:'Consume 2.5L de agua cada día durante 2 semanas.', type:'hydration', diff:'easy', duration:14, goal:'2.5L de agua diarios durante 14 días', points:150, participants:342, createdBy:'WacoPro' },
+      { id:'c4', name:'100 Dominadas en 30 Días', desc:'Completa un total de 100 dominadas distribuidas en 30 días.', type:'workout', diff:'hard', duration:30, goal:'100 dominadas totales', points:400, participants:45, createdBy:'WacoPro' },
+      { id:'c5', name:'Plan Nutricional Semanal', desc:'Sigue tu plan de comidas al 100% durante una semana entera.', type:'nutrition', diff:'medium', duration:7, goal:'7 días de adherencia completa al plan', points:250, participants:89, createdBy:'WacoPro' },
+      { id:'c6', name:'Reto Híbrido 21 Días', desc:'Combina entrenamientos y nutrición saludable durante 21 días.', type:'hybrid', diff:'medium', duration:21, goal:'Entrena 4x/semana + sigue el plan nutricional', points:600, participants:33, createdBy:'WacoPro' },
+    ];
+
+    function daysLeft(ch) {
+      const j = getMyJoined();
+      if (!j[ch.id]) return ch.duration;
+      const joined = new Date(j[ch.id].joinedAt);
+      const end = new Date(joined);
+      end.setDate(end.getDate() + ch.duration);
+      const diff = Math.ceil((end - new Date()) / 86400000);
+      return Math.max(0, diff);
+    }
+
+    function renderChallenges() {
+      const all = getChallenges();
+      const joined = getMyJoined();
+      let filtered = all;
+      if (currentTab === 'my') filtered = all.filter(c => joined[c.id] && !joined[c.id].completed);
+      if (currentTab === 'completed') filtered = all.filter(c => joined[c.id]?.completed);
+
+      const grid = document.getElementById('challengesGrid');
+      if (!filtered.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:rgba(255,255,255,0.25);font-size:0.85rem;">No hay retos en esta categoría</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(ch => {
+        const isJoined = !!joined[ch.id];
+        const progress = joined[ch.id]?.progress || 0;
+        const completed = joined[ch.id]?.completed;
+        const left = daysLeft(ch);
+
+        return `
+          <div class="challenge-card ${isJoined ? 'joined' : ''}">
+            <div class="ch-type">
+              ${TYPE_ICONS[ch.type] || '🏋️'} ${ch.type.toUpperCase()}
+              <span class="difficulty-badge diff-${ch.diff}" style="margin-left:auto;">${DIFF_LABELS[ch.diff]}</span>
+            </div>
+            <div class="ch-name">${ch.name}</div>
+            <div class="ch-desc">${ch.desc}</div>
+            <div class="ch-meta">
+              <div class="ch-meta-item">⏱ ${ch.duration} días</div>
+              <div class="ch-meta-item">👥 ${ch.participants + (isJoined ? 1 : 0)}</div>
+              <div class="ch-meta-item">⭐ ${ch.points} pts</div>
+              ${isJoined ? `<div class="ch-meta-item" style="color:${left === 0 ? '#10b981' : 'inherit'};">📅 ${left === 0 ? 'Finalizado' : left + ' días restantes'}</div>` : ''}
+            </div>
+            ${isJoined ? `
+              <div class="ch-progress-wrap">
+                <div class="ch-progress-label">
+                  <span>Progreso</span><span>${progress}%</span>
+                </div>
+                <div class="ch-progress-bar">
+                  <div class="ch-progress-fill" style="width:${progress}%;${completed ? 'background:linear-gradient(90deg,#10b981,#34d399);' : ''}"></div>
+                </div>
+              </div>
+            ` : ''}
+            <div class="ch-actions">
+              ${completed ? `
+                <span style="font-size:0.7rem;font-family:'Orbitron',sans-serif;color:#10b981;">✓ COMPLETADO</span>
+              ` : isJoined ? `
+                <button type="button" class="btn-neon" onclick="openProgressModal('${ch.id}')" style="font-size:0.65rem;padding:0.35rem 0.75rem;">ACTUALIZAR</button>
+                <button type="button" onclick="leaveChallenge('${ch.id}')" style="background:transparent;border:1px solid rgba(239,68,68,0.3);color:rgba(239,68,68,0.7);border-radius:6px;padding:0.35rem 0.75rem;font-size:0.65rem;cursor:pointer;">SALIR</button>
+              ` : `
+                <button type="button" class="btn-neon" onclick="joinChallenge('${ch.id}')" style="font-size:0.65rem;padding:0.35rem 0.875rem;">UNIRSE</button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateSideStats();
+    }
+
+    function setTab(el, tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      currentTab = tab;
+      renderChallenges();
+    }
+
+    function joinChallenge(id) {
+      const joined = getMyJoined();
+      joined[id] = { joinedAt: new Date().toISOString(), progress: 0, completed: false };
+      saveMyJoined(joined);
+      window.showNotification('¡Te has unido al reto!', 'success');
+      renderChallenges();
+    }
+
+    function leaveChallenge(id) {
+      if (!confirm('¿Salir de este reto?')) return;
+      const joined = getMyJoined();
+      delete joined[id];
+      saveMyJoined(joined);
+      window.showNotification('Saliste del reto', 'info');
+      renderChallenges();
+    }
+
+    function openProgressModal(id) {
+      selectedProgressId = id;
+      const challenges = getChallenges();
+      const ch = challenges.find(c => c.id === id);
+      const joined = getMyJoined();
+      const current = joined[id]?.progress || 0;
+      document.getElementById('progressModalTitle').textContent = ch.name;
+      document.getElementById('progressModalGoal').textContent = 'Meta: ' + ch.goal;
+      document.getElementById('progressRange').value = current;
+      document.getElementById('progressVal').textContent = current + '%';
+      document.getElementById('progressModal').style.display = 'flex';
+    }
+
+    function closeProgressModal() { document.getElementById('progressModal').style.display = 'none'; selectedProgressId = null; }
+
+    function saveProgress() {
+      if (!selectedProgressId) return;
+      const val = Number(document.getElementById('progressRange').value);
+      const joined = getMyJoined();
+      joined[selectedProgressId].progress = val;
+      if (val >= 100) {
+        joined[selectedProgressId].completed = true;
+        window.showNotification('🎉 ¡Reto completado! ¡Felicidades!', 'success');
+      } else {
+        window.showNotification('Progreso actualizado', 'success');
+      }
+      saveMyJoined(joined);
+      closeProgressModal();
+      renderChallenges();
+    }
+
+    function showCreateChallenge() { document.getElementById('createModal').style.display = 'flex'; }
+    function closeCreateChallenge() { document.getElementById('createModal').style.display = 'none'; }
+
+    function saveChallenge() {
+      const name = document.getElementById('cName').value.trim();
+      if (!name) { window.showNotification('Escribe el nombre del reto', 'warning'); return; }
+      const challenges = getChallenges();
+      const newCh = {
+        id: 'c_' + Date.now(),
+        name,
+        desc: document.getElementById('cDesc').value.trim(),
+        type: document.getElementById('cType').value,
+        diff: document.getElementById('cDiff').value,
+        duration: Number(document.getElementById('cDuration').value) || 30,
+        goal: document.getElementById('cGoal').value.trim(),
+        points: Number(document.getElementById('cPoints').value) || 100,
+        participants: 0,
+        createdBy: 'Tú',
+      };
+      challenges.push(newCh);
+      saveChallenges(challenges);
+      closeCreateChallenge();
+      window.showNotification('¡Reto creado!', 'success');
+      renderChallenges();
+    }
+
+    function updateSideStats() {
+      const joined = getMyJoined();
+      const active = Object.values(joined).filter(j => !j.completed).length;
+      const completed = Object.values(joined).filter(j => j.completed).length;
+      const challenges = getChallenges();
+      let points = 0;
+      Object.entries(joined).forEach(([id, j]) => {
+        if (j.completed) {
+          const ch = challenges.find(c => c.id === id);
+          if (ch) points += ch.points;
+        }
+      });
+      document.getElementById('sideActiveCount').textContent = active;
+      document.getElementById('sideCompletedCount').textContent = completed;
+      document.getElementById('sideTotalPoints').textContent = points;
+    }
+
+    function renderLeaderboard() {
+      const users = [
+        { name:'Alex M.', points:1850, completed:7 },
+        { name:'Sara G.', points:1620, completed:6 },
+        { name:'Carlos R.', points:1430, completed:5 },
+        { name:'Laura P.', points:1200, completed:4 },
+        { name:'Miguel T.', points:980, completed:3 },
+      ];
+      const medals = ['🥇','🥈','🥉','4°','5°'];
+      document.getElementById('leaderboardList').innerHTML = users.map((u, i) => `
+        <div class="leaderboard-row">
+          <div class="lb-rank">${medals[i]}</div>
+          <div class="lb-avatar">${u.name[0]}</div>
+          <div class="lb-name">${u.name}</div>
+          <div style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:'Orbitron',sans-serif;margin-right:0.75rem;">${u.completed} retos</div>
+          <div class="lb-score">${u.points} pts</div>
+        </div>
+      `).join('');
+    }
+
+    // Init
+    const u = window.api.getCurrentUser();
+    if (u) document.getElementById('navUserName').textContent = (u.name || u.email).split(' ')[0];
+    renderChallenges();
+    renderLeaderboard();
+  </script>
+</body>
+</html>

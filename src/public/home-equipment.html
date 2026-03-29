@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipamiento en Casa | WacoPro Fitness</title>
+  <style>
+    :root {
+      --bg: #0a0a1a; --surface: #12122a; --surface2: #1a1a35;
+      --primary: #6c63ff; --accent: #00d9a6; --secondary: #ff6b6b; --warning: #ffd93d;
+      --text: #e8e8f0; --text-muted: #6b6b8a;
+      --border: rgba(108,99,255,0.2);
+      --glow: 0 0 20px rgba(108,99,255,0.4);
+      --glow-accent: 0 0 20px rgba(0,217,166,0.4);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    nav { background: rgba(10,10,26,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: .9rem; transition: color .2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+    .nav-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .5rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: .85rem; }
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,166,0.08)); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2rem; text-align: center; }
+    .hero h1 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: .5rem; }
+    .hero p { color: var(--text-muted); max-width: 580px; margin: 0 auto 2rem; font-size: 1.05rem; }
+    .setup-wizard-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .85rem 2rem; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; box-shadow: var(--glow); transition: all .2s; }
+    .setup-wizard-btn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(108,99,255,0.6); }
+
+    /* BUDGET BUNDLES */
+    .section { padding: 2.5rem 2rem; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .section-title { font-size: 1.3rem; font-weight: 800; color: var(--text); }
+    .section-title span { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .section-subtitle { font-size: .85rem; color: var(--text-muted); margin-top: .25rem; }
+
+    .bundles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1rem; }
+    .bundle-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: all .25s;
+    }
+    .bundle-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--glow); }
+    .bundle-card.featured { border-color: var(--accent); box-shadow: var(--glow-accent); }
+    .bundle-header { background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,217,166,0.1)); padding: 1.5rem; text-align: center; position: relative; }
+    .bundle-card.featured .bundle-header { background: linear-gradient(135deg, rgba(0,217,166,0.2), rgba(108,99,255,0.15)); }
+    .bundle-icon { font-size: 3rem; margin-bottom: .5rem; }
+    .bundle-name { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+    .bundle-price { font-size: 1.6rem; font-weight: 800; color: var(--accent); margin: .3rem 0; }
+    .bundle-price-range { font-size: .75rem; color: var(--text-muted); }
+    .featured-badge { position: absolute; top: .75rem; right: .75rem; background: var(--accent); color: #000; font-size: .7rem; padding: .2rem .6rem; border-radius: 8px; font-weight: 800; }
+    .bundle-body { padding: 1.2rem; }
+    .bundle-desc { font-size: .84rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 1rem; }
+    .bundle-items { list-style: none; display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
+    .bundle-items li { font-size: .82rem; color: var(--text-muted); display: flex; align-items: center; gap: .5rem; }
+    .bundle-items li::before { content: '✅'; font-size: .75rem; }
+    .bundle-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .bundle-stat { font-size: .75rem; color: var(--text-muted); display: flex; align-items: center; gap: .3rem; }
+    .btn-bundle { width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .7rem; border-radius: 10px; cursor: pointer; font-weight: 700; margin-top: 1rem; transition: all .2s; }
+    .btn-bundle:hover { box-shadow: var(--glow); }
+
+    /* PRODUCT CATEGORIES TABS */
+    .cat-tabs { display: flex; gap: .5rem; padding: 0 2rem 1rem; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: .45rem 1.1rem; border-radius: 20px; cursor: pointer; font-size: .82rem; white-space: nowrap; transition: all .2s; }
+    .cat-tab:hover { border-color: var(--primary); color: var(--primary); }
+    .cat-tab.active { background: linear-gradient(135deg, var(--primary), var(--accent)); border-color: transparent; color: #fff; }
+
+    /* FILTERS */
+    .filter-bar { display: flex; gap: 1rem; padding: 1.5rem 2rem .5rem; flex-wrap: wrap; align-items: center; }
+    .filter-bar-search { flex: 1; min-width: 200px; position: relative; }
+    .filter-bar-search input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .6rem 1rem .6rem 2.3rem; border-radius: 10px; font-size: .9rem; }
+    .filter-bar-search input:focus { outline: none; border-color: var(--primary); }
+    .filter-bar-search .si { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .filter-select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .6rem 1rem; border-radius: 10px; font-size: .82rem; }
+    .filter-badge { background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3); color: var(--primary); font-size: .75rem; padding: .3rem .7rem; border-radius: 10px; cursor: pointer; }
+    .filter-badge.active { background: var(--primary); color: #fff; }
+
+    /* PRODUCT GRID */
+    .product-section { padding: 1.5rem 2rem; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.2rem; }
+
+    .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: all .25s; cursor: pointer; }
+    .product-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--glow); }
+    .product-img { aspect-ratio: 4/3; background: linear-gradient(135deg, var(--surface2), rgba(108,99,255,0.1)); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+    .product-img img { width: 100%; height: 100%; object-fit: cover; }
+    .product-img .rec-badge { position: absolute; top: .6rem; left: .6rem; background: var(--warning); color: #000; font-size: .65rem; padding: .2rem .5rem; border-radius: 6px; font-weight: 800; }
+    .product-img .level-badge { position: absolute; top: .6rem; right: .6rem; font-size: .65rem; padding: .2rem .5rem; border-radius: 6px; font-weight: 700; }
+    .lvl-beginner { background: rgba(0,217,166,0.25); color: var(--accent); }
+    .lvl-intermediate { background: rgba(255,217,61,0.25); color: var(--warning); }
+    .lvl-advanced { background: rgba(255,107,107,0.25); color: var(--secondary); }
+
+    .product-body { padding: 1rem; }
+    .product-body h4 { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .35rem; }
+    .product-desc { font-size: .78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: .75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .product-price-row { display: flex; align-items: center; justify-content: space-between; }
+    .product-price { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+    .product-price-orig { font-size: .75rem; color: var(--text-muted); text-decoration: line-through; margin-left: .3rem; }
+    .product-discount { font-size: .7rem; background: rgba(255,107,107,0.2); color: var(--secondary); padding: .15rem .4rem; border-radius: 5px; font-weight: 700; }
+    .btn-add { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .45rem .9rem; border-radius: 8px; cursor: pointer; font-size: .8rem; font-weight: 700; transition: all .2s; }
+    .btn-add:hover { box-shadow: var(--glow); }
+    .product-tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .6rem; }
+    .ptag { background: var(--surface2); color: var(--text-muted); font-size: .68rem; padding: .15rem .45rem; border-radius: 5px; }
+
+    /* WIZARD MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 600px; max-height: 88vh; overflow-y: auto; transform: translateY(30px); transition: transform .25s; }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+    .modal-close { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .modal-close:hover { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+    .modal-body { padding: 1.5rem; }
+
+    /* WIZARD STEPS */
+    .wizard-progress { display: flex; gap: .5rem; margin-bottom: 2rem; }
+    .wizard-step { flex: 1; height: 4px; border-radius: 4px; background: var(--surface2); transition: background .3s; }
+    .wizard-step.done { background: var(--accent); }
+    .wizard-step.active { background: var(--primary); }
+    .wizard-question { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1.5rem; text-align: center; }
+    .wizard-options { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .wizard-option {
+      background: var(--surface2); border: 2px solid var(--border); border-radius: 12px; padding: 1.2rem;
+      cursor: pointer; text-align: center; transition: all .2s;
+    }
+    .wizard-option:hover { border-color: var(--primary); }
+    .wizard-option.selected { border-color: var(--accent); background: rgba(0,217,166,0.1); }
+    .wizard-option .opt-icon { font-size: 2rem; margin-bottom: .5rem; }
+    .wizard-option .opt-label { font-size: .85rem; font-weight: 700; color: var(--text); }
+    .wizard-option .opt-sub { font-size: .72rem; color: var(--text-muted); margin-top: .2rem; }
+    .wizard-nav { display: flex; gap: 1rem; margin-top: 2rem; }
+    .btn-wizard-next { flex: 1; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .75rem; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: .95rem; }
+    .btn-wizard-back { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: .75rem 1.5rem; border-radius: 12px; cursor: pointer; font-size: .9rem; }
+    .btn-wizard-back:hover { border-color: var(--text-muted); color: var(--text); }
+
+    /* RESULT */
+    .wizard-result { text-align: center; }
+    .wizard-result .result-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .wizard-result h3 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: .5rem; }
+    .wizard-result p { color: var(--text-muted); font-size: .9rem; margin-bottom: 1.5rem; }
+    .result-bundle { background: var(--surface2); border: 1px solid var(--accent); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem; text-align: left; }
+    .result-bundle h4 { font-size: 1rem; font-weight: 800; color: var(--accent); margin-bottom: .75rem; }
+    .result-items { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+    .result-items li { display: flex; justify-content: space-between; align-items: center; font-size: .85rem; }
+    .result-items li .item-name { color: var(--text-muted); }
+    .result-items li .item-price { color: var(--accent); font-weight: 700; }
+    .result-total { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: .75rem; margin-top: .75rem; font-weight: 800; }
+
+    /* WISHLIST */
+    .wishlist-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 1rem 2rem; position: sticky; bottom: 0; z-index: 50; display: flex; align-items: center; gap: 1rem; }
+    .wishlist-bar.hidden { display: none; }
+    .wishlist-count { background: var(--primary); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 800; }
+    .wishlist-items-preview { flex: 1; font-size: .82rem; color: var(--text-muted); }
+    .btn-wishlist { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .55rem 1.3rem; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: .85rem; }
+    .btn-clear-wishlist { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: .5rem .85rem; border-radius: 10px; cursor: pointer; font-size: .8rem; }
+
+    .toast { position: fixed; bottom: 5rem; right: 2rem; z-index: 999; background: var(--surface2); border: 1px solid var(--accent); color: var(--text); padding: .75rem 1.25rem; border-radius: 10px; font-size: .9rem; box-shadow: var(--glow-accent); transform: translateY(100px); opacity: 0; transition: all .3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .loading { text-align: center; padding: 4rem; color: var(--text-muted); }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .wizard-options { grid-template-columns: 1fr; }
+      .bundles-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⚡ WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/virtual-classes">Clases</a>
+    <a href="/on-demand">Videos</a>
+    <a href="/programs">Programas</a>
+    <a href="/coaches">Coaches</a>
+    <a href="/home-equipment" class="active">Equipamiento</a>
+  </div>
+  <button type="button" class="nav-btn" onclick="location.href='/profile'">Mi Cuenta</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🏠 Equipa tu Gimnasio en Casa</h1>
+  <p>Recomendaciones personalizadas de equipamiento para entrenar en casa según tu presupuesto, espacio y objetivos.</p>
+  <button type="button" class="setup-wizard-btn" onclick="openWizard()">🧙 Asistente de configuración →</button>
+</div>
+
+<!-- BUDGET BUNDLES -->
+<div class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-title">📦 Packs <span>Recomendados</span></div>
+      <div class="section-subtitle">Combinaciones curadas para cada presupuesto</div>
+    </div>
+  </div>
+  <div class="bundles-grid">
+
+    <div class="bundle-card" onclick="applyBundle('starter')">
+      <div class="bundle-header">
+        <div class="bundle-icon">🌱</div>
+        <div class="bundle-name">Pack Starter</div>
+        <div class="bundle-price">~$80–150</div>
+        <div class="bundle-price-range">Presupuesto bajo</div>
+      </div>
+      <div class="bundle-body">
+        <p class="bundle-desc">Lo esencial para comenzar a entrenar en casa sin gastar mucho. Perfecto para principiantes.</p>
+        <ul class="bundle-items">
+          <li>Esterilla de ejercicios (10mm)</li>
+          <li>Set de bandas elásticas (5 niveles)</li>
+          <li>Par de mancuernas 5-10 kg</li>
+          <li>Rueda abdominal</li>
+          <li>Cuerda para saltar</li>
+        </ul>
+        <div class="bundle-stats">
+          <div class="bundle-stat">🎯 Principiante</div>
+          <div class="bundle-stat">📐 Espacio mínimo</div>
+          <div class="bundle-stat">💪 HIIT + Cardio</div>
+        </div>
+        <button class="btn-bundle">Ver productos del pack</button>
+      </div>
+    </div>
+
+    <div class="bundle-card featured" onclick="applyBundle('intermediate')">
+      <div class="bundle-header">
+        <div class="featured-badge">⭐ Más popular</div>
+        <div class="bundle-icon">💪</div>
+        <div class="bundle-name">Pack Intermedio</div>
+        <div class="bundle-price">~$300–600</div>
+        <div class="bundle-price-range">Presupuesto medio</div>
+      </div>
+      <div class="bundle-body">
+        <p class="bundle-desc">El equilibrio perfecto entre funcionalidad y precio. Cubre la mayoría de objetivos de fitness.</p>
+        <ul class="bundle-items">
+          <li>Rack de sentadillas plegable</li>
+          <li>Barra olímpica + discos 60 kg</li>
+          <li>Set de mancuernas ajustables</li>
+          <li>Banco de ejercicio plano/inclinado</li>
+          <li>Bandas de resistencia premium</li>
+          <li>Rueda de equilibrio + TRX</li>
+        </ul>
+        <div class="bundle-stats">
+          <div class="bundle-stat">🎯 Intermedio</div>
+          <div class="bundle-stat">📐 6–10 m²</div>
+          <div class="bundle-stat">💪 Fuerza + Cardio</div>
+        </div>
+        <button class="btn-bundle">Ver productos del pack</button>
+      </div>
+    </div>
+
+    <div class="bundle-card" onclick="applyBundle('pro')">
+      <div class="bundle-header">
+        <div class="bundle-icon">🏆</div>
+        <div class="bundle-name">Pack Pro</div>
+        <div class="bundle-price">~$1,500–3,000</div>
+        <div class="bundle-price-range">Presupuesto alto</div>
+      </div>
+      <div class="bundle-body">
+        <p class="bundle-desc">Un gym completo en casa para atletas serios. Máxima versatilidad y calidad profesional.</p>
+        <ul class="bundle-items">
+          <li>Power rack completo con accesorios</li>
+          <li>Barra olímpica + 150 kg en discos</li>
+          <li>Cable crossover compacto</li>
+          <li>Cinta de correr plegable</li>
+          <li>Kettlebells set 8–32 kg</li>
+          <li>Espejo pared completa + suelo goma</li>
+          <li>Smart display para entrenamientos</li>
+        </ul>
+        <div class="bundle-stats">
+          <div class="bundle-stat">🎯 Avanzado</div>
+          <div class="bundle-stat">📐 15–25 m²</div>
+          <div class="bundle-stat">💪 Gym completo</div>
+        </div>
+        <button class="btn-bundle">Ver productos del pack</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="cat-tabs">
+  <button type="button" class="cat-tab active" onclick="filterByCat(null, this)">🎯 Todo</button>
+  <button type="button" class="cat-tab" onclick="filterByCat('mats', this)">🧘 Esterillas</button>
+  <button type="button" class="cat-tab" onclick="filterByCat('weights', this)">🏋️ Pesas</button>
+  <button type="button" class="cat-tab" onclick="filterByCat('bands', this)">🤸 Bandas</button>
+  <button type="button" class="cat-tab" onclick="filterByCat('cardio', this)">🏃 Cardio</button>
+  <button type="button" class="cat-tab" onclick="filterByCat('accessories', this)">🔧 Accesorios</button>
+  <button type="button" class="cat-tab" onclick="filterByCat('smart', this)">📱 Smart Fitness</button>
+  <button type="button" class="cat-tab" onclick="filterByCat('recovery', this)">💆 Recuperación</button>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-bar-search">
+    <span class="si">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar equipamiento...">
+  </div>
+  <select class="filter-select" id="filterLevel" onchange="applyFilters()">
+    <option value="">Todos los niveles</option>
+    <option value="beginner">Principiante</option>
+    <option value="intermediate">Intermedio</option>
+    <option value="advanced">Avanzado</option>
+  </select>
+  <select class="filter-select" id="filterBudget" onchange="applyFilters()">
+    <option value="">Cualquier precio</option>
+    <option value="50">Hasta $50</option>
+    <option value="100">Hasta $100</option>
+    <option value="300">Hasta $300</option>
+    <option value="500">Hasta $500</option>
+  </select>
+  <select class="filter-select" id="sortSelect" onchange="applyFilters()">
+    <option value="rec">Recomendados</option>
+    <option value="price_asc">Precio: menor</option>
+    <option value="price_desc">Precio: mayor</option>
+    <option value="rating">Mejor valorados</option>
+  </select>
+  <button type="button" class="filter-badge active" id="toggleDiscount" onclick="toggleDiscountFilter()">🏷 Ofertas</button>
+</div>
+
+<!-- PRODUCTS -->
+<div class="product-section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
+    <span style="font-size:.85rem;color:var(--text-muted);">Mostrando <strong id="productCount" style="color:var(--accent);">–</strong> productos</span>
+    <span id="activeFiltersLabel" style="font-size:.78rem;color:var(--text-muted);"></span>
+  </div>
+  <div id="productsGrid" class="products-grid">
+    <div class="loading" style="grid-column:1/-1;"><div class="spinner"></div><p>Cargando catálogo...</p></div>
+  </div>
+</div>
+
+<!-- WISHLIST BAR -->
+<div class="wishlist-bar hidden" id="wishlistBar">
+  <span>🛒 <span class="wishlist-count" id="wishlistCount">0</span></span>
+  <div class="wishlist-items-preview" id="wishlistPreview">productos en tu lista</div>
+  <button type="button" class="btn-clear-wishlist" onclick="clearWishlist()">✕ Limpiar</button>
+  <button type="button" class="btn-wishlist" onclick="viewWishlist()">Ver lista completa</button>
+</div>
+
+<!-- SETUP WIZARD MODAL -->
+<div class="modal-overlay" id="wizardModal" onclick="handleModalClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🧙 Asistente de Configuración</h3>
+      <button type="button" class="modal-close" onclick="closeWizard()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="wizard-progress" id="wizardProgress"></div>
+      <div id="wizardContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WISHLIST MODAL -->
+<div class="modal-overlay" id="wishlistModal" onclick="handleWishlistModalClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🛒 Mi Lista de Equipamiento</h3>
+      <button type="button" class="modal-close" onclick="closeWishlistModal()">✕</button>
+    </div>
+    <div class="modal-body" id="wishlistModalBody">
+      <!-- populated -->
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let allProducts = getProducts();
+  let filteredProducts = [...allProducts];
+  let wishlist = JSON.parse(localStorage.getItem('waco_equipment_wishlist') || '[]');
+  let activeCat = null;
+  let showDiscountOnly = false;
+  let searchTimer = null;
+
+  const wizardQuestions = [
+    {
+      id: 'goal', question: '¿Cuál es tu principal objetivo de entrenamiento?',
+      options: [
+        { value: 'weight_loss', icon: '🔥', label: 'Perder peso', sub: 'Cardio + HIIT' },
+        { value: 'muscle', icon: '💪', label: 'Ganar músculo', sub: 'Fuerza + hipertrofia' },
+        { value: 'flexibility', icon: '🤸', label: 'Flexibilidad', sub: 'Yoga + movilidad' },
+        { value: 'general', icon: '🎯', label: 'Fitness general', sub: 'Todo en uno' },
+      ]
+    },
+    {
+      id: 'budget', question: '¿Cuál es tu presupuesto para equipamiento?',
+      options: [
+        { value: 'low', icon: '💚', label: 'Bajo ($50–150)', sub: 'Starter kit' },
+        { value: 'medium', icon: '💛', label: 'Medio ($150–500)', sub: 'Setup completo' },
+        { value: 'high', icon: '🧡', label: 'Alto ($500–1500)', sub: 'Gym en casa' },
+        { value: 'premium', icon: '❤️', label: 'Premium (+$1500)', sub: 'Profesional' },
+      ]
+    },
+    {
+      id: 'space', question: '¿Cuánto espacio tienes disponible?',
+      options: [
+        { value: 'tiny', icon: '📦', label: 'Muy poco', sub: 'Menos de 4 m²' },
+        { value: 'small', icon: '🛋️', label: 'Pequeño', sub: '4–8 m²' },
+        { value: 'medium', icon: '🏠', label: 'Mediano', sub: '8–15 m²' },
+        { value: 'large', icon: '🏗️', label: 'Grande', sub: '+15 m²' },
+      ]
+    },
+    {
+      id: 'level', question: '¿Cuál es tu nivel de experiencia?',
+      options: [
+        { value: 'beginner', icon: '🌱', label: 'Principiante', sub: 'Empezando' },
+        { value: 'intermediate', icon: '📈', label: 'Intermedio', sub: '1–3 años' },
+        { value: 'advanced', icon: '🏆', label: 'Avanzado', sub: '+3 años' },
+        { value: 'athlete', icon: '⚡', label: 'Atleta', sub: 'Competitivo' },
+      ]
+    }
+  ];
+
+  let wizardStep = 0;
+  let wizardAnswers = {};
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    const si = document.getElementById('searchInput');
+    si.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(applyFilters, 400); });
+    renderProducts(allProducts);
+    updateWishlistBar();
+  });
+
+  // ── Products ─────────────────────────────────────────────────────────────────
+  function renderProducts(products) {
+    const grid = document.getElementById('productsGrid');
+    document.getElementById('productCount').textContent = products.length;
+
+    if (!products.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;"><div style="font-size:2.5rem;opacity:.5;">🔍</div><p style="color:var(--text-muted);margin-top:.75rem;">No se encontraron productos con esos filtros.</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = products.map(p => productCardHTML(p)).join('');
+  }
+
+  function productCardHTML(p) {
+    const inWishlist = wishlist.some(w => w.id === p.id);
+    const discount = p.originalPrice ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
+    return `
+      <div class="product-card">
+        <div class="product-img">
+          <span>${p.icon}</span>
+          ${p.recommended ? '<div class="rec-badge">⭐ Recomendado</div>' : ''}
+          <div class="level-badge lvl-${p.level}">${levelLabel(p.level)}</div>
+        </div>
+        <div class="product-body">
+          <h4>${escHtml(p.name)}</h4>
+          <p class="product-desc">${escHtml(p.description)}</p>
+          <div class="product-price-row">
+            <div>
+              <span class="product-price">$${p.price}</span>
+              ${p.originalPrice ? `<span class="product-price-orig">$${p.originalPrice}</span>` : ''}
+              ${discount ? `<span class="product-discount">-${discount}%</span>` : ''}
+            </div>
+            <button type="button" class="btn-add" onclick="toggleWishlist('${p.id}')" style="${inWishlist ? 'background: var(--accent);' : ''}">
+              ${inWishlist ? '✓ Añadido' : '+ Añadir'}
+            </button>
+          </div>
+          <div class="product-tags">${(p.tags || []).map(t => `<span class="ptag">${t}</span>`).join('')}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function filterByCat(cat, btn) {
+    activeCat = cat;
+    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+
+  function toggleDiscountFilter() {
+    showDiscountOnly = !showDiscountOnly;
+    document.getElementById('toggleDiscount').classList.toggle('active', showDiscountOnly);
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    const level = document.getElementById('filterLevel').value;
+    const maxPrice = parseFloat(document.getElementById('filterBudget').value) || 0;
+    const sort = document.getElementById('sortSelect').value;
+
+    let filtered = [...allProducts];
+    if (activeCat) filtered = filtered.filter(p => p.category === activeCat);
+    if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || p.description.toLowerCase().includes(search) || (p.tags || []).some(t => t.toLowerCase().includes(search)));
+    if (level) filtered = filtered.filter(p => p.level === level);
+    if (maxPrice) filtered = filtered.filter(p => p.price <= maxPrice);
+    if (showDiscountOnly) filtered = filtered.filter(p => p.originalPrice);
+
+    if (sort === 'price_asc') filtered.sort((a, b) => a.price - b.price);
+    else if (sort === 'price_desc') filtered.sort((a, b) => b.price - a.price);
+    else if (sort === 'rating') filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    else filtered.sort((a, b) => (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0));
+
+    renderProducts(filtered);
+  }
+
+  function applyBundle(bundleId) {
+    activeCat = null;
+    document.querySelectorAll('.cat-tab').forEach((b, i) => { b.classList.toggle('active', i === 0); });
+    document.getElementById('filterLevel').value = '';
+    document.getElementById('filterBudget').value = '';
+    document.getElementById('searchInput').value = '';
+    showDiscountOnly = false;
+
+    const bundleFilters = {
+      starter: { maxPrice: 150, level: null, cats: ['mats', 'bands', 'accessories'] },
+      intermediate: { maxPrice: 700, level: 'intermediate', cats: ['weights', 'accessories', 'cardio'] },
+      pro: { maxPrice: 9999, level: 'advanced', cats: null },
+    };
+    const f = bundleFilters[bundleId];
+    let filtered = [...allProducts];
+    if (f.maxPrice < 9999) filtered = filtered.filter(p => p.price <= f.maxPrice);
+    if (f.level) filtered = filtered.filter(p => p.level === f.level || p.level === 'beginner');
+    if (f.cats) filtered = filtered.filter(p => f.cats.includes(p.category));
+
+    renderProducts(filtered);
+    document.querySelector('.product-section').scrollIntoView({ behavior: 'smooth' });
+    showToast(`📦 Mostrando productos del Pack ${bundleId.charAt(0).toUpperCase() + bundleId.slice(1)}`);
+  }
+
+  // ── Wishlist ──────────────────────────────────────────────────────────────────
+  function toggleWishlist(productId) {
+    const p = allProducts.find(x => x.id === productId);
+    if (!p) return;
+    const idx = wishlist.findIndex(w => w.id === productId);
+    if (idx > -1) {
+      wishlist.splice(idx, 1);
+      showToast(`❌ ${p.name} eliminado de tu lista`);
+    } else {
+      wishlist.push(p);
+      showToast(`✅ ${p.name} añadido a tu lista`);
+    }
+    localStorage.setItem('waco_equipment_wishlist', JSON.stringify(wishlist));
+    applyFilters();
+    updateWishlistBar();
+  }
+
+  function updateWishlistBar() {
+    const bar = document.getElementById('wishlistBar');
+    const count = document.getElementById('wishlistCount');
+    const preview = document.getElementById('wishlistPreview');
+    if (!wishlist.length) { bar.classList.add('hidden'); return; }
+    bar.classList.remove('hidden');
+    count.textContent = wishlist.length;
+    const total = wishlist.reduce((s, p) => s + p.price, 0);
+    preview.textContent = `${wishlist.slice(0, 2).map(p => p.name).join(', ')}${wishlist.length > 2 ? ` +${wishlist.length - 2} más` : ''} — Total: $${total.toFixed(0)}`;
+  }
+
+  function clearWishlist() {
+    if (!confirm('¿Limpiar toda tu lista?')) return;
+    wishlist = [];
+    localStorage.setItem('waco_equipment_wishlist', JSON.stringify(wishlist));
+    applyFilters();
+    updateWishlistBar();
+    showToast('🗑️ Lista limpiada');
+  }
+
+  function viewWishlist() {
+    const modal = document.getElementById('wishlistModal');
+    const body = document.getElementById('wishlistModalBody');
+    modal.classList.add('open');
+    if (!wishlist.length) { body.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">Tu lista está vacía.</div>`; return; }
+    const total = wishlist.reduce((s, p) => s + p.price, 0);
+    body.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem;">
+        ${wishlist.map(p => `
+          <div style="display:flex;align-items:center;gap:1rem;padding:.85rem;background:var(--surface2);border-radius:10px;">
+            <div style="font-size:1.8rem;">${p.icon}</div>
+            <div style="flex:1;">
+              <div style="font-size:.9rem;font-weight:700;color:var(--text);">${escHtml(p.name)}</div>
+              <div style="font-size:.75rem;color:var(--text-muted);">${escHtml(p.description).slice(0, 60)}...</div>
+            </div>
+            <div style="font-size:1rem;font-weight:800;color:var(--accent);">$${p.price}</div>
+            <button type="button" onclick="toggleWishlist('${p.id}'); renderWishlistModal();" style="background:none;border:1px solid var(--border);color:var(--text-muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.8rem;">✕</button>
+          </div>
+        `).join('')}
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:1.2rem;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.85rem;color:var(--text-muted);">${wishlist.length} productos</div>
+        <div style="display:flex;justify-content:space-between;font-size:1.2rem;font-weight:800;"><span style="color:var(--text);">Total estimado</span><span style="color:var(--accent);">$${total.toFixed(0)}</span></div>
+      </div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:.75rem;text-align:center;">💡 Esta es una lista de recomendaciones. Puedes comprar los productos en tiendas especializadas o Amazon.</p>
+    `;
+  }
+
+  function renderWishlistModal() { viewWishlist(); updateWishlistBar(); }
+  function closeWishlistModal() { document.getElementById('wishlistModal').classList.remove('open'); }
+  function handleWishlistModalClick(e) { if (e.target === document.getElementById('wishlistModal')) closeWishlistModal(); }
+
+  // ── Wizard ─────────────────────────────────────────────────────────────────────
+  function openWizard() {
+    wizardStep = 0; wizardAnswers = {};
+    document.getElementById('wizardModal').classList.add('open');
+    renderWizardStep();
+  }
+
+  function closeWizard() { document.getElementById('wizardModal').classList.remove('open'); }
+  function handleModalClick(e) { if (e.target === document.getElementById('wizardModal')) closeWizard(); }
+
+  function renderWizardStep() {
+    const total = wizardQuestions.length;
+    const progress = document.getElementById('wizardProgress');
+    progress.innerHTML = Array.from({ length: total }, (_, i) =>
+      `<div class="wizard-step ${i < wizardStep ? 'done' : i === wizardStep ? 'active' : ''}"></div>`
+    ).join('');
+
+    if (wizardStep >= total) { renderWizardResult(); return; }
+
+    const q = wizardQuestions[wizardStep];
+    const selected = wizardAnswers[q.id];
+    const content = document.getElementById('wizardContent');
+    content.innerHTML = `
+      <p class="wizard-question">${q.question}</p>
+      <div class="wizard-options">
+        ${q.options.map(o => `
+          <div class="wizard-option ${selected === o.value ? 'selected' : ''}" onclick="selectWizardOption('${q.id}', '${o.value}', this)">
+            <div class="opt-icon">${o.icon}</div>
+            <div class="opt-label">${o.label}</div>
+            <div class="opt-sub">${o.sub}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="wizard-nav">
+        ${wizardStep > 0 ? `<button type="button" class="btn-wizard-back" onclick="wizardBack()">← Atrás</button>` : ''}
+        <button type="button" class="btn-wizard-next" onclick="wizardNext()" ${!selected ? 'disabled style="opacity:.5"' : ''} id="wizardNextBtn">
+          ${wizardStep === total - 1 ? '🎯 Ver recomendaciones' : 'Siguiente →'}
+        </button>
+      </div>
+    `;
+  }
+
+  function selectWizardOption(qId, value, el) {
+    wizardAnswers[qId] = value;
+    el.closest('.wizard-options').querySelectorAll('.wizard-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    const nextBtn = document.getElementById('wizardNextBtn');
+    if (nextBtn) { nextBtn.disabled = false; nextBtn.style.opacity = '1'; }
+  }
+
+  function wizardNext() { wizardStep++; renderWizardStep(); }
+  function wizardBack() { wizardStep--; renderWizardStep(); }
+
+  function renderWizardResult() {
+    const { goal, budget, space, level } = wizardAnswers;
+    const budgetMap = { low: { label: '$50–150', max: 150 }, medium: { label: '$150–500', max: 500 }, high: { label: '$500–1500', max: 1500 }, premium: { label: '+$1500', max: 99999 } };
+    const { label: budgetLabel, max: maxBudget } = budgetMap[budget] || budgetMap.medium;
+
+    const recommended = allProducts.filter(p => {
+      const fitsLevel = !level || p.level === level || (level === 'intermediate' && p.level === 'beginner') || (level === 'advanced') || (level === 'athlete');
+      const fitsPrice = p.price <= maxBudget;
+      const fitsGoal = !goal || (p.goals || []).includes(goal) || (p.tags || []).some(t => t.includes(goal));
+      return fitsLevel && fitsPrice && (fitsGoal || p.recommended);
+    }).slice(0, 6);
+
+    const total = recommended.reduce((s, p) => s + p.price, 0);
+
+    document.getElementById('wizardContent').innerHTML = `
+      <div class="wizard-result">
+        <div class="result-icon">🎯</div>
+        <h3>Tu setup ideal está listo</h3>
+        <p>Basado en tus respuestas, estas son las mejores recomendaciones para ti (${budgetLabel})</p>
+        <div class="result-bundle">
+          <h4>📦 Pack personalizado para ti</h4>
+          <ul class="result-items">
+            ${recommended.map(p => `
+              <li>
+                <span class="item-name">${p.icon} ${escHtml(p.name)}</span>
+                <span class="item-price">$${p.price}</span>
+              </li>
+            `).join('')}
+          </ul>
+          <div class="result-total">
+            <span style="color:var(--text);">Inversión total estimada</span>
+            <span style="color:var(--accent);">~$${total}</span>
+          </div>
+        </div>
+        <button type="button" class="btn-bundle" onclick="applyWizardRecommendations(${JSON.stringify(recommended.map(p => p.id))}); closeWizard();">
+          Ver estos productos en el catálogo →
+        </button>
+      </div>
+    `;
+  }
+
+  function applyWizardRecommendations(ids) {
+    const filtered = allProducts.filter(p => ids.includes(p.id));
+    renderProducts(filtered);
+    document.querySelector('.product-section').scrollIntoView({ behavior: 'smooth' });
+    showToast('✨ Mostrando tus recomendaciones personalizadas');
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  function levelLabel(l) { return { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' }[l] || l; }
+  function escHtml(str) { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function showToast(msg, dur = 3000) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), dur); }
+
+  // ── Product catalog ───────────────────────────────────────────────────────────
+  function getProducts() {
+    return [
+      // MATS
+      { id: 'mat1', name: 'Esterilla Premium 10mm', description: 'Superficie antideslizante de alta densidad, ideal para yoga, pilates y ejercicios de suelo.', price: 28, originalPrice: 40, icon: '🧘', category: 'mats', level: 'beginner', recommended: true, rating: 4.8, tags: ['yoga', 'pilates', 'core'], goals: ['flexibility', 'general'] },
+      { id: 'mat2', name: 'Esterilla Gruesa 20mm', description: 'Máximo amortiguamiento para entrenamientos de impacto y protección articular.', price: 45, icon: '🟦', category: 'mats', level: 'beginner', rating: 4.6, tags: ['hiit', 'suelo', 'rodillas'], goals: ['weight_loss', 'general'] },
+      // WEIGHTS
+      { id: 'w1', name: 'Mancuernas Ajustables 2–24 kg', description: 'Sustituyen 15 pares de mancuernas en una sola. Sistema de ajuste rápido con dial.', price: 185, originalPrice: 240, icon: '🏋️', category: 'weights', level: 'intermediate', recommended: true, rating: 4.9, tags: ['fuerza', 'hipertrofia', 'versatil'], goals: ['muscle', 'general'] },
+      { id: 'w2', name: 'Set Mancuernas Fijas 3-5-8 kg', description: 'Set básico de tres pares de mancuernas con soporte. Perfecto para empezar.', price: 55, icon: '💪', category: 'weights', level: 'beginner', rating: 4.4, tags: ['tono', 'principiante', 'cardio'], goals: ['weight_loss', 'general'] },
+      { id: 'w3', name: 'Kettlebell 16 kg', description: 'Kettlebell de hierro fundido con mango ergonómico. Ideal para swing, clean y press.', price: 38, icon: '🔔', category: 'weights', level: 'intermediate', rating: 4.7, tags: ['funcional', 'cardio', 'fuerza'], goals: ['weight_loss', 'muscle'] },
+      { id: 'w4', name: 'Barra Olímpica + 60 kg Discos', description: 'Barra olímpica 220cm + set de discos de goma 60kg. Para sentadillas, peso muerto y press.', price: 280, icon: '🏗️', category: 'weights', level: 'advanced', rating: 4.8, tags: ['powerlifting', 'sentadilla', 'press'], goals: ['muscle', 'general'] },
+      // BANDS
+      { id: 'b1', name: 'Set Bandas Elásticas 5 niveles', description: 'Set de 5 bandas de resistencia (10–50 lbs) con bolsa de transporte. Entrena en cualquier lugar.', price: 22, originalPrice: 35, icon: '🤸', category: 'bands', level: 'beginner', recommended: true, rating: 4.7, tags: ['movilidad', 'calentamiento', 'viaje'], goals: ['flexibility', 'weight_loss', 'general'] },
+      { id: 'b2', name: 'Bandas de Resistencia Hip Circle', description: 'Específicamente diseñadas para glúteos, cadera y piernas. Alta durabilidad.', price: 18, icon: '🔁', category: 'bands', level: 'beginner', rating: 4.5, tags: ['glúteos', 'piernas', 'activación'], goals: ['weight_loss', 'muscle'] },
+      { id: 'b3', name: 'TRX Home2 Sistema Suspensión', description: 'Entrena todo el cuerpo usando tu peso. Ancla en puerta o barra. 300+ ejercicios.', price: 95, originalPrice: 130, icon: '🪢', category: 'bands', level: 'intermediate', recommended: true, rating: 4.8, tags: ['funcional', 'core', 'suspensión'], goals: ['muscle', 'general'] },
+      // CARDIO
+      { id: 'c1', name: 'Cuerda de Saltar Profesional', description: 'Cuerda de velocidad con rodamientos de precisión. Ajustable. Quema 600 kcal/hora.', price: 15, icon: '🪃', category: 'cardio', level: 'beginner', rating: 4.6, tags: ['cardio', 'coordinación', 'hiit'], goals: ['weight_loss'] },
+      { id: 'c2', name: 'Bicicleta Estática Plegable', description: 'Bicicleta indoor plegable con 8 niveles de resistencia y display digital. Silenciosa.', price: 175, originalPrice: 220, icon: '🚴', category: 'cardio', level: 'beginner', recommended: true, rating: 4.5, tags: ['cardio', 'low-impact', 'plegable'], goals: ['weight_loss', 'general'] },
+      { id: 'c3', name: 'Cinta de Correr Plegable', description: 'Velocidad 1–14 km/h, inclinación manual, superficie 125x45cm. Se pliega verticalmente.', price: 450, icon: '🏃', category: 'cardio', level: 'intermediate', rating: 4.4, tags: ['running', 'cardio', 'plegable'], goals: ['weight_loss'] },
+      // ACCESSORIES
+      { id: 'a1', name: 'Rueda Abdominal con rodillas', description: 'Ejercicio principal para core profundo. Incluye rodilleras acolchadas.', price: 18, icon: '⚙️', category: 'accessories', level: 'intermediate', rating: 4.5, tags: ['core', 'abdomen', 'fuerza'], goals: ['muscle', 'general'] },
+      { id: 'a2', name: 'Barra de Dominadas para Puerta', description: 'Sin tornillos. Aguanta hasta 120 kg. Múltiples agarres para espalda, bíceps y core.', price: 32, originalPrice: 45, icon: '🔧', category: 'accessories', level: 'intermediate', recommended: true, rating: 4.7, tags: ['espalda', 'bíceps', 'calistenia'], goals: ['muscle'] },
+      { id: 'a3', name: 'Banco Plegable Plano/Inclinado', description: 'Banco multiposición (plano, 30°, 45°, 60°, 90°). Capacidad 200 kg. Plegable.', price: 88, icon: '🪑', category: 'accessories', level: 'intermediate', rating: 4.6, tags: ['press', 'banca', 'versatil'], goals: ['muscle'] },
+      { id: 'a4', name: 'Rodillo de Espuma Trigger Point', description: 'Foam roller de alta densidad para liberación miofascial y recuperación muscular.', price: 35, icon: '🎢', category: 'recovery', level: 'beginner', rating: 4.7, tags: ['recuperación', 'masaje', 'flexibilidad'], goals: ['flexibility', 'general'] },
+      // SMART
+      { id: 's1', name: 'Smart Scale Withings Body+', description: 'Báscula inteligente: peso, grasa corporal, músculo, agua. Sincroniza con app.', price: 80, originalPrice: 100, icon: '⚖️', category: 'smart', level: 'beginner', recommended: true, rating: 4.8, tags: ['tracking', 'composición', 'app'], goals: ['weight_loss', 'muscle'] },
+      { id: 's2', name: 'Polar H10 Monitor Cardíaco', description: 'La banda cardíaca más precisa del mercado. Compatible con cualquier app de fitness.', price: 85, icon: '💓', category: 'smart', level: 'intermediate', rating: 4.9, tags: ['frecuencia cardíaca', 'training', 'precisión'], goals: ['weight_loss', 'general'] },
+      // RECOVERY
+      { id: 'r1', name: 'Pistola de Masaje Percusivo', description: 'Recuperación muscular profunda con 6 cabezales intercambiables. 20 niveles de intensidad.', price: 65, originalPrice: 90, icon: '🔫', category: 'recovery', level: 'beginner', recommended: true, rating: 4.8, tags: ['recuperación', 'dolor muscular', 'masaje'], goals: ['flexibility', 'general'] },
+      { id: 'r2', name: 'Bandas de Compresión Articulaciones', description: 'Set de rodilleras + muñequeras + coderas elásticas para protección durante el entrenamiento.', price: 25, icon: '🩹', category: 'recovery', level: 'beginner', rating: 4.4, tags: ['lesiones', 'protección', 'compresión'], goals: ['general'] },
+    ];
+  }
+</script>
+</body>
+</html>

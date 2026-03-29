@@ -1,0 +1,107 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: wacopro-backend
+  namespace: wacopro-production
+spec:
+  hosts:
+    - wacopro-backend.wacopro-production.svc.cluster.local
+    - api.wacopro.com
+  gateways:
+    - wacopro-gateway
+    - mesh
+  http:
+    # Canary: header-based routing for canary testing
+    - match:
+        - headers:
+            x-canary:
+              exact: "true"
+      route:
+        - destination:
+            host: wacopro-backend
+            subset: v2
+          weight: 100
+
+    # Default: 95% v1, 5% canary v2
+    - route:
+        - destination:
+            host: wacopro-backend
+            subset: v1
+          weight: 95
+        - destination:
+            host: wacopro-backend
+            subset: v2
+          weight: 5
+
+      # Guardrail: retry on server errors
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: "5xx,reset,connect-failure,retriable-4xx"
+
+      # Circuit breaker at route level
+      timeout: 10s
+
+      # Fault injection for chaos testing (disabled by default)
+      # fault:
+      #   delay:
+      #     percentage:
+      #       value: 0.1
+      #     fixedDelay: 100ms
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: wacopro-backend
+  namespace: wacopro-production
+spec:
+  host: wacopro-backend
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        h2UpgradePolicy: UPGRADE
+        idleTimeout: 90s
+    loadBalancer:
+      simple: LEAST_CONN
+    outlierDetection:
+      consecutiveGatewayErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: wacopro-gateway
+  namespace: wacopro-production
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: wacopro-tls
+      hosts:
+        - api.wacopro.com
+        - "*.wacopro.com"
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - api.wacopro.com
+      tls:
+        httpsRedirect: true

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - WacoPro Fitness</title>
+  <meta name="description" content="Tu plataforma de fitness y bienestar - Dashboard principal">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+  <script src="/js/app-init.js" defer></script>
+  <style>
+    /* ── Feature grid cards ──────────────────────────────────────────────── */
+    .feature-section { margin-top: 1.5rem; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: .9rem;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(108,99,255,0.22);
+      border-radius: 14px;
+      padding: 1.1rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .55rem;
+      cursor: pointer;
+      transition: all .22s;
+      text-align: center;
+    }
+    .feature-card:hover {
+      border-color: var(--neon-purple, #6c63ff);
+      background: rgba(108,99,255,0.1);
+      transform: translateY(-3px);
+      box-shadow: 0 0 18px rgba(108,99,255,0.35);
+    }
+    .feature-card.premium {
+      border-color: rgba(0,217,166,0.25);
+    }
+    .feature-card.premium:hover {
+      border-color: #00d9a6;
+      background: rgba(0,217,166,0.08);
+      box-shadow: 0 0 18px rgba(0,217,166,0.3);
+    }
+    .feature-card .fc-icon { font-size: 2rem; line-height: 1; }
+    .feature-card .fc-label { font-size: .78rem; font-weight: 700; letter-spacing: .5px; color: var(--text-secondary, #b0b0c8); text-transform: uppercase; }
+    .feature-card .fc-badge {
+      font-size: .62rem; padding: .15rem .45rem; border-radius: 6px;
+      background: rgba(0,217,166,0.2); color: #00d9a6; font-weight: 800; letter-spacing: .5px;
+    }
+    /* ── Sidebar premium badge ───────────────────────────────────────────── */
+    .sidebar-nav-link .badge-new {
+      font-size: .58rem; background: rgba(0,217,166,0.2); color: #00d9a6;
+      border-radius: 5px; padding: .1rem .35rem; margin-left: .4rem; font-weight: 800;
+    }
+    .sidebar-nav-link .badge-ai {
+      font-size: .58rem; background: rgba(255,107,107,0.2); color: #ff6b6b;
+      border-radius: 5px; padding: .1rem .35rem; margin-left: .4rem; font-weight: 800;
+    }
+    /* ── Expanded navbar ────────────────────────────────────────────────── */
+    .nav-links { flex-wrap: wrap; gap: .35rem; }
+    .nav-link-premium { color: #00d9a6 !important; }
+    /* ── Premium section title ───────────────────────────────────────────── */
+    .sidebar-section-sep {
+      border: none; border-top: 1px solid rgba(255,255,255,0.07);
+      margin: 1rem 0 .75rem;
+    }
+    /* ── Progress tracker quick link ─────────────────────────────────────── */
+    .progress-quick {
+      display: flex; gap: .6rem; align-items: center;
+      background: rgba(108,99,255,0.08); border: 1px solid rgba(108,99,255,0.2);
+      border-radius: 10px; padding: .75rem; margin-top: .75rem;
+      text-decoration: none; color: var(--text-secondary, #b0b0c8);
+      transition: all .2s;
+    }
+    .progress-quick:hover { border-color: #6c63ff; color: #e8e8f0; }
+    .progress-quick .pq-icon { font-size: 1.4rem; }
+    .progress-quick .pq-text { font-size: .78rem; }
+    .progress-quick .pq-text strong { display: block; font-size: .85rem; color: #e8e8f0; }
+    /* ── Section welcome banner ──────────────────────────────────────────── */
+    .phase6-banner {
+      background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,166,0.08));
+      border: 1px solid rgba(108,99,255,0.25);
+      border-radius: 14px; padding: 1.2rem 1.5rem;
+      display: flex; align-items: center; gap: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+    .phase6-banner .banner-icon { font-size: 2.5rem; }
+    .phase6-banner h3 { font-size: 1rem; font-weight: 800; color: #e8e8f0; margin-bottom: .25rem; }
+    .phase6-banner p { font-size: .8rem; color: #8888a8; }
+    @media (max-width: 900px) {
+      .nav-links a.nav-link-hide { display: none; }
+    }
+    @media (max-width: 640px) {
+      .feature-grid { grid-template-columns: repeat(3, 1fr); }
+      .phase6-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav class="dash-nav">
+    <div class="dash-nav-inner">
+      <a href="/dashboard" class="nav-brand">
+        <div class="nav-brand-icon">W</div>
+        <span class="nav-brand-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard"     class="nav-link active">📊 Dashboard</a>
+        <a href="/ai-coach"      class="nav-link nav-link-premium">🤖 AI Coach</a>
+        <a href="/on-demand"     class="nav-link nav-link-hide">🎬 Videos</a>
+        <a href="/virtual-classes" class="nav-link nav-link-hide">📡 Clases</a>
+        <a href="/coaches"       class="nav-link nav-link-hide">🏆 Coaches</a>
+        <a href="/analytics"     class="nav-link nav-link-hide">📈 Analíticas</a>
+        <a href="/social-feed"   class="nav-link nav-link-hide">👥 Social</a>
+        <a href="/profile"       class="nav-link">👤 Perfil</a>
+      </div>
+      <div class="nav-right" style="display:flex;align-items:center;gap:.5rem;">
+        <!-- Theme Toggle -->
+        <button type="button" id="themeToggleBtn" title="Cambiar tema" onclick="toggleTheme()" style="background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);color:#e2e8f0;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">🌙</button>
+        <!-- Language Selector -->
+        <select id="langSelect" onchange="changeLanguage(this.value)" title="Idioma" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;padding:.3rem .5rem;border-radius:8px;font-size:.75rem;cursor:pointer;">
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+          <option value="pt">PT</option>
+        </select>
+        <span class="nav-user-name" id="navUserName">...</span>
+        <button type="button" class="btn-logout" onclick="logout()">SALIR</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== BODY ===================== -->
+  <div class="dash-body">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="dash-sidebar">
+      <div class="sidebar-card">
+
+        <!-- NAV: Core sections (SPA in-page) -->
+        <p class="sidebar-section-title">NAVEGACIÓN</p>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="sidebar-nav-link active" data-section="dashboard"   onclick="loadSection('dashboard',   this)">📊 Resumen</a></li>
+          <li><a href="#" class="sidebar-nav-link"        data-section="nutrition"   onclick="loadSection('nutrition',   this)">🍎 Nutrición</a></li>
+          <li><a href="#" class="sidebar-nav-link"        data-section="training"    onclick="loadSection('training',    this)">💪 Entrenamiento</a></li>
+          <li><a href="#" class="sidebar-nav-link"        data-section="supplements" onclick="loadSection('supplements', this)">💊 Suplementos</a></li>
+          <li><a href="#" class="sidebar-nav-link"        data-section="hydration"   onclick="loadSection('hydration',   this)">💧 Hidratación</a></li>
+          <li><a href="#" class="sidebar-nav-link"        data-section="recovery"    onclick="loadSection('recovery',    this)">😴 Recuperación</a></li>
+          <li><a href="#" class="sidebar-nav-link"        data-section="shopping"    onclick="loadSection('shopping',    this)">🛒 Compras</a></li>
+          <li><a href="#" class="sidebar-nav-link"        data-section="progress"    onclick="loadSection('progress',    this)">📈 Progreso</a></li>
+        </ul>
+
+        <hr class="sidebar-section-sep">
+
+        <!-- TEMPORALLY DISABLED - FASE 6 - Date: 2026-03-28 - Will be enabled in future release -->
+        <!--
+        <p class="sidebar-section-title">HOME FITNESS <span style="color:#00d9a6;font-size:.65rem;"> FASE 6</span></p>
+        <ul class="sidebar-nav">
+          <li><a href="/virtual-classes" class="sidebar-nav-link">📡 Clases en Vivo</a></li>
+          <li><a href="/on-demand"       class="sidebar-nav-link">🎬 Videos On-Demand</a></li>
+          <li><a href="/programs"        class="sidebar-nav-link">📋 Programas</a></li>
+          <li><a href="/coaches"         class="sidebar-nav-link">🏆 Coaches 1:1</a></li>
+          <li><a href="/progress-tracker" class="sidebar-nav-link">📸 Fotos & Medidas</a></li>
+          <li><a href="/fitness-challenges" class="sidebar-nav-link">⚡ Retos Fitness</a></li>
+          <li><a href="/home-equipment"  class="sidebar-nav-link">🏠 Equipo Casa</a></li>
+        </ul>
+
+        <hr class="sidebar-section-sep">
+        -->
+        <!-- END DISABLED FASE 6 -->
+
+        <!-- TEMPORALLY DISABLED - FASE 7 - Date: 2026-03-28 - Will be enabled in future release -->
+        <!--
+        <p class="sidebar-section-title">NUEVAS FUNCIONES <span style="color:#00d9a6;font-size:.65rem;"> FASE 7</span></p>
+        <ul class="sidebar-nav">
+          <li><a href="/periodized-plans" class="sidebar-nav-link">📋 Planes Periodizados <span class="badge-new">NEW</span></a></li>
+          <li><a href="/recovery"         class="sidebar-nav-link">💤 Recuperación HRV <span class="badge-new">NEW</span></a></li>
+          <li><a href="/form-check"       class="sidebar-nav-link">🤖 Form Check IA <span class="badge-ai">AI</span></a></li>
+          <li><a href="/meal-delivery"    class="sidebar-nav-link">🛵 Meal Delivery <span class="badge-new">NEW</span></a></li>
+          <li><a href="/shop"             class="sidebar-nav-link">🏪 Tienda Suplementos <span class="badge-new">NEW</span></a></li>
+        </ul>
+
+        <hr class="sidebar-section-sep">
+        -->
+        <!-- END DISABLED FASE 7 -->
+
+        <hr class="sidebar-section-sep">
+
+        <!-- NAV: Premium Features -->
+        <p class="sidebar-section-title">PREMIUM</p>
+        <ul class="sidebar-nav">
+          <li><a href="/ai-coach"     class="sidebar-nav-link">🤖 AI Coach <span class="badge-ai">AI</span></a></li>
+          <li><a href="/wearables"    class="sidebar-nav-link">⌚ Wearables</a></li>
+          <li><a href="/challenges"   class="sidebar-nav-link">🏅 Retos</a></li>
+        </ul>
+
+        <hr class="sidebar-section-sep">
+
+        <!-- NAV: Tools -->
+        <p class="sidebar-section-title">HERRAMIENTAS</p>
+        <ul class="sidebar-nav">
+          <li><a href="/profile"          class="sidebar-nav-link">👤 Mi Perfil</a></li>
+          <li><a href="/analytics"        class="sidebar-nav-link">📊 Analíticas</a></li>
+          <li><a href="/social-feed"      class="sidebar-nav-link">🌐 Social</a></li>
+          <li><a href="/workout-builder"  class="sidebar-nav-link">🏗️ Constructor</a></li>
+          <li><a href="/exercise-library" class="sidebar-nav-link">📚 Ejercicios</a></li>
+          <li><a href="/meal-planner"     class="sidebar-nav-link">🥗 Plan Comidas</a></li>
+          <li><a href="/pricing"          class="sidebar-nav-link">💳 Planes & Precios</a></li>
+          <li><a href="/"                 class="sidebar-nav-link">🔌 API Explorer</a></li>
+        </ul>
+
+      </div>
+    </aside>
+
+    <!-- ===================== MAIN ===================== -->
+    <main class="dash-main">
+
+      <!-- ===== SECCIÓN: RESUMEN ===== -->
+      <section id="section-dashboard" class="dash-section active">
+        <div class="page-header">
+          <h1 class="page-title">Hola, <span id="welcomeName">Usuario</span> 👋</h1>
+          <p class="page-subtitle" id="dateText">Cargando...</p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon">🍎</div><div><div class="stat-value" id="caloriesConsumed">—</div><div class="stat-label">CALORÍAS HOY</div></div></div>
+          <div class="stat-card"><div class="stat-icon">💪</div><div><div class="stat-value" id="workoutsCompleted">—</div><div class="stat-label">ENTRENAMIENTOS</div></div></div>
+          <div class="stat-card"><div class="stat-icon">💧</div><div><div class="stat-value" id="waterIntake">—</div><div class="stat-label">ML DE AGUA</div></div></div>
+          <div class="stat-card"><div class="stat-icon">🔥</div><div><div class="stat-value" id="caloriesBurned">—</div><div class="stat-label">QUEMADAS</div></div></div>
+        </div>
+
+        <!-- Activity + next workout -->
+        <div class="content-grid">
+          <div class="dash-card">
+            <div class="card-header">
+              <span class="card-title">ACTIVIDAD RECIENTE</span>
+              <a href="#" class="card-link" onclick="loadSection('progress', document.querySelector('[data-section=progress]')); return false;">Ver todo</a>
+            </div>
+            <div id="recentActivity"><div class="loading-state"><span class="spinner"></span> Cargando...</div></div>
+          </div>
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">PRÓXIMO ENTRENAMIENTO</span></div>
+            <div id="nextWorkout"><div class="loading-state"><span class="spinner"></span> Cargando...</div></div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <p class="section-title">ACCIONES RÁPIDAS</p>
+          <div class="actions-grid">
+            <button type="button" class="action-card" onclick="openModal('modalMeal')">         <span class="action-icon">🍽️</span><span class="action-label">Registrar Comida</span></button>
+            <button type="button" class="action-card" onclick="openModal('modalWorkout')">      <span class="action-icon">💪</span><span class="action-label">Registrar Entreno</span></button>
+            <button type="button" class="action-card" onclick="openModal('modalWater')">        <span class="action-icon">💧</span><span class="action-label">Agregar Agua</span></button>
+            <button type="button" class="action-card" onclick="loadSection('progress', document.querySelector('[data-section=progress]'))"><span class="action-icon">📊</span><span class="action-label">Ver Progreso</span></button>
+            <button type="button" class="action-card" onclick="window.location.href='/ai-coach'">         <span class="action-icon">🤖</span><span class="action-label">AI Coach</span></button>
+            <button type="button" class="action-card" onclick="window.location.href='/on-demand'">        <span class="action-icon">🎬</span><span class="action-label">Videos</span></button>
+            <button type="button" class="action-card" onclick="window.location.href='/coaches'">          <span class="action-icon">🏆</span><span class="action-label">Buscar Coach</span></button>
+            <button type="button" class="action-card" onclick="window.location.href='/fitness-challenges'"><span class="action-icon">⚡</span><span class="action-label">Retos Fitness</span></button>
+          </div>
+        </div>
+
+        <!-- TEMPORALLY DISABLED - FASE 6 Dashboard Banner + Grid - Date: 2026-03-28 - Will be enabled in future release -->
+        <!--
+        <div class="feature-section">
+          <div class="phase6-banner">
+            <div class="banner-icon">🚀</div>
+            <div>
+              <h3>Plataforma Home Fitness — Fase 6</h3>
+              <p>Clases virtuales, coaches remotos, videos on-demand, programas estructurados y seguimiento de progreso.</p>
+            </div>
+          </div>
+          <div class="feature-grid">
+            <a href="/virtual-classes" class="feature-card premium">
+              <div class="fc-icon">📡</div>
+              <div class="fc-label">Clases en Vivo</div>
+              <div class="fc-badge">LIVE</div>
+            </a>
+            <a href="/on-demand" class="feature-card premium">
+              <div class="fc-icon">🎬</div>
+              <div class="fc-label">Videos On-Demand</div>
+            </a>
+            <a href="/programs" class="feature-card premium">
+              <div class="fc-icon">📋</div>
+              <div class="fc-label">Programas</div>
+            </a>
+            <a href="/coaches" class="feature-card premium">
+              <div class="fc-icon">🏆</div>
+              <div class="fc-label">Coaches 1:1</div>
+            </a>
+            <a href="/progress-tracker" class="feature-card premium">
+              <div class="fc-icon">📸</div>
+              <div class="fc-label">Fotos & Medidas</div>
+            </a>
+            <a href="/fitness-challenges" class="feature-card premium">
+              <div class="fc-icon">⚡</div>
+              <div class="fc-label">Retos Fitness</div>
+            </a>
+            <a href="/home-equipment" class="feature-card">
+              <div class="fc-icon">🏠</div>
+              <div class="fc-label">Equipo Casa</div>
+            </a>
+            <a href="/ai-coach" class="feature-card premium">
+              <div class="fc-icon">🤖</div>
+              <div class="fc-label">AI Coach</div>
+              <div class="fc-badge" style="background:rgba(255,107,107,0.2);color:#ff6b6b;">AI</div>
+            </a>
+            <a href="/wearables" class="feature-card">
+              <div class="fc-icon">⌚</div>
+              <div class="fc-label">Wearables</div>
+            </a>
+            <a href="/challenges" class="feature-card">
+              <div class="fc-icon">🏅</div>
+              <div class="fc-label">Retos</div>
+            </a>
+            <a href="/analytics" class="feature-card">
+              <div class="fc-icon">📈</div>
+              <div class="fc-label">Analíticas</div>
+            </a>
+            <a href="/social-feed" class="feature-card">
+              <div class="fc-icon">🌐</div>
+              <div class="fc-label">Social</div>
+            </a>
+          </div>
+        </div>
+        -->
+        <!-- END DISABLED FASE 6 Dashboard -->
+
+        <!-- TEMPORALLY DISABLED - FASE 7 Dashboard Banner + Grid - Date: 2026-03-28 - Will be enabled in future release -->
+        <!--
+        <div class="feature-section">
+          <div class="phase6-banner" style="background:linear-gradient(135deg,rgba(0,217,166,0.1),rgba(108,99,255,0.06));border-color:rgba(0,217,166,0.25);">
+            <div class="banner-icon">🚀</div>
+            <div>
+              <h3>Nuevas Funciones — Fase 7</h3>
+              <p>Planes periodizados, análisis de forma con IA, recuperación HRV, meal delivery y tienda de suplementos.</p>
+            </div>
+          </div>
+          <div class="feature-grid">
+            <a href="/periodized-plans" class="feature-card premium">
+              <div class="fc-icon">📋</div>
+              <div class="fc-label">Planes Periodizados</div>
+              <div class="fc-badge">NEW</div>
+            </a>
+            <a href="/recovery" class="feature-card premium">
+              <div class="fc-icon">💤</div>
+              <div class="fc-label">Recuperación HRV</div>
+              <div class="fc-badge">NEW</div>
+            </a>
+            <a href="/form-check" class="feature-card premium">
+              <div class="fc-icon">🤖</div>
+              <div class="fc-label">Form Check IA</div>
+              <div class="fc-badge" style="background:rgba(255,107,107,0.2);color:#ff6b6b;">AI</div>
+            </a>
+            <a href="/meal-delivery" class="feature-card premium">
+              <div class="fc-icon">🛵</div>
+              <div class="fc-label">Meal Delivery</div>
+              <div class="fc-badge">NEW</div>
+            </a>
+            <a href="/shop" class="feature-card premium">
+              <div class="fc-icon">🏪</div>
+              <div class="fc-label">Tienda Suplementos</div>
+              <div class="fc-badge">NEW</div>
+            </a>
+          </div>
+        </div>
+        -->
+        <!-- END DISABLED FASE 7 Dashboard -->
+      </section>
+
+      <!-- ===== SECCIÓN: NUTRICIÓN ===== -->
+      <section id="section-nutrition" class="dash-section">
+        <div class="page-header">
+          <h1 class="page-title">🍎 Nutrición</h1>
+          <p class="page-subtitle">Gestiona tus alimentos y comidas</p>
+        </div>
+        <div class="macro-grid">
+          <div class="macro-card"><p class="macro-label">CALORÍAS</p><div class="macro-value neon-purple" id="nutCalories">0 kcal</div><div class="macro-bar"><div class="macro-fill" id="barCalories" style="width:0%"></div></div></div>
+          <div class="macro-card"><p class="macro-label">PROTEÍNAS</p><div class="macro-value" id="nutProtein">0g</div><div class="macro-bar"><div class="macro-fill fill-red" id="barProtein" style="width:0%"></div></div></div>
+          <div class="macro-card"><p class="macro-label">CARBOHIDRATOS</p><div class="macro-value" id="nutCarbs">0g</div><div class="macro-bar"><div class="macro-fill fill-yellow" id="barCarbs" style="width:0%"></div></div></div>
+          <div class="macro-card"><p class="macro-label">GRASAS</p><div class="macro-value" id="nutFat">0g</div><div class="macro-bar"><div class="macro-fill fill-green" id="barFat" style="width:0%"></div></div></div>
+        </div>
+        <div class="content-grid">
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">COMIDAS DE HOY</span>
+              <button type="button" class="card-link-btn" onclick="openModal('modalMeal')">+ Registrar</button>
+            </div>
+            <div id="todayMeals"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">ALIMENTOS POPULARES</span>
+              <a href="/meal-planner" class="card-link">Plan completo →</a>
+            </div>
+            <div id="popularFoods"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECCIÓN: ENTRENAMIENTO ===== -->
+      <section id="section-training" class="dash-section">
+        <div class="page-header">
+          <h1 class="page-title">💪 Entrenamiento</h1>
+          <p class="page-subtitle">Gestiona tus rutinas y ejercicios</p>
+        </div>
+        <div class="overview-grid">
+          <div class="overview-card"><p class="macro-label">ENTRENOS ESTA SEMANA</p><div class="overview-val" id="weeklyWorkouts">—</div></div>
+          <div class="overview-card"><p class="macro-label">TIEMPO TOTAL</p><div class="overview-val" id="totalTime">—</div></div>
+          <div class="overview-card"><p class="macro-label">EJERCICIOS EN BD</p><div class="overview-val" id="totalExercises">—</div></div>
+        </div>
+        <div class="dash-card" style="margin-top:1rem;">
+          <div class="card-header">
+            <span class="card-title">MIS RUTINAS</span>
+            <button type="button" class="card-link-btn" onclick="openModal('modalCreateWorkout')">+ Nueva Rutina</button>
+          </div>
+          <div id="myWorkouts"><div class="loading-state"><span class="spinner"></span></div></div>
+        </div>
+        <!-- Phase 6 workout links -->
+        <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
+          <a href="/workout-builder"  class="progress-quick"><span class="pq-icon">🏗️</span><div class="pq-text"><strong>Constructor de Rutinas</strong>Crea rutinas personalizadas</div></a>
+          <a href="/exercise-library" class="progress-quick"><span class="pq-icon">📚</span><div class="pq-text"><strong>Biblioteca de Ejercicios</strong>+1000 ejercicios con instrucciones</div></a>
+          <a href="/programs"         class="progress-quick"><span class="pq-icon">📋</span><div class="pq-text"><strong>Programas Estructurados</strong>4-12 semanas con progresión</div></a>
+        </div>
+      </section>
+
+      <!-- ===== SECCIÓN: SUPLEMENTOS ===== -->
+      <section id="section-supplements" class="dash-section">
+        <div class="page-header">
+          <h1 class="page-title">💊 Suplementos</h1>
+          <p class="page-subtitle">Catálogo y tu stack personal</p>
+        </div>
+        <div class="content-grid">
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">MIS SUPLEMENTOS</span></div>
+            <div id="mySupplements"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">CATÁLOGO</span></div>
+            <div id="supplementCatalog"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECCIÓN: HIDRATACIÓN ===== -->
+      <section id="section-hydration" class="dash-section">
+        <div class="page-header">
+          <h1 class="page-title">💧 Hidratación</h1>
+          <p class="page-subtitle">Controla tu consumo de agua diario</p>
+        </div>
+        <div class="hydration-layout">
+          <div class="water-center dash-card" style="text-align:center;padding:2rem;">
+            <div class="water-ring-wrap">
+              <svg class="water-ring" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+                <circle id="waterRingBar" cx="60" cy="60" r="50" fill="none" stroke="var(--neon-blue)" stroke-width="10"
+                  stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"
+                  transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 0.8s ease;filter:drop-shadow(0 0 6px var(--neon-blue));"/>
+              </svg>
+              <div class="water-ring-text">
+                <div class="water-ml" id="waterMl">0</div>
+                <div class="water-unit">ml</div>
+                <div class="water-goal-lbl" id="waterGoalLbl">meta: 2100</div>
+              </div>
+            </div>
+            <button type="button" class="btn-neon" onclick="openModal('modalWater')" style="margin-top:1.5rem;">+ AGREGAR AGUA</button>
+          </div>
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">HISTORIAL DE HOY</span></div>
+            <div id="waterHistory"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECCIÓN: RECUPERACIÓN ===== -->
+      <section id="section-recovery" class="dash-section">
+        <div class="page-header">
+          <h1 class="page-title">😴 Recuperación</h1>
+          <p class="page-subtitle">Sueño y descanso activo</p>
+        </div>
+        <div class="overview-grid">
+          <div class="overview-card"><p class="macro-label">HORAS DE SUEÑO (PROM.)</p><div class="overview-val" id="avgSleep">—</div></div>
+          <div class="overview-card"><p class="macro-label">CALIDAD DEL SUEÑO</p><div class="overview-val" id="sleepQuality">—</div></div>
+          <div class="overview-card"><p class="macro-label">SCORE RECUPERACIÓN</p><div class="overview-val" id="recoveryScore">—</div></div>
+        </div>
+        <div class="content-grid" style="margin-top:1rem;">
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">REGISTROS DE SUEÑO</span></div>
+            <div id="sleepRecords"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">TÉCNICAS DE RELAJACIÓN</span></div>
+            <div id="relaxationTechniques"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+        </div>
+        <a href="/wearables" class="progress-quick" style="margin-top:1rem;display:flex;">
+          <span class="pq-icon">⌚</span>
+          <div class="pq-text"><strong>Sincroniza Wearable</strong>Conecta tu dispositivo para tracking automático de sueño</div>
+        </a>
+      </section>
+
+      <!-- ===== SECCIÓN: COMPRAS ===== -->
+      <section id="section-shopping" class="dash-section">
+        <div class="page-header">
+          <h1 class="page-title">🛒 Lista de Compras</h1>
+          <p class="page-subtitle">Organiza tus alimentos y suplementos</p>
+        </div>
+        <div class="dash-card">
+          <div class="shopping-add">
+            <input type="text" id="shoppingInput" class="shop-input" placeholder="Agregar item a la lista..." onkeydown="if(event.key==='Enter')addShoppingItem()">
+            <button type="button" class="btn-neon" onclick="addShoppingItem()">AGREGAR</button>
+          </div>
+          <div id="shoppingContent"><div class="loading-state"><span class="spinner"></span></div></div>
+        </div>
+        <div class="dash-card" style="margin-top:1rem;">
+          <div class="card-header"><span class="card-title">MIS LISTAS GUARDADAS</span></div>
+          <div id="shoppingLists"><div class="loading-state"><span class="spinner"></span></div></div>
+        </div>
+        <a href="/home-equipment" class="progress-quick" style="margin-top:1rem;display:flex;">
+          <span class="pq-icon">🏠</span>
+          <div class="pq-text"><strong>Equipo para Casa</strong>Recomendaciones de equipamiento para tu gimnasio en casa</div>
+        </a>
+      </section>
+
+      <!-- ===== SECCIÓN: PROGRESO ===== -->
+      <section id="section-progress" class="dash-section">
+        <div class="page-header">
+          <h1 class="page-title">📈 Progreso</h1>
+          <p class="page-subtitle">Tu evolución a lo largo del tiempo</p>
+        </div>
+        <div class="overview-grid" style="margin-bottom:1rem;" id="progressStats">
+          <div class="overview-card"><p class="macro-label">DÍAS ACTIVO</p><div class="overview-val" id="activeDays">—</div></div>
+          <div class="overview-card"><p class="macro-label">ENTRENOS TOTALES</p><div class="overview-val" id="totalWorkouts">—</div></div>
+          <div class="overview-card"><p class="macro-label">RACHA ACTUAL</p><div class="overview-val" id="currentStreak">—</div></div>
+        </div>
+        <div class="content-grid">
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">ACTIVIDAD SEMANAL</span></div>
+            <div id="weeklyActivity"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+          <div class="dash-card">
+            <div class="card-header"><span class="card-title">PROGRESO DE NUTRICIÓN</span></div>
+            <div id="nutritionProgress"><div class="loading-state"><span class="spinner"></span></div></div>
+          </div>
+        </div>
+        <!-- Phase 6 progress links -->
+        <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
+          <a href="/progress-tracker"    class="progress-quick"><span class="pq-icon">📸</span><div class="pq-text"><strong>Fotos de Progreso</strong>Compara frente / espalda / lateral</div></a>
+          <a href="/fitness-challenges"  class="progress-quick"><span class="pq-icon">⚡</span><div class="pq-text"><strong>Retos Fitness</strong>Compite y gana badges</div></a>
+          <a href="/analytics"           class="progress-quick"><span class="pq-icon">📊</span><div class="pq-text"><strong>Analíticas Avanzadas</strong>Tendencias y estadísticas</div></a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===================== MODALES ===================== -->
+
+  <!-- Modal: Registrar Comida -->
+  <div id="modalMeal" class="modal" onclick="if(event.target===this)closeModal('modalMeal')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span class="modal-title">🍽️ REGISTRAR COMIDA</span>
+        <button type="button" class="modal-close" onclick="closeModal('modalMeal')">✕</button>
+      </div>
+      <form onsubmit="submitMeal(event)">
+        <div class="form-group"><label class="form-lbl">ALIMENTO</label>
+          <input type="text" id="mealFood" class="modal-input" required placeholder="Ej: Pechuga de pollo"></div>
+        <div class="form-row2">
+          <div class="form-group"><label class="form-lbl">CALORÍAS</label>
+            <input type="number" id="mealCalories" class="modal-input" required min="0" placeholder="0"></div>
+          <div class="form-group"><label class="form-lbl">PROTEÍNAS (g)</label>
+            <input type="number" id="mealProtein" class="modal-input" min="0" placeholder="0"></div>
+        </div>
+        <div class="form-row2">
+          <div class="form-group"><label class="form-lbl">CARBOHIDRATOS (g)</label>
+            <input type="number" id="mealCarbs" class="modal-input" min="0" placeholder="0"></div>
+          <div class="form-group"><label class="form-lbl">GRASAS (g)</label>
+            <input type="number" id="mealFat" class="modal-input" min="0" placeholder="0"></div>
+        </div>
+        <div class="form-group"><label class="form-lbl">TIPO DE COMIDA</label>
+          <select id="mealType" class="modal-input">
+            <option value="breakfast">Desayuno</option>
+            <option value="lunch">Almuerzo</option>
+            <option value="dinner">Cena</option>
+            <option value="snack">Snack</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-neon" style="width:100%;margin-top:0.5rem;">REGISTRAR</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar Entrenamiento -->
+  <div id="modalWorkout" class="modal" onclick="if(event.target===this)closeModal('modalWorkout')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span class="modal-title">💪 REGISTRAR ENTRENAMIENTO</span>
+        <button type="button" class="modal-close" onclick="closeModal('modalWorkout')">✕</button>
+      </div>
+      <form onsubmit="submitWorkout(event)">
+        <div class="form-group"><label class="form-lbl">NOMBRE</label>
+          <input type="text" id="workoutName" class="modal-input" required placeholder="Ej: Pecho y Tríceps"></div>
+        <div class="form-group"><label class="form-lbl">DURACIÓN (min)</label>
+          <input type="number" id="workoutDuration" class="modal-input" required min="1" placeholder="60"></div>
+        <div class="form-group"><label class="form-lbl">NOTAS</label>
+          <textarea id="workoutNotes" class="modal-input" rows="3" placeholder="Ejercicios realizados, peso, repeticiones..."></textarea></div>
+        <button type="submit" class="btn-neon" style="width:100%;margin-top:0.5rem;">REGISTRAR</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Agregar Agua -->
+  <div id="modalWater" class="modal" onclick="if(event.target===this)closeModal('modalWater')">
+    <div class="modal-box" style="max-width:380px;">
+      <div class="modal-head">
+        <span class="modal-title">💧 AGREGAR AGUA</span>
+        <button type="button" class="modal-close" onclick="closeModal('modalWater')">✕</button>
+      </div>
+      <form onsubmit="submitWater(event)">
+        <div class="form-group"><label class="form-lbl">CANTIDAD</label>
+          <select id="waterAmount" class="modal-input">
+            <option value="150">150 ml — Taza pequeña</option>
+            <option value="250">250 ml — Vaso</option>
+            <option value="500" selected>500 ml — Botella pequeña</option>
+            <option value="750">750 ml</option>
+            <option value="1000">1000 ml — Botella grande</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-neon" style="width:100%;margin-top:0.5rem;">AGREGAR</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Crear Rutina -->
+  <div id="modalCreateWorkout" class="modal" onclick="if(event.target===this)closeModal('modalCreateWorkout')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span class="modal-title">📋 CREAR RUTINA</span>
+        <button type="button" class="modal-close" onclick="closeModal('modalCreateWorkout')">✕</button>
+      </div>
+      <form onsubmit="submitCreateWorkout(event)">
+        <div class="form-group"><label class="form-lbl">NOMBRE DE LA RUTINA</label>
+          <input type="text" id="newWorkoutName" class="modal-input" required placeholder="Ej: Pierna y Hombros"></div>
+        <div class="form-group"><label class="form-lbl">FECHA PROGRAMADA</label>
+          <input type="datetime-local" id="newWorkoutDate" class="modal-input" required></div>
+        <div class="form-group"><label class="form-lbl">DESCRIPCIÓN (opcional)</label>
+          <textarea id="newWorkoutDesc" class="modal-input" rows="2" placeholder="Objetivos, músculos a trabajar..."></textarea></div>
+        <button type="submit" class="btn-neon" style="width:100%;margin-top:0.5rem;">CREAR RUTINA</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script>
+    // Theme + Language controls
+    function toggleTheme() {
+      const current = window.WacoTheme?.get() || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      window.WacoTheme?.set(next);
+      document.getElementById('themeToggleBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+    }
+    function changeLanguage(lang) {
+      window.WacoI18n?.setLang(lang);
+    }
+    // Init controls state
+    document.addEventListener('DOMContentLoaded', () => {
+      const theme = window.WacoTheme?.get() || 'dark';
+      document.getElementById('themeToggleBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+      const lang = window.WacoI18n?.getLang() || 'es';
+      document.getElementById('langSelect').value = lang;
+    });
+  </script>
+</body>
+</html>

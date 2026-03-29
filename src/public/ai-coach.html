@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WacoCoach AI - WacoPro Fitness</title>
+  <link rel="stylesheet" href="/css/ai-coach.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f13; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Nav */
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: #16161e; border-bottom: 1px solid #2d2d3a; }
+    .nav-logo { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #6c63ff, #48bb78); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: #a0aec0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: #6c63ff; }
+
+    /* Layout */
+    .main { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar { width: 280px; background: #16161e; border-right: 1px solid #2d2d3a; display: flex; flex-direction: column; overflow-y: auto; }
+    .sidebar-section { padding: 1.25rem; border-bottom: 1px solid #2d2d3a; }
+    .sidebar-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #718096; margin-bottom: 0.75rem; }
+
+    /* AI Tools */
+    .ai-tool-btn { width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #2d2d3a; background: #1e1e2d; color: #e2e8f0; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; transition: all 0.2s; font-size: 0.875rem; }
+    .ai-tool-btn:hover { background: #2d2d3a; border-color: #6c63ff; }
+    .ai-tool-btn.active { background: rgba(108, 99, 255, 0.15); border-color: #6c63ff; }
+    .ai-tool-btn .icon { font-size: 1.25rem; }
+    .ai-tool-btn .label { flex: 1; }
+    .ai-tool-btn .badge { font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; background: #6c63ff; color: white; }
+
+    /* Usage bar */
+    .usage-info { margin-top: 0.5rem; }
+    .usage-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: #718096; margin-bottom: 0.35rem; }
+    .usage-bar { height: 4px; background: #2d2d3a; border-radius: 2px; overflow: hidden; }
+    .usage-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #6c63ff); border-radius: 2px; transition: width 0.5s; }
+
+    /* Chat area */
+    .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-header { padding: 1rem 1.5rem; background: #16161e; border-bottom: 1px solid #2d2d3a; display: flex; align-items: center; gap: 1rem; }
+    .chat-header .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6c63ff, #48bb78); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .chat-header .info h2 { font-size: 1rem; font-weight: 600; }
+    .chat-header .info p { font-size: 0.8rem; color: #48bb78; }
+    .online-dot { width: 8px; height: 8px; background: #48bb78; border-radius: 50%; display: inline-block; margin-right: 4px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* Messages */
+    .messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .message { display: flex; gap: 0.75rem; max-width: 80%; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .message .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6c63ff, #48bb78); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
+    .message.user .avatar { background: linear-gradient(135deg, #48bb78, #38a169); }
+    .message .bubble { padding: 0.75rem 1rem; border-radius: 16px; font-size: 0.9rem; line-height: 1.5; }
+    .message.ai .bubble { background: #1e1e2d; border-radius: 4px 16px 16px 16px; }
+    .message.user .bubble { background: linear-gradient(135deg, #6c63ff, #5a52d5); border-radius: 16px 4px 16px 16px; }
+    .message .time { font-size: 0.7rem; color: #718096; margin-top: 0.35rem; }
+    .message.user .time { text-align: right; }
+
+    /* Typing indicator */
+    .typing-indicator { display: none; align-items: center; gap: 0.75rem; padding: 0.5rem 0; }
+    .typing-indicator.visible { display: flex; }
+    .typing-dots { display: flex; gap: 4px; }
+    .typing-dots span { width: 6px; height: 6px; background: #6c63ff; border-radius: 50%; animation: bounce 1s infinite; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+    /* Input area */
+    .input-area { padding: 1rem 1.5rem; background: #16161e; border-top: 1px solid #2d2d3a; }
+    .input-wrapper { display: flex; gap: 0.75rem; align-items: flex-end; background: #1e1e2d; border: 1px solid #2d2d3a; border-radius: 16px; padding: 0.75rem 1rem; transition: border-color 0.2s; }
+    .input-wrapper:focus-within { border-color: #6c63ff; }
+    #messageInput { flex: 1; background: none; border: none; outline: none; color: #e2e8f0; font-size: 0.9rem; resize: none; max-height: 120px; line-height: 1.5; font-family: inherit; }
+    #messageInput::placeholder { color: #4a5568; }
+    .send-btn { background: linear-gradient(135deg, #6c63ff, #5a52d5); border: none; border-radius: 10px; padding: 0.5rem 1rem; color: white; cursor: pointer; font-size: 0.9rem; transition: opacity 0.2s; white-space: nowrap; }
+    .send-btn:hover { opacity: 0.9; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .input-hints { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    .hint-chip { padding: 0.25rem 0.75rem; background: #1e1e2d; border: 1px solid #2d2d3a; border-radius: 20px; font-size: 0.75rem; color: #a0aec0; cursor: pointer; transition: all 0.2s; }
+    .hint-chip:hover { border-color: #6c63ff; color: #6c63ff; }
+
+    /* AI Tool Panels */
+    .tool-panel { display: none; flex: 1; flex-direction: column; padding: 1.5rem; overflow-y: auto; gap: 1rem; }
+    .tool-panel.active { display: flex; }
+    .tool-panel h3 { font-size: 1.1rem; font-weight: 600; }
+    .tool-panel p { color: #a0aec0; font-size: 0.875rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 500; color: #a0aec0; }
+    .form-group input, .form-group select, .form-group textarea {
+      background: #1e1e2d; border: 1px solid #2d2d3a; border-radius: 8px; padding: 0.6rem 0.9rem;
+      color: #e2e8f0; font-size: 0.875rem; outline: none; font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: #6c63ff; }
+
+    .btn { padding: 0.6rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, #6c63ff, #5a52d5); color: white; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-box { background: #1e1e2d; border: 1px solid #2d2d3a; border-radius: 12px; padding: 1.25rem; }
+    .result-box pre { white-space: pre-wrap; font-size: 0.8rem; color: #a0aec0; font-family: monospace; }
+    .result-box .meal-day { border-bottom: 1px solid #2d2d3a; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .result-box .meal-day:last-child { border-bottom: none; margin-bottom: 0; }
+    .meal-name { font-weight: 600; color: #e2e8f0; margin-bottom: 0.25rem; }
+    .meal-macros { font-size: 0.78rem; color: #718096; display: flex; gap: 1rem; }
+    .macro-badge { padding: 0.15rem 0.5rem; border-radius: 4px; background: rgba(108,99,255,0.15); color: #a78bfa; }
+
+    /* Food scan */
+    .upload-area { border: 2px dashed #2d2d3a; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .upload-area:hover { border-color: #6c63ff; background: rgba(108,99,255,0.05); }
+    .upload-area input { display: none; }
+    .upload-preview { max-width: 300px; max-height: 200px; border-radius: 8px; margin-top: 1rem; object-fit: cover; display: none; }
+
+    /* Spinner */
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 10px; background: #1e1e2d; border: 1px solid; font-size: 0.875rem; z-index: 9999; transform: translateY(100px); transition: transform 0.3s; }
+    .toast.show { transform: translateY(0); }
+    .toast.success { border-color: #48bb78; color: #48bb78; }
+    .toast.error { border-color: #fc8181; color: #fc8181; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .message { max-width: 95%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">WacoPro AI</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/meal-planner">Nutrición</a>
+    <a href="/workout-builder">Entrenamiento</a>
+    <a href="/ai-coach" class="active">AI Coach</a>
+    <a href="/wearables">Wearables</a>
+  </div>
+</nav>
+
+<div class="main">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Herramientas AI</div>
+      <button type="button" class="ai-tool-btn active" data-tool="chat" onclick="switchTool('chat', this)">
+        <span class="icon">💬</span>
+        <span class="label">WacoCoach Chat</span>
+        <span class="badge">Live</span>
+      </button>
+      <button type="button" class="ai-tool-btn" data-tool="meal-plan" onclick="switchTool('meal-plan', this)">
+        <span class="icon">🥗</span>
+        <span class="label">Plan de Comidas</span>
+      </button>
+      <button type="button" class="ai-tool-btn" data-tool="workout" onclick="switchTool('workout', this)">
+        <span class="icon">💪</span>
+        <span class="label">Rutina de Entrenamiento</span>
+      </button>
+      <button type="button" class="ai-tool-btn" data-tool="food-scan" onclick="switchTool('food-scan', this)">
+        <span class="icon">📷</span>
+        <span class="label">Escanear Comida</span>
+        <span class="badge">Vision AI</span>
+      </button>
+      <button type="button" class="ai-tool-btn" data-tool="insights" onclick="switchTool('insights', this)">
+        <span class="icon">📊</span>
+        <span class="label">Insights de Progreso</span>
+      </button>
+      <button type="button" class="ai-tool-btn" data-tool="recipe" onclick="switchTool('recipe', this)">
+        <span class="icon">👨‍🍳</span>
+        <span class="label">Generar Receta</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Uso Diario</div>
+      <div class="usage-info">
+        <div class="usage-label">
+          <span id="usageText">Cargando...</span>
+          <span id="planBadge"></span>
+        </div>
+        <div class="usage-bar">
+          <div class="usage-fill" id="usageFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Chat Panel -->
+  <div id="panel-chat" class="chat-area">
+    <div class="chat-header">
+      <div class="avatar">🤖</div>
+      <div class="info">
+        <h2>WacoCoach</h2>
+        <p><span class="online-dot"></span>En línea · Listo para ayudarte</p>
+      </div>
+      <!-- Voice status badge -->
+      <span id="voiceStatus">🎤 Listo</span>
+    </div>
+    <!-- Aviso compatibilidad de voz (se muestra solo si el navegador no lo soporta) -->
+    <div id="voiceSupportNotice"></div>
+    <!-- Transcripción en tiempo real mientras el usuario habla -->
+    <div id="liveTranscript"></div>
+    <div class="messages" id="messages">
+      <div class="message ai">
+        <div class="avatar">🤖</div>
+        <div>
+          <div class="bubble">¡Hola! Soy WacoCoach, tu asistente personal de fitness. Puedo ayudarte con nutrición, entrenamiento, recuperación y mucho más. ¿En qué te puedo ayudar hoy?</div>
+          <div class="time">Ahora</div>
+        </div>
+      </div>
+    </div>
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6c63ff,#48bb78);display:flex;align-items:center;justify-content:center;">🤖</div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+    <div class="input-area">
+      <div class="input-wrapper">
+        <!-- Botón de micrófono (voz nativa Web Speech API — sin APIs externas) -->
+        <button type="button" id="micBtn" class="idle" title="Presionar para hablar (Chrome/Edge)">🎤</button>
+        <textarea id="messageInput" placeholder="Escribí tu pregunta o presioná el 🎤..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
+        <button type="button" class="send-btn" id="sendBtn" onclick="sendMessage()">Enviar ↑</button>
+      </div>
+      <div class="input-hints">
+        <span class="hint-chip" onclick="useHint(this)">¿Cuántas proteínas necesito?</span>
+        <span class="hint-chip" onclick="useHint(this)">Dame una rutina para hoy</span>
+        <span class="hint-chip" onclick="useHint(this)">¿Cómo mejorar mi recuperación?</span>
+        <span class="hint-chip" onclick="useHint(this)">Analiza mi progreso</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meal Plan Panel -->
+  <div id="panel-meal-plan" class="tool-panel">
+    <h3>🥗 Generador de Plan de Comidas</h3>
+    <p>La IA creará un plan personalizado basado en tu perfil nutricional y objetivos.</p>
+    <div class="form-group">
+      <label>Días del plan</label>
+      <select id="mealDays">
+        <option value="1">1 día</option>
+        <option value="3">3 días</option>
+        <option value="5">5 días</option>
+        <option value="7" selected>7 días (semana completa)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Restricciones alimentarias (separadas por coma)</label>
+      <input type="text" id="mealRestrictions" placeholder="Ej: sin gluten, sin lácteos, vegetariano" />
+    </div>
+    <div class="form-group">
+      <label>Preferencias de cocina (opcional)</label>
+      <input type="text" id="mealCuisine" placeholder="Ej: mediterráneo, mexicano, asiático" />
+    </div>
+    <button type="button" class="btn btn-primary" id="mealPlanBtn" onclick="generateMealPlan()">Generar Plan 🥗</button>
+    <div id="mealPlanResult"></div>
+  </div>
+
+  <!-- Workout Panel -->
+  <div id="panel-workout" class="tool-panel">
+    <h3>💪 Generador de Rutina</h3>
+    <p>La IA diseñará un programa de entrenamiento progresivo adaptado a tu perfil.</p>
+    <div class="form-group">
+      <label>Duración del programa</label>
+      <select id="workoutWeeks">
+        <option value="1">1 semana (prueba)</option>
+        <option value="4" selected>4 semanas</option>
+        <option value="8">8 semanas</option>
+        <option value="12">12 semanas</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Objetivos específicos adicionales (opcional)</label>
+      <input type="text" id="workoutGoals" placeholder="Ej: aumentar press banca, mejorar resistencia" />
+    </div>
+    <button type="button" class="btn btn-primary" id="workoutBtn" onclick="generateWorkout()">Generar Rutina 💪</button>
+    <div id="workoutResult"></div>
+  </div>
+
+  <!-- Food Scan Panel -->
+  <div id="panel-food-scan" class="tool-panel">
+    <h3>📷 Análisis de Comida por Imagen</h3>
+    <p>Sube una foto de tu comida y la IA calculará las calorías y macronutrientes.</p>
+    <div class="upload-area" onclick="document.getElementById('foodImageInput').click()">
+      <div style="font-size:3rem;margin-bottom:0.5rem">📸</div>
+      <p>Haz clic para seleccionar una imagen</p>
+      <p style="font-size:0.8rem;color:#718096;margin-top:0.25rem">JPG, PNG, WebP · Máx 4MB</p>
+      <input type="file" id="foodImageInput" accept="image/*" onchange="previewImage(event)" />
+      <img id="uploadPreview" class="upload-preview" />
+    </div>
+    <button type="button" class="btn btn-primary" id="scanBtn" onclick="analyzeFoodImage()" disabled>Analizar Imagen 🔍</button>
+    <div id="foodScanResult"></div>
+  </div>
+
+  <!-- Insights Panel -->
+  <div id="panel-insights" class="tool-panel">
+    <h3>📊 Insights de Progreso</h3>
+    <p>Análisis inteligente de tus últimas 20 sesiones de entrenamiento y 2 semanas de nutrición.</p>
+    <button type="button" class="btn btn-primary" id="insightsBtn" onclick="getInsights()">Generar Insights 📊</button>
+    <div id="insightsResult"></div>
+  </div>
+
+  <!-- Recipe Panel -->
+  <div id="panel-recipe" class="tool-panel">
+    <h3>👨‍🍳 Generador de Recetas</h3>
+    <p>Ingresa los ingredientes que tienes y la IA creará una receta optimizada para tus macros.</p>
+    <div class="form-group">
+      <label>Ingredientes disponibles (separados por coma) *</label>
+      <textarea id="recipeIngredients" rows="3" placeholder="Ej: pollo, brócoli, arroz integral, aceite de oliva"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Tipo de comida</label>
+      <select id="recipeMealType">
+        <option value="">Cualquiera</option>
+        <option value="breakfast">Desayuno</option>
+        <option value="lunch">Almuerzo</option>
+        <option value="dinner">Cena</option>
+        <option value="snack">Snack</option>
+        <option value="pre_workout">Pre-entreno</option>
+        <option value="post_workout">Post-entreno</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Tiempo máximo de cocción (minutos)</label>
+      <input type="number" id="recipeCookTime" min="5" max="120" placeholder="Ej: 30" />
+    </div>
+    <button type="button" class="btn btn-primary" id="recipeBtn" onclick="generateRecipe()">Crear Receta 👨‍🍳</button>
+    <div id="recipeResult"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('token');
+let sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2,9)}`;
+let imageBase64 = null;
+let imageType = null;
+
+if (!token) window.location.href = '/login';
+
+// ── Tool switching ─────────────────────────────────────────────────────────
+
+function switchTool(tool, btn) {
+  document.querySelectorAll('.ai-tool-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Chat uses chat-area, others use tool-panel
+  document.getElementById('panel-chat').style.display = tool === 'chat' ? 'flex' : 'none';
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+
+  if (tool !== 'chat') {
+    const panel = document.getElementById(`panel-${tool}`);
+    if (panel) panel.classList.add('active');
+  }
+}
+
+// ── Chat ───────────────────────────────────────────────────────────────────
+
+function handleKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+function useHint(chip) {
+  document.getElementById('messageInput').value = chip.textContent;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('messageInput');
+  const message = input.value.trim();
+  if (!message) return;
+
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  addMessage('user', message);
+  showTyping(true);
+
+  try {
+    const res = await fetch(`${API}/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ message, sessionId, stream: false }),
+    });
+
+    const data = await res.json();
+    showTyping(false);
+
+    if (!res.ok) {
+      if (res.status === 429) {
+        addMessage('ai', `⚠️ ${data.error}. Actualiza tu plan para más llamadas diarias.`);
+      } else {
+        addMessage('ai', '❌ Error al procesar tu mensaje. Inténtalo de nuevo.');
+      }
+    } else {
+      addMessage('ai', data.response);
+    }
+  } catch (err) {
+    showTyping(false);
+    addMessage('ai', '❌ Error de conexión. Verifica tu red e inténtalo de nuevo.');
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+    loadUsage();
+  }
+}
+
+function addMessage(role, content) {
+  const container = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+
+  const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  div.innerHTML = `
+    <div class="avatar">${role === 'ai' ? '🤖' : '👤'}</div>
+    <div>
+      <div class="bubble">${escapeHtml(content).replace(/\n/g, '<br>')}</div>
+      <div class="time">${time}</div>
+    </div>
+  `;
+
+  const typingEl = document.getElementById('typingIndicator');
+  container.insertBefore(div, typingEl);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping(show) {
+  document.getElementById('typingIndicator').classList.toggle('visible', show);
+  const container = document.getElementById('messages');
+  container.scrollTop = container.scrollHeight;
+}
+
+// ── Meal Plan ─────────────────────────────────────────────────────────────
+
+async function generateMealPlan() {
+  const btn = document.getElementById('mealPlanBtn');
+  const days = parseInt(document.getElementById('mealDays').value);
+  const restrictionsRaw = document.getElementById('mealRestrictions').value;
+  const cuisineRaw = document.getElementById('mealCuisine').value;
+
+  const restrictions = restrictionsRaw ? restrictionsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const cuisinePreferences = cuisineRaw ? cuisineRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generando...';
+  document.getElementById('mealPlanResult').innerHTML = '';
+
+  try {
+    const res = await fetch(`${API}/ai/meal-plan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ daysRequested: days, restrictions, cuisinePreferences }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showResult('mealPlanResult', `<p style="color:#fc8181">❌ ${data.error}</p>`);
+    } else {
+      renderMealPlan(data.plan);
+    }
+  } catch {
+    showResult('mealPlanResult', '<p style="color:#fc8181">❌ Error de conexión</p>');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generar Plan 🥗';
+    loadUsage();
+  }
+}
+
+function renderMealPlan(plan) {
+  if (!plan || !plan.days) {
+    showResult('mealPlanResult', `<div class="result-box"><pre>${JSON.stringify(plan, null, 2)}</pre></div>`);
+    return;
+  }
+
+  let html = `<div class="result-box">
+    <h4 style="margin-bottom:0.75rem;color:#a78bfa">${escapeHtml(plan.planName || 'Plan de Comidas')}</h4>
+    <p style="font-size:0.8rem;color:#718096;margin-bottom:1rem">${escapeHtml(plan.description || '')}</p>`;
+
+  for (const day of plan.days) {
+    html += `<div class="meal-day"><h5 style="color:#e2e8f0;margin-bottom:0.5rem">Día ${day.day} · ${day.totalCalories || '?'} kcal</h5>`;
+    for (const meal of (day.meals || [])) {
+      html += `<div style="margin-bottom:0.5rem">
+        <div class="meal-name">${escapeHtml(meal.name || meal.type)}</div>
+        <div class="meal-macros">
+          <span class="macro-badge">P: ${meal.macros?.protein || 0}g</span>
+          <span class="macro-badge">C: ${meal.macros?.carbs || 0}g</span>
+          <span class="macro-badge">G: ${meal.macros?.fat || 0}g</span>
+          <span style="color:#718096">${meal.macros?.calories || 0} kcal · ${meal.prepTime || 0}min prep</span>
+        </div>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  html += '</div>';
+  showResult('mealPlanResult', html);
+}
+
+// ── Workout ───────────────────────────────────────────────────────────────
+
+async function generateWorkout() {
+  const btn = document.getElementById('workoutBtn');
+  const weeks = parseInt(document.getElementById('workoutWeeks').value);
+  const goalsRaw = document.getElementById('workoutGoals').value;
+  const specificGoals = goalsRaw ? goalsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generando rutina...';
+  document.getElementById('workoutResult').innerHTML = '';
+
+  try {
+    const res = await fetch(`${API}/ai/workout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ weeksRequested: weeks, specificGoals }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      showResult('workoutResult', `<p style="color:#fc8181">❌ ${data.error}</p>`);
+    } else {
+      renderWorkout(data.workout);
+    }
+  } catch {
+    showResult('workoutResult', '<p style="color:#fc8181">❌ Error de conexión</p>');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generar Rutina 💪';
+    loadUsage();
+  }
+}
+
+function renderWorkout(workout) {
+  if (!workout || !workout.planName) {
+    showResult('workoutResult', `<div class="result-box"><pre>${JSON.stringify(workout, null, 2)}</pre></div>`);
+    return;
+  }
+
+  let html = `<div class="result-box">
+    <h4 style="margin-bottom:0.5rem;color:#a78bfa">${escapeHtml(workout.planName)}</h4>
+    <p style="font-size:0.8rem;color:#718096;margin-bottom:1rem">${escapeHtml(workout.description || '')}</p>
+    <div style="display:flex;gap:1rem;font-size:0.8rem;margin-bottom:1rem">
+      <span class="macro-badge">${workout.durationWeeks} semanas</span>
+      <span class="macro-badge">${workout.daysPerWeek} días/semana</span>
+      <span class="macro-badge">${workout.splitType || 'N/A'}</span>
+    </div>`;
+
+  const week = workout.weeks?.[0];
+  if (week) {
+    html += `<h5 style="color:#e2e8f0;margin-bottom:0.5rem">Semana 1: ${escapeHtml(week.focus || '')}</h5>`;
+    for (const day of (week.days || []).slice(0, 3)) {
+      html += `<div style="margin-bottom:0.75rem;padding:0.75rem;background:#16161e;border-radius:8px">
+        <div style="font-weight:600;margin-bottom:0.25rem">Día ${day.dayNumber}: ${escapeHtml(day.name || '')}</div>
+        <div style="font-size:0.78rem;color:#718096">${(day.exercises || []).map(e => escapeHtml(e.name)).join(' · ')}</div>
+      </div>`;
+    }
+    if (workout.weeks.length > 1) {
+      html += `<p style="font-size:0.8rem;color:#718096">+ ${workout.weeks.length - 1} semana(s) más en el plan completo</p>`;
+    }
+  }
+
+  html += '</div>';
+  showResult('workoutResult', html);
+}
+
+// ── Food Scan ─────────────────────────────────────────────────────────────
+
+function previewImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 4 * 1024 * 1024) {
+    showToast('Imagen demasiado grande (máx 4MB)', 'error');
+    return;
+  }
+
+  imageType = file.type;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imageBase64 = e.target.result.split(',')[1];
+    const preview = document.getElementById('uploadPreview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    document.getElementById('scanBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeFoodImage() {
+  if (!imageBase64) return;
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analizando...';
+  document.getElementById('foodScanResult').innerHTML = '';
+
+  try {
+    const res = await fetch(`${API}/ai/food-scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ base64Image: imageBase64, mimeType: imageType }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      showResult('foodScanResult', `<p style="color:#fc8181">❌ ${data.error}</p>`);
+    } else {
+      renderFoodScan(data.analysis);
+    }
+  } catch {
+    showResult('foodScanResult', '<p style="color:#fc8181">❌ Error de conexión</p>');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Analizar Imagen 🔍';
+    loadUsage();
+  }
+}
+
+function renderFoodScan(analysis) {
+  if (!analysis) return;
+  let html = `<div class="result-box">
+    <h4 style="margin-bottom:0.75rem;color:#a78bfa">Resultado del análisis</h4>
+    <div style="display:flex;gap:1rem;font-size:0.875rem;margin-bottom:1rem">
+      <span class="macro-badge">🔥 ${analysis.totalCalories || 0} kcal</span>
+      <span class="macro-badge">P: ${analysis.totalMacros?.protein || 0}g</span>
+      <span class="macro-badge">C: ${analysis.totalMacros?.carbs || 0}g</span>
+      <span class="macro-badge">G: ${analysis.totalMacros?.fat || 0}g</span>
+    </div>`;
+
+  for (const food of (analysis.foods || [])) {
+    html += `<div style="margin-bottom:0.5rem;padding:0.6rem;background:#16161e;border-radius:8px">
+      <div style="font-weight:500">${escapeHtml(food.name)} · ${food.estimatedWeight || '?'}g</div>
+      <div style="font-size:0.78rem;color:#718096">${food.calories || 0} kcal · Confianza: ${Math.round((food.confidence || 0) * 100)}%</div>
+    </div>`;
+  }
+
+  if (analysis.suggestions?.length) {
+    html += `<div style="margin-top:0.75rem"><div style="font-size:0.8rem;color:#a78bfa;margin-bottom:0.35rem">Sugerencias:</div>`;
+    for (const s of analysis.suggestions) {
+      html += `<div style="font-size:0.8rem;color:#a0aec0">• ${escapeHtml(s)}</div>`;
+    }
+    html += '</div>';
+  }
+
+  html += '</div>';
+  showResult('foodScanResult', html);
+}
+
+// ── Insights ──────────────────────────────────────────────────────────────
+
+async function getInsights() {
+  const btn = document.getElementById('insightsBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analizando datos...';
+  document.getElementById('insightsResult').innerHTML = '';
+
+  try {
+    const res = await fetch(`${API}/ai/insights`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      showResult('insightsResult', `<p style="color:#fc8181">❌ ${data.error}</p>`);
+    } else {
+      renderInsights(data.insights);
+    }
+  } catch {
+    showResult('insightsResult', '<p style="color:#fc8181">❌ Error de conexión</p>');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generar Insights 📊';
+    loadUsage();
+  }
+}
+
+function renderInsights(insights) {
+  if (!insights) return;
+  const trendIcon = { improving: '📈', declining: '📉', stable: '➡️' };
+
+  let html = `<div class="result-box">`;
+  if (insights.weeklyHighlight) {
+    html += `<div style="background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.3);border-radius:8px;padding:0.75rem;margin-bottom:1rem">
+      <div style="font-size:0.75rem;color:#a78bfa;margin-bottom:0.25rem">HIGHLIGHT SEMANAL</div>
+      <div>${escapeHtml(insights.weeklyHighlight)}</div>
+    </div>`;
+  }
+
+  for (const insight of (insights.insights || [])) {
+    html += `<div style="margin-bottom:0.75rem;padding:0.75rem;background:#16161e;border-radius:8px">
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem">
+        <span>${trendIcon[insight.trend] || '➡️'}</span>
+        <span style="font-weight:600">${escapeHtml(insight.title)}</span>
+        <span style="font-size:0.7rem;padding:0.1rem 0.4rem;border-radius:4px;background:rgba(108,99,255,0.2);color:#a78bfa">${insight.category}</span>
+      </div>
+      <div style="font-size:0.85rem;color:#a0aec0;margin-bottom:0.35rem">${escapeHtml(insight.description)}</div>
+      <div style="font-size:0.8rem;color:#48bb78">💡 ${escapeHtml(insight.recommendation)}</div>
+    </div>`;
+  }
+
+  html += '</div>';
+  showResult('insightsResult', html);
+}
+
+// ── Recipe ────────────────────────────────────────────────────────────────
+
+async function generateRecipe() {
+  const btn = document.getElementById('recipeBtn');
+  const ingredientsRaw = document.getElementById('recipeIngredients').value;
+  const mealType = document.getElementById('recipeMealType').value;
+  const cookTimeMax = document.getElementById('recipeCookTime').value;
+
+  const ingredients = ingredientsRaw.split(',').map(s => s.trim()).filter(Boolean);
+  if (ingredients.length === 0) {
+    showToast('Ingresa al menos un ingrediente', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creando receta...';
+  document.getElementById('recipeResult').innerHTML = '';
+
+  try {
+    const body = { ingredients };
+    if (mealType) body.mealType = mealType;
+    if (cookTimeMax) body.cookTimeMax = parseInt(cookTimeMax);
+
+    const res = await fetch(`${API}/ai/recipe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      showResult('recipeResult', `<p style="color:#fc8181">❌ ${data.error}</p>`);
+    } else {
+      renderRecipe(data.recipe);
+    }
+  } catch {
+    showResult('recipeResult', '<p style="color:#fc8181">❌ Error de conexión</p>');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Crear Receta 👨‍🍳';
+    loadUsage();
+  }
+}
+
+function renderRecipe(recipe) {
+  if (!recipe || !recipe.name) {
+    showResult('recipeResult', `<div class="result-box"><pre>${JSON.stringify(recipe, null, 2)}</pre></div>`);
+    return;
+  }
+
+  let html = `<div class="result-box">
+    <h4 style="color:#a78bfa;margin-bottom:0.25rem">${escapeHtml(recipe.name)}</h4>
+    <p style="font-size:0.85rem;color:#718096;margin-bottom:0.75rem">${escapeHtml(recipe.description || '')}</p>
+    <div style="display:flex;gap:0.75rem;font-size:0.8rem;margin-bottom:1rem">
+      <span>⏱ ${(recipe.prepTime || 0) + (recipe.cookTime || 0)} min total</span>
+      <span>👥 ${recipe.servings || 1} porción(es)</span>
+      <span class="macro-badge">🔥 ${recipe.macros?.calories || 0} kcal</span>
+      <span class="macro-badge">P: ${recipe.macros?.protein || 0}g</span>
+    </div>
+    <h5 style="margin-bottom:0.5rem">Ingredientes</h5>
+    <ul style="list-style:none;margin-bottom:1rem">`;
+
+  for (const ing of (recipe.ingredients || [])) {
+    html += `<li style="font-size:0.875rem;padding:0.2rem 0;color:#a0aec0">• ${ing.amount} ${ing.unit} ${escapeHtml(ing.name)}</li>`;
+  }
+
+  html += `</ul><h5 style="margin-bottom:0.5rem">Preparación</h5><ol style="padding-left:1.25rem">`;
+  for (const step of (recipe.instructions || [])) {
+    html += `<li style="font-size:0.875rem;padding:0.25rem 0;color:#a0aec0">${escapeHtml(step)}</li>`;
+  }
+  html += '</ol></div>';
+  showResult('recipeResult', html);
+}
+
+// ── Usage ─────────────────────────────────────────────────────────────────
+
+async function loadUsage() {
+  try {
+    const res = await fetch(`${API}/ai/usage`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const { usage } = await res.json();
+
+    document.getElementById('usageText').textContent = `${usage.used} / ${usage.limit} llamadas`;
+    document.getElementById('planBadge').textContent = usage.plan.toUpperCase();
+    const pct = Math.min((usage.used / usage.limit) * 100, 100);
+    document.getElementById('usageFill').style.width = pct + '%';
+  } catch {}
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function showResult(id, html) {
+  document.getElementById(id).innerHTML = html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Init
+loadUsage();
+</script>
+
+<!-- WacoCoach Voice Integration — Web Speech API (STT + TTS nativo, sin APIs externas) -->
+<script src="/js/ai-coach.js"></script>
+</body>
+</html>

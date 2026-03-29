@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wearables - WacoPro Fitness</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f13; color: #e2e8f0; min-height: 100vh; }
+
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: #16161e; border-bottom: 1px solid #2d2d3a; }
+    .nav-logo { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #6c63ff, #48bb78); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: #a0aec0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: #6c63ff; }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .subtitle { color: #718096; margin-bottom: 2rem; }
+
+    /* Provider Grid */
+    .providers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; }
+
+    .provider-card { background: #16161e; border: 1px solid #2d2d3a; border-radius: 16px; padding: 1.5rem; transition: all 0.2s; }
+    .provider-card:hover { border-color: #4a4a6a; }
+    .provider-card.connected { border-color: #48bb78; }
+
+    .provider-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .provider-logo { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; }
+    .provider-info h3 { font-size: 1rem; font-weight: 600; }
+    .provider-info p { font-size: 0.8rem; color: #718096; }
+
+    .status-badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; margin-bottom: 1rem; }
+    .status-badge.connected { background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); }
+    .status-badge.disconnected { background: rgba(113, 128, 150, 0.1); color: #718096; border: 1px solid #2d2d3a; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .provider-meta { font-size: 0.78rem; color: #718096; margin-bottom: 1rem; }
+    .provider-meta span { display: block; margin-bottom: 0.2rem; }
+
+    .btn { padding: 0.6rem 1.25rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; width: 100%; }
+    .btn-connect { background: linear-gradient(135deg, #6c63ff, #5a52d5); color: white; }
+    .btn-connect:hover { opacity: 0.9; }
+    .btn-disconnect { background: transparent; border: 1px solid #fc8181; color: #fc8181; }
+    .btn-disconnect:hover { background: rgba(252, 129, 129, 0.1); }
+    .btn-sync { background: rgba(108, 99, 255, 0.15); border: 1px solid rgba(108, 99, 255, 0.3); color: #a78bfa; margin-bottom: 0.5rem; }
+    .btn-sync:hover { background: rgba(108, 99, 255, 0.25); }
+
+    /* Sync Section */
+    .sync-section { background: #16161e; border: 1px solid #2d2d3a; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; }
+    .sync-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .sync-header h2 { font-size: 1.1rem; font-weight: 600; }
+    .btn-sync-all { padding: 0.5rem 1.25rem; background: linear-gradient(135deg, #6c63ff, #5a52d5); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; }
+
+    .sync-result { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.875rem; display: none; }
+    .sync-result.success { background: rgba(72, 187, 120, 0.1); border: 1px solid rgba(72, 187, 120, 0.3); color: #48bb78; }
+    .sync-result.error { background: rgba(252, 129, 129, 0.1); border: 1px solid rgba(252, 129, 129, 0.3); color: #fc8181; }
+
+    /* iOS section */
+    .ios-section { background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(72,187,120,0.1)); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; }
+    .ios-section h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .ios-section p { font-size: 0.875rem; color: #a0aec0; margin-bottom: 1rem; }
+    .app-store-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; background: #16161e; border: 1px solid #2d2d3a; border-radius: 10px; color: #e2e8f0; text-decoration: none; font-size: 0.85rem; }
+
+    /* Data Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: #16161e; border: 1px solid #2d2d3a; border-radius: 12px; padding: 1rem; text-align: center; }
+    .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #a78bfa; }
+    .stat-card .label { font-size: 0.75rem; color: #718096; margin-top: 0.25rem; }
+    .stat-card .icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 10px; background: #1e1e2d; border: 1px solid; font-size: 0.875rem; z-index: 9999; transform: translateY(100px); transition: transform 0.3s; }
+    .toast.show { transform: translateY(0); }
+    .toast.success { border-color: #48bb78; color: #48bb78; }
+    .toast.error { border-color: #fc8181; color: #fc8181; }
+
+    @media (max-width: 600px) {
+      .container { padding: 1rem; }
+      .providers-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/ai-coach">AI Coach</a>
+    <a href="/wearables" class="active">Wearables</a>
+    <a href="/profile">Perfil</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>⌚ Dispositivos Wearables</h1>
+  <p class="subtitle">Conecta tus dispositivos para sincronizar automáticamente tus datos de salud y fitness.</p>
+
+  <!-- Stats from wearables -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><div class="icon">👟</div><div class="value" id="stepsVal">—</div><div class="label">Pasos hoy</div></div>
+    <div class="stat-card"><div class="icon">❤️</div><div class="value" id="hrVal">—</div><div class="label">FC en reposo</div></div>
+    <div class="stat-card"><div class="icon">😴</div><div class="value" id="sleepVal">—</div><div class="label">Horas de sueño</div></div>
+    <div class="stat-card"><div class="icon">🔥</div><div class="value" id="calVal">—</div><div class="label">Calorías quemadas</div></div>
+    <div class="stat-card"><div class="icon">🫀</div><div class="value" id="hrvVal">—</div><div class="label">HRV (ms)</div></div>
+    <div class="stat-card"><div class="icon">🧘</div><div class="value" id="activeVal">—</div><div class="label">Min activos</div></div>
+  </div>
+
+  <!-- Sync all -->
+  <div class="sync-section">
+    <div class="sync-header">
+      <h2>Sincronización de datos</h2>
+      <button type="button" class="btn-sync-all" onclick="syncAll()">🔄 Sincronizar todo</button>
+    </div>
+    <p style="font-size:0.875rem;color:#718096">Última sincronización: <span id="lastSyncTime">Nunca</span></p>
+    <div class="sync-result" id="syncResult"></div>
+  </div>
+
+  <!-- HealthKit / iOS -->
+  <div class="ios-section">
+    <h2>📱 Apple Health (HealthKit)</h2>
+    <p>HealthKit se integra directamente desde nuestra app iOS. Los datos se sincronizan automáticamente en segundo plano.</p>
+    <a href="#" class="app-store-btn">🍎 Descargar WacoPro para iOS</a>
+  </div>
+
+  <!-- Providers Grid -->
+  <h2 style="margin-bottom:1.25rem;font-size:1.1rem">Proveedores disponibles</h2>
+  <div class="providers-grid" id="providersGrid">
+    <!-- Injected by JS -->
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login';
+
+const PROVIDERS = [
+  { id: 'fitbit', name: 'Fitbit', emoji: '📟', color: '#00B0B9', description: 'Pasos, FC, sueño, calorías', features: ['Pasos', 'Frecuencia cardíaca', 'Sueño', 'Calorías'] },
+  { id: 'garmin', name: 'Garmin', emoji: '⌚', color: '#007CC3', description: 'GPS, rendimiento atlético, VO2 Max', features: ['GPS', 'VO2 Max', 'Estrés', 'Sueño'] },
+  { id: 'google_fit', name: 'Google Fit', emoji: '🏃', color: '#34A853', description: 'Android / Google integration', features: ['Pasos', 'FC', 'Actividad', 'Minutos activos'] },
+  { id: 'whoop', name: 'WHOOP', emoji: '💪', color: '#00FF87', description: 'Recuperación, HRV, strain', features: ['HRV', 'Recuperación', 'Strain', 'SpO2'] },
+  { id: 'oura', name: 'Oura Ring', emoji: '💍', color: '#C8A96E', description: 'Anillo de salud, sueño profundo', features: ['Sueño', 'Readiness', 'HRV', 'Temperatura'] },
+];
+
+let connections = {};
+
+async function loadConnections() {
+  try {
+    const res = await fetch(`${API}/wearables`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    connections = {};
+    for (const conn of (data.connections || [])) {
+      connections[conn.provider] = conn;
+    }
+
+    renderProviders();
+    updateLastSync();
+  } catch {}
+}
+
+function renderProviders() {
+  const grid = document.getElementById('providersGrid');
+  grid.innerHTML = '';
+
+  for (const p of PROVIDERS) {
+    const conn = connections[p.id];
+    const isConnected = conn?.isActive;
+
+    const card = document.createElement('div');
+    card.className = `provider-card ${isConnected ? 'connected' : ''}`;
+    card.id = `card-${p.id}`;
+    card.innerHTML = `
+      <div class="provider-header">
+        <div class="provider-logo" style="background:${p.color}20">${p.emoji}</div>
+        <div class="provider-info">
+          <h3>${p.name}</h3>
+          <p>${p.description}</p>
+        </div>
+      </div>
+      <div class="status-badge ${isConnected ? 'connected' : 'disconnected'}">
+        <span class="status-dot"></span>
+        ${isConnected ? 'Conectado' : 'No conectado'}
+      </div>
+      <div class="provider-meta">
+        <span>📊 Datos: ${p.features.join(', ')}</span>
+        ${conn?.lastSync ? `<span>🕐 Última sync: ${new Date(conn.lastSync).toLocaleDateString('es-ES')}</span>` : ''}
+      </div>
+      ${isConnected ? `
+        <button type="button" class="btn btn-sync" onclick="syncProvider('${p.id}')">🔄 Sincronizar</button>
+        <button type="button" class="btn btn-disconnect" onclick="disconnect('${p.id}')">Desconectar</button>
+      ` : `
+        <button type="button" class="btn btn-connect" onclick="connect('${p.id}')">Conectar ${p.name}</button>
+      `}
+    `;
+    grid.appendChild(card);
+  }
+}
+
+async function connect(provider) {
+  try {
+    const res = await fetch(`${API}/wearables/connect/${provider}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast(data.error || 'Error al conectar', 'error');
+      return;
+    }
+
+    // Open OAuth window
+    const win = window.open(data.authUrl, '_blank', 'width=600,height=700,scrollbars=yes');
+    showToast(`Autoriza ${provider} en la ventana que se abrió`, 'success');
+
+    // Poll for connection completion
+    const poll = setInterval(async () => {
+      if (win?.closed) {
+        clearInterval(poll);
+        await loadConnections();
+        showToast('Verifica si la conexión fue exitosa', 'success');
+      }
+    }, 1000);
+  } catch {
+    showToast('Error de conexión', 'error');
+  }
+}
+
+async function disconnect(provider) {
+  if (!confirm(`¿Desconectar ${provider}? Los datos ya sincronizados no se eliminarán.`)) return;
+
+  try {
+    const res = await fetch(`${API}/wearables/${provider}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.ok) {
+      showToast(`${provider} desconectado`, 'success');
+      await loadConnections();
+    }
+  } catch {
+    showToast('Error al desconectar', 'error');
+  }
+}
+
+async function syncAll() {
+  const btn = document.querySelector('.btn-sync-all');
+  btn.innerHTML = '<span class="spinner"></span> Sincronizando...';
+  btn.disabled = true;
+
+  const result = document.getElementById('syncResult');
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/wearables/sync`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      const msg = data.synced?.length
+        ? `✅ Sincronizado: ${data.synced.join(', ')}`
+        : 'No hay dispositivos conectados para sincronizar';
+
+      const errors = data.errors?.length ? `\n⚠️ Errores: ${data.errors.join(', ')}` : '';
+      result.className = 'sync-result success';
+      result.textContent = msg + errors;
+      result.style.display = 'block';
+
+      document.getElementById('lastSyncTime').textContent = new Date().toLocaleString('es-ES');
+      await loadConnections();
+    }
+  } catch {
+    result.className = 'sync-result error';
+    result.textContent = '❌ Error al sincronizar';
+    result.style.display = 'block';
+  } finally {
+    btn.textContent = '🔄 Sincronizar todo';
+    btn.disabled = false;
+  }
+}
+
+async function syncProvider(provider) {
+  await syncAll(); // For MVP, syncs all active
+}
+
+function updateLastSync() {
+  const lastSyncs = Object.values(connections)
+    .filter(c => c.lastSync)
+    .map(c => new Date(c.lastSync).getTime());
+
+  if (lastSyncs.length) {
+    const latest = new Date(Math.max(...lastSyncs));
+    document.getElementById('lastSyncTime').textContent = latest.toLocaleString('es-ES');
+  }
+}
+
+// Check URL params for OAuth callback result
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('success')) {
+  showToast(`${urlParams.get('connected')} conectado exitosamente`, 'success');
+  window.history.replaceState({}, '', '/wearables');
+} else if (urlParams.get('error')) {
+  showToast(decodeURIComponent(urlParams.get('error')), 'error');
+  window.history.replaceState({}, '', '/wearables');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+loadConnections();
+</script>
+</body>
+</html>

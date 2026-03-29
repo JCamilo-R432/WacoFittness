@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca de Ejercicios - WacoPro Fitness</title>
+  <meta name="description" content="Biblioteca de ejercicios con tutoriales en video y análisis de forma">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+  <script src="/js/app-init.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .library-controls { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .search-input { flex: 1; min-width: 200px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.5rem 0.875rem; color: rgba(255,255,255,0.8); font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif; }
+    .filter-select { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.5rem 0.75rem; color: rgba(255,255,255,0.7); font-size: 0.8rem; outline: none; cursor: pointer; }
+    .ex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .ex-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1.25rem; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .ex-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--neon-purple), transparent); opacity: 0; transition: opacity 0.2s; }
+    .ex-card:hover { border-color: rgba(188,19,254,0.3); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(188,19,254,0.1); }
+    .ex-card:hover::before { opacity: 1; }
+    .ex-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+    .ex-name { font-size: 0.9rem; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 0.35rem; }
+    .ex-muscle { font-size: 0.65rem; font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin-bottom: 0.5rem; }
+    .ex-desc { font-size: 0.75rem; color: rgba(255,255,255,0.45); line-height: 1.5; margin-bottom: 0.75rem; }
+    .ex-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .ex-tag { font-size: 0.58rem; padding: 0.12rem 0.45rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.35); }
+    .ex-tag.equipment { border-color: rgba(0,243,255,0.2); color: rgba(0,243,255,0.6); }
+    .ex-tag.diff { border-color: rgba(188,19,254,0.2); color: rgba(188,19,254,0.6); }
+    .cat-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .cat-btn { padding: 0.3rem 0.875rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.4); font-family: 'Orbitron', sans-serif; font-size: 0.62rem; cursor: pointer; transition: all 0.2s; }
+    .cat-btn.active { background: rgba(188,19,254,0.12); border-color: var(--neon-purple); color: var(--neon-purple); }
+    .ex-count { font-size: 0.7rem; color: rgba(255,255,255,0.3); margin-bottom: 0.75rem; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-box { background: #0f0f1a; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 520px; max-height: 80vh; overflow-y: auto; }
+    .modal-ex-name { font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.95); margin-bottom: 0.25rem; }
+    .modal-ex-muscle { font-size: 0.7rem; font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin-bottom: 1rem; }
+    .steps-list { list-style: none; padding: 0; }
+    .steps-list li { display: flex; gap: 0.875rem; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.5; }
+    .step-num { min-width: 24px; height: 24px; border-radius: 50%; background: rgba(188,19,254,0.2); border: 1px solid rgba(188,19,254,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; color: var(--neon-purple); flex-shrink: 0; }
+    .muscles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+    .muscle-chip { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .muscle-chip.primary { border-color: rgba(0,243,255,0.25); color: var(--neon-blue); background: rgba(0,243,255,0.05); }
+    .add-to-routine-btn { width: 100%; margin-top: 1rem; }
+    .video-section { margin: 1rem 0; }
+    .video-label { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .video-badge { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #ff6b6b; border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.55rem; }
+    .video-player { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); position: relative; }
+    .video-player video { width: 100%; height: 100%; object-fit: cover; }
+    .video-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: rgba(255,255,255,0.3); font-size: 0.8rem; }
+    .video-placeholder .play-icon { font-size: 2rem; }
+    .video-thumb-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; }
+    .video-thumb { width: 80px; height: 52px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; flex-shrink: 0; overflow: hidden; position: relative; transition: border-color 0.2s; }
+    .video-thumb:hover, .video-thumb.active { border-color: rgba(108,99,255,0.5); }
+    .video-thumb-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); font-size: 0.5rem; color: rgba(255,255,255,0.7); padding: 0.15rem 0.25rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+    .pr-badge { position: absolute; top: 0.75rem; right: 0.75rem; font-size: 0.55rem; font-family: 'Orbitron', sans-serif; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; border-radius: 6px; padding: 0.15rem 0.4rem; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <nav class="dash-nav">
+    <div class="dash-nav-inner">
+      <a href="/dashboard.html" class="nav-brand">
+        <div class="nav-brand-icon">W</div>
+        <span class="nav-brand-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">DASHBOARD</a>
+        <a href="/analytics.html" class="nav-link">ANALÍTICAS</a>
+        <a href="/social-feed.html" class="nav-link">SOCIAL</a>
+        <a href="/profile.html" class="nav-link">PERFIL</a>
+      </div>
+      <div class="nav-right">
+        <span class="nav-user-name" id="navUserName">...</span>
+        <button type="button" class="btn-logout" onclick="logout()">SALIR</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <aside class="dash-sidebar">
+      <div class="sidebar-card">
+        <p class="sidebar-section-title">HERRAMIENTAS</p>
+        <ul class="sidebar-nav">
+          <li><a href="/dashboard.html" class="sidebar-nav-link">📊 Dashboard</a></li>
+          <li><a href="/analytics.html" class="sidebar-nav-link">📈 Analíticas</a></li>
+          <li><a href="/social-feed.html" class="sidebar-nav-link">🌐 Social</a></li>
+          <li><a href="/workout-builder.html" class="sidebar-nav-link">🏗️ Constructor</a></li>
+          <li><a href="/exercise-library.html" class="sidebar-nav-link active">🏋️ Ejercicios</a></li>
+          <li><a href="/meal-planner.html" class="sidebar-nav-link">🥗 Plan Comidas</a></li>
+          <li><a href="/challenges.html" class="sidebar-nav-link">🏆 Retos</a></li>
+        </ul>
+      </div>
+
+      <!-- PR tracker -->
+      <div class="sidebar-card" style="margin-top:1rem;">
+        <p class="sidebar-section-title">MIS RÉCORDS (PR)</p>
+        <div id="prList" style="max-height:220px;overflow-y:auto;">
+          <div style="color:rgba(255,255,255,0.2);font-size:0.75rem;text-align:center;padding:0.5rem;">Sin récords aún</div>
+        </div>
+        <button type="button" onclick="showAddPR()" class="btn-neon" style="width:100%;margin-top:0.75rem;font-size:0.62rem;padding:0.35rem;">+ AÑADIR PR</button>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="page-header">
+        <h1 class="page-title">Biblioteca de Ejercicios</h1>
+        <p class="page-subtitle">Explora y aprende la técnica correcta</p>
+      </div>
+
+      <!-- Controls -->
+      <div class="library-controls">
+        <input class="search-input" id="exSearch" placeholder="Buscar ejercicio..." oninput="filterAll()">
+        <select class="filter-select" id="equipFilter" onchange="filterAll()">
+          <option value="">Todo el equipo</option>
+          <option value="Barra">Barra</option>
+          <option value="Mancuernas">Mancuernas</option>
+          <option value="Cable">Cable / Polea</option>
+          <option value="Máquina">Máquina</option>
+          <option value="Sin equipo">Sin equipo</option>
+          <option value="Paralelas">Paralelas / Barras</option>
+        </select>
+        <select class="filter-select" id="diffFilter" onchange="filterAll()">
+          <option value="">Cualquier nivel</option>
+          <option value="Principiante">Principiante</option>
+          <option value="Intermedio">Intermedio</option>
+          <option value="Avanzado">Avanzado</option>
+        </select>
+      </div>
+
+      <!-- Category bar -->
+      <div class="cat-bar" id="catBar">
+        <button type="button" class="cat-btn active" data-cat="all" onclick="setCat(this,'all')">Todos</button>
+        <button type="button" class="cat-btn" data-cat="chest" onclick="setCat(this,'chest')">💪 Pecho</button>
+        <button type="button" class="cat-btn" data-cat="back" onclick="setCat(this,'back')">🔙 Espalda</button>
+        <button type="button" class="cat-btn" data-cat="shoulders" onclick="setCat(this,'shoulders')">🏔️ Hombros</button>
+        <button type="button" class="cat-btn" data-cat="arms" onclick="setCat(this,'arms')">💪 Brazos</button>
+        <button type="button" class="cat-btn" data-cat="legs" onclick="setCat(this,'legs')">🦵 Piernas</button>
+        <button type="button" class="cat-btn" data-cat="core" onclick="setCat(this,'core')">🎯 Core</button>
+        <button type="button" class="cat-btn" data-cat="cardio" onclick="setCat(this,'cardio')">❤️ Cardio</button>
+      </div>
+
+      <div class="ex-count" id="exCount">Mostrando 0 ejercicios</div>
+      <div class="ex-grid" id="exGrid"><!-- Rendered by JS --></div>
+    </main>
+  </div>
+
+  <!-- Exercise detail modal -->
+  <div id="exModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
+        <div>
+          <div class="modal-ex-name" id="modalName"></div>
+          <div class="modal-ex-muscle" id="modalMuscle"></div>
+        </div>
+        <button type="button" onclick="closeModal()" style="background:transparent;border:none;color:rgba(255,255,255,0.4);font-size:1.2rem;cursor:pointer;padding:0;">✕</button>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;" id="modalTags"></div>
+
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.65rem;color:rgba(255,255,255,0.35);margin-bottom:0.5rem;">MÚSCULOS</div>
+      <div class="muscles-grid" id="modalMuscles"></div>
+
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.65rem;color:rgba(255,255,255,0.35);margin-bottom:0.5rem;">INSTRUCCIONES</div>
+      <ul class="steps-list" id="modalSteps"></ul>
+
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.65rem;color:rgba(255,255,255,0.35);margin:0.875rem 0 0.5rem;">CONSEJOS</div>
+      <p style="font-size:0.8rem;color:rgba(255,255,255,0.55);line-height:1.6;" id="modalTips"></p>
+
+      <!-- Video tutorials -->
+      <div class="video-section" id="videoSection">
+        <div class="video-label">
+          VIDEO TUTORIALES
+          <span class="video-badge">▶ DEMO</span>
+        </div>
+        <div class="video-player" id="videoPlayer">
+          <div class="video-placeholder" id="videoPlaceholder">
+            <span class="play-icon">▶</span>
+            <span id="videoPlaceholderText">Cargando tutoriales...</span>
+          </div>
+          <video id="mainVideo" style="display:none;" controls preload="metadata">
+            <track kind="captions" src="" label="Español">
+          </video>
+        </div>
+        <div class="video-thumb-row" id="videoThumbs"></div>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+        <button type="button" class="btn-neon add-to-routine-btn" onclick="addToRoutineFromLibrary()" style="flex:1;font-size:0.7rem;">+ AÑADIR A RUTINA</button>
+        <button type="button" onclick="logPRFromModal()" style="flex:1;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:0.65rem;cursor:pointer;">⭐ REGISTRAR PR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add PR modal -->
+  <div id="prModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closePRModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.8rem;color:#f59e0b;margin-bottom:1rem;">⭐ REGISTRAR RÉCORD PERSONAL</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.875rem;">
+        <div class="form-group" style="margin:0;grid-column:1/-1;"><label class="form-label">EJERCICIO</label>
+          <select id="prExercise" class="form-input"><!-- Filled by JS --></select>
+        </div>
+        <div class="form-group" style="margin:0;"><label class="form-label">PESO (kg)</label><input type="number" step="0.5" id="prWeight" class="form-input" placeholder="100"></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">REPETICIONES</label><input type="number" id="prReps" class="form-input" placeholder="5"></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">FECHA</label><input type="date" id="prDate" class="form-input"></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">NOTAS</label><input type="text" id="prNotes" class="form-input" placeholder="Ej: Con cinto"></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="button" class="btn-neon" onclick="savePR()" style="font-size:0.7rem;background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:#f59e0b;">GUARDAR PR</button>
+        <button type="button" onclick="closePRModal()" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);border-radius:6px;padding:0.4rem 0.875rem;font-size:0.7rem;cursor:pointer;">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    if (!requireAuth()) { /* redirected */ }
+
+    const EXERCISES = [
+      // CHEST
+      { id:'bench-press', name:'Press de Banca', muscle:'chest', secondary:['triceps','shoulders'], equipment:'Barra', diff:'Intermedio', icon:'🏋️',
+        steps:['Ajusta el banco a posición horizontal y carga la barra con el peso adecuado.','Agarra la barra con agarre ligeramente más ancho que los hombros.','Baja la barra lentamente hasta que toque el pecho.','Empuja la barra explosivamente hacia arriba hasta extender los brazos completamente.','Repite el movimiento controlando en todo momento.'],
+        tips:'Mantén los pies firmes en el suelo y los hombros retraídos. No reboces la barra en el pecho.' },
+      { id:'incline-press', name:'Press Inclinado con Mancuernas', muscle:'chest', secondary:['shoulders','triceps'], equipment:'Mancuernas', diff:'Intermedio', icon:'💪',
+        steps:['Ajusta el banco a 30-45 grados.','Agarra las mancuernas con palmas hacia adelante.','Baja las mancuernas a los lados del pecho.','Empuja hacia arriba y ligeramente al centro.'],
+        tips:'El ángulo de inclinación mayor activa más el pecho superior. No bloquees los codos.' },
+      { id:'chest-fly', name:'Aperturas con Cable', muscle:'chest', secondary:['shoulders'], equipment:'Cable', diff:'Principiante', icon:'🦅',
+        steps:['Configura las poleas en posición alta.','Agarra los cables con los brazos extendidos.','Lleva las manos al centro con un movimiento de abrazo.','Regresa lentamente a la posición inicial.'],
+        tips:'Mantén una ligera flexión en los codos durante todo el movimiento.' },
+      { id:'dips', name:'Fondos en Paralelas', muscle:'chest', secondary:['triceps','shoulders'], equipment:'Paralelas', diff:'Intermedio', icon:'⬇️',
+        steps:['Sube a las paralelas con brazos extendidos.','Inclínate ligeramente hacia adelante para activar el pecho.','Baja hasta que los codos formen 90 grados.','Sube empujando fuerte con los brazos.'],
+        tips:'Mayor inclinación = más pecho. Posición vertical = más tríceps.' },
+      // BACK
+      { id:'pull-up', name:'Dominadas', muscle:'back', secondary:['biceps','core'], equipment:'Sin equipo', diff:'Avanzado', icon:'⬆️',
+        steps:['Agarra la barra con agarre prono más ancho que los hombros.','Cuelga con los brazos completamente extendidos.','Tira del cuerpo hacia arriba hasta que el mentón supere la barra.','Baja lentamente a la posición inicial.'],
+        tips:'Activa el core y no uses impulso. Si es difícil, usa banda de asistencia.' },
+      { id:'row-barbell', name:'Remo con Barra', muscle:'back', secondary:['biceps','core'], equipment:'Barra', diff:'Intermedio', icon:'🚣',
+        steps:['Párate con los pies a la anchura de los hombros.','Inclínate hacia adelante manteniendo la espalda recta.','Agarra la barra y tírala hacia el abdomen.','Baja la barra controlando el movimiento.'],
+        tips:'Mantén la espalda baja neutra. Los codos deben ir hacia atrás al tirar.' },
+      { id:'lat-pulldown', name:'Jalón al Pecho', muscle:'back', secondary:['biceps'], equipment:'Cable', diff:'Principiante', icon:'🔽',
+        steps:['Siéntate y ajusta los rodilleros.','Agarra la barra con agarre prono ancho.','Tira de la barra hacia el pecho.','Sube lentamente extendiendo los brazos.'],
+        tips:'Inclínate ligeramente hacia atrás. Piensa en llevar los codos hacia las caderas.' },
+      { id:'seated-row', name:'Remo en Polea', muscle:'back', secondary:['biceps'], equipment:'Cable', diff:'Principiante', icon:'🎯',
+        steps:['Siéntate frente a la polea con los pies apoyados.','Agarra el mango y extiende los brazos.','Tira hacia el abdomen retrayendo las escápulas.','Regresa controlando.'],
+        tips:'Separa el movimiento de espalda del de brazos. Primero retrae, luego dobla codos.' },
+      // SHOULDERS
+      { id:'ohp', name:'Press Militar', muscle:'shoulders', secondary:['triceps','core'], equipment:'Barra', diff:'Intermedio', icon:'🏔️',
+        steps:['Agarra la barra en posición de clavícula.','Mantén el core tenso y la espalda recta.','Empuja la barra verticalmente sobre la cabeza.','Baja la barra lentamente.'],
+        tips:'Activa el core para proteger la zona lumbar. Evita arquear la espalda.' },
+      { id:'lateral-raise', name:'Elevaciones Laterales', muscle:'shoulders', secondary:[], equipment:'Mancuernas', diff:'Principiante', icon:'✈️',
+        steps:['Sostén las mancuernas a los lados.','Eleva los brazos hasta la altura de los hombros.','Mantén una ligera flexión en los codos.','Baja lentamente.'],
+        tips:'No uses impulso. Sube hasta que los brazos estén paralelos al suelo.' },
+      { id:'face-pull', name:'Face Pull', muscle:'shoulders', secondary:['back'], equipment:'Cable', diff:'Principiante', icon:'😤',
+        steps:['Configura la polea a la altura de la cara.','Agarra la cuerda con los pulgares hacia arriba.','Tira hacia la cara separando las manos.','Regresa lentamente.'],
+        tips:'Excelente para la salud de los hombros. Trabaja los rotadores externos.' },
+      // ARMS
+      { id:'bicep-curl', name:'Curl de Bíceps con Barra', muscle:'arms', secondary:[], equipment:'Barra', diff:'Principiante', icon:'💪',
+        steps:['Agarra la barra con agarre supino a la anchura de los hombros.','Mantén los codos pegados al cuerpo.','Sube la barra hasta que los antebrazos toquen los bíceps.','Baja lentamente.'],
+        tips:'No balancees el torso. El movimiento debe ser solo del antebrazo.' },
+      { id:'hammer-curl', name:'Curl Martillo', muscle:'arms', secondary:['forearms'], equipment:'Mancuernas', diff:'Principiante', icon:'🔨',
+        steps:['Sostén las mancuernas con agarre neutro.','Mantén los codos fijos.','Sube las mancuernas alternando o juntas.','Baja controlando.'],
+        tips:'El agarre neutro trabaja el braquial, añadiendo grosor al brazo.' },
+      { id:'tricep-ext', name:'Extensión Tríceps en Polea', muscle:'arms', secondary:[], equipment:'Cable', diff:'Principiante', icon:'🔻',
+        steps:['Agarra la cuerda con los codos doblados a 90 grados.','Extiende los brazos hacia abajo separando la cuerda.','Vuelve lentamente a posición inicial.'],
+        tips:'Mantén los codos fijos. Solo el antebrazo debe moverse.' },
+      { id:'skull-crusher', name:'Skull Crusher', muscle:'arms', secondary:[], equipment:'Barra', diff:'Intermedio', icon:'💀',
+        steps:['Acuéstate en el banco con la barra sobre el pecho.','Extiende los brazos perpendicularmente.','Dobla los codos para bajar la barra a la frente.','Extiende para volver.'],
+        tips:'Mantén los codos apuntando al techo. Usa peso moderado.' },
+      // LEGS
+      { id:'squat', name:'Sentadilla con Barra', muscle:'legs', secondary:['glutes','core'], equipment:'Barra', diff:'Avanzado', icon:'🦵',
+        steps:['Coloca la barra en la parte alta de los trapecios.','Pies a anchura de hombros o más.','Baja manteniendo la espalda recta y el pecho arriba.','Las rodillas siguen la dirección de los pies.','Sube empujando con los talones.'],
+        tips:'La profundidad ideal es muslos paralelos al suelo o más abajo. Activa el core.' },
+      { id:'deadlift', name:'Peso Muerto', muscle:'legs', secondary:['back','glutes'], equipment:'Barra', diff:'Avanzado', icon:'⬆️',
+        steps:['Párate con los pies bajo la barra.','Baja agarrando la barra con los brazos extendidos.','Mantén la espalda recta y el pecho arriba.','Sube empujando con las piernas mientras extiendes la cadera.'],
+        tips:'Es el rey de los ejercicios. Prioriza la técnica antes de añadir peso.' },
+      { id:'leg-press', name:'Prensa de Piernas', muscle:'legs', secondary:['glutes'], equipment:'Máquina', diff:'Principiante', icon:'🏗️',
+        steps:['Ajusta el asiento y coloca los pies a la anchura de los hombros.','Suelta los seguros y baja la plataforma.','Las rodillas forman 90 grados.','Empuja la plataforma hasta casi extender las piernas.'],
+        tips:'No bloquees las rodillas en la extensión. Controla el descenso.' },
+      { id:'lunges', name:'Zancadas', muscle:'legs', secondary:['glutes','core'], equipment:'Mancuernas', diff:'Principiante', icon:'🚶',
+        steps:['Sostén las mancuernas a los lados.','Da un paso grande hacia adelante.','Baja hasta que la rodilla trasera casi toque el suelo.','Sube y repite con la otra pierna.'],
+        tips:'La rodilla delantera no debe sobrepasar el pie. Mantén el torso erguido.' },
+      { id:'leg-curl', name:'Curl Femoral en Máquina', muscle:'legs', secondary:[], equipment:'Máquina', diff:'Principiante', icon:'🦿',
+        steps:['Ajusta la máquina y acuéstate boca abajo.','Coloca el rodillo sobre los tobillos.','Dobla las rodillas llevando los talones hacia los glúteos.','Baja lentamente.'],
+        tips:'Trabaja los isquiotibiales de forma aislada. Importante para el equilibrio.' },
+      { id:'calf-raise', name:'Elevaciones de Gemelos', muscle:'legs', secondary:[], equipment:'Máquina', diff:'Principiante', icon:'👟',
+        steps:['Coloca los hombros bajo las almohadillas.','Párate con las puntas de los pies en el escalón.','Sube sobre las puntas lo máximo posible.','Baja más allá del nivel del escalón.'],
+        tips:'Haz repeticiones lentas. Los gemelos responden bien al volumen alto.' },
+      // CORE
+      { id:'plank', name:'Plancha', muscle:'core', secondary:['shoulders','back'], equipment:'Sin equipo', diff:'Principiante', icon:'📏',
+        steps:['Apóyate sobre los antebrazos y puntas de los pies.','El cuerpo forma una línea recta.','Activa el core y glúteos.','Mantén la posición el tiempo indicado.'],
+        tips:'No dejes caer las caderas ni las eleves demasiado. Respira normalmente.' },
+      { id:'crunch', name:'Crunch Abdominal', muscle:'core', secondary:[], equipment:'Sin equipo', diff:'Principiante', icon:'🔄',
+        steps:['Acuéstate boca arriba con rodillas dobladas.','Pon las manos detrás de la cabeza.','Eleva los hombros del suelo contrayendo el abdomen.','Baja controlando.'],
+        tips:'El cuello no debe tirar de la cabeza. La contracción la hacen los abdominales.' },
+      { id:'russian-twist', name:'Russian Twist', muscle:'core', secondary:[], equipment:'Sin equipo', diff:'Principiante', icon:'🌀',
+        steps:['Siéntate con las rodillas dobladas y el torso a 45 grados.','Gira el torso de lado a lado.','Puedes sostener un peso para mayor dificultad.'],
+        tips:'Mantén la espalda recta durante todo el movimiento.' },
+      { id:'leg-raise', name:'Elevación de Piernas', muscle:'core', secondary:[], equipment:'Sin equipo', diff:'Intermedio', icon:'🦵',
+        steps:['Acuéstate boca arriba con los brazos a los lados.','Eleva las piernas juntas hasta 90 grados.','Baja lentamente sin que toquen el suelo.'],
+        tips:'La zona lumbar debe estar pegada al suelo durante todo el ejercicio.' },
+      // CARDIO
+      { id:'burpee', name:'Burpees', muscle:'cardio', secondary:['chest','legs','core'], equipment:'Sin equipo', diff:'Avanzado', icon:'⚡',
+        steps:['De pie, baja a sentadilla.','Lleva los pies atrás a posición de plancha.','Haz una flexión.','Salta los pies hacia las manos.','Salta con los brazos arriba.'],
+        tips:'El ritmo es clave. Controla la respiración y mantén el core activo.' },
+      { id:'jump-rope', name:'Saltar a la Comba', muscle:'cardio', secondary:['calves','shoulders'], equipment:'Sin equipo', diff:'Principiante', icon:'🪢',
+        steps:['Sostén las asas a los lados de las caderas.','Gira la comba con las muñecas, no los brazos.','Salta con los dos pies o alternando.','Mantén un ritmo constante.'],
+        tips:'Ideal para calentar y mejorar la coordinación. Empieza lento.' },
+      { id:'rowing', name:'Remo en Máquina', muscle:'cardio', secondary:['back','legs','arms'], equipment:'Máquina', diff:'Intermedio', icon:'🚣',
+        steps:['Siéntate y ajusta los pies en los soportes.','Extiende las piernas mientras inclines el torso atrás.','Tira del mango hacia el abdomen.','Regresa con control.'],
+        tips:'El 60% del esfuerzo viene de las piernas. No te inclines demasiado atrás.' },
+    ];
+
+    let currentCat = 'all';
+    let selectedExercise = null;
+
+    function setCat(el, cat) {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      currentCat = cat;
+      filterAll();
+    }
+
+    function filterAll() {
+      const q = document.getElementById('exSearch').value.toLowerCase();
+      const equip = document.getElementById('equipFilter').value;
+      const diff = document.getElementById('diffFilter').value;
+
+      const filtered = EXERCISES.filter(ex =>
+        (currentCat === 'all' || ex.muscle === currentCat) &&
+        (!q || ex.name.toLowerCase().includes(q) || ex.muscle.toLowerCase().includes(q)) &&
+        (!equip || ex.equipment === equip) &&
+        (!diff || ex.diff === diff)
+      );
+
+      document.getElementById('exCount').textContent = `Mostrando ${filtered.length} ejercicios`;
+      renderExercises(filtered);
+    }
+
+    function getPRs() { return JSON.parse(localStorage.getItem('waco_prs') || '[]'); }
+    function savePRs(p) { localStorage.setItem('waco_prs', JSON.stringify(p)); }
+
+    function hasPR(exId) { return getPRs().some(p => p.exerciseId === exId); }
+
+    function renderExercises(list) {
+      const grid = document.getElementById('exGrid');
+      grid.innerHTML = list.map(ex => `
+        <div class="ex-card" onclick="showExercise('${ex.id}')">
+          ${hasPR(ex.id) ? '<span class="pr-badge">⭐ PR</span>' : ''}
+          <div class="ex-icon">${ex.icon}</div>
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-muscle">${ex.muscle.toUpperCase()} · ${ex.secondary.length ? ex.secondary.join(', ') : 'Aislado'}</div>
+          <div class="ex-desc">${ex.steps[0]}</div>
+          <div class="ex-tags">
+            <span class="ex-tag equipment">${ex.equipment}</span>
+            <span class="ex-tag diff">${ex.diff}</span>
+          </div>
+        </div>
+      `).join('') || '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:rgba(255,255,255,0.25);">Sin resultados para tu búsqueda</div>';
+    }
+
+    function showExercise(id) {
+      const ex = EXERCISES.find(e => e.id === id);
+      if (!ex) return;
+      selectedExercise = ex;
+
+      document.getElementById('modalName').textContent = ex.name;
+      document.getElementById('modalMuscle').textContent = ex.muscle.toUpperCase() + ' · ' + ex.equipment;
+
+      document.getElementById('modalTags').innerHTML = [
+        `<span class="ex-tag equipment" style="font-size:0.65rem;padding:0.2rem 0.55rem;">${ex.equipment}</span>`,
+        `<span class="ex-tag diff" style="font-size:0.65rem;padding:0.2rem 0.55rem;">${ex.diff}</span>`,
+        ...ex.secondary.map(s => `<span class="ex-tag" style="font-size:0.65rem;padding:0.2rem 0.55rem;">${s}</span>`),
+      ].join('');
+
+      document.getElementById('modalMuscles').innerHTML = [
+        `<div class="muscle-chip primary">🎯 ${ex.muscle.charAt(0).toUpperCase() + ex.muscle.slice(1)}</div>`,
+        ...ex.secondary.map(s => `<div class="muscle-chip">${s}</div>`),
+      ].join('');
+
+      document.getElementById('modalSteps').innerHTML = ex.steps.map((s, i) => `
+        <li><span class="step-num">${i+1}</span><span>${s}</span></li>
+      `).join('');
+
+      document.getElementById('modalTips').textContent = ex.tips;
+      document.getElementById('exModal').style.display = 'flex';
+      loadExerciseVideos(ex.name, ex.muscle);
+    }
+
+    async function loadExerciseVideos(exerciseName, muscle) {
+      const placeholder = document.getElementById('videoPlaceholder');
+      const mainVideo = document.getElementById('mainVideo');
+      const thumbsRow = document.getElementById('videoThumbs');
+      placeholder.style.display = 'flex';
+      mainVideo.style.display = 'none';
+      thumbsRow.innerHTML = '';
+      document.getElementById('videoPlaceholderText').textContent = 'Buscando tutoriales...';
+      try {
+        const token = localStorage.getItem('wacoPro_token');
+        const res = await fetch(`/api/videos?exercise=${encodeURIComponent(exerciseName)}&muscle=${encodeURIComponent(muscle)}&limit=5`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        const data = res.ok ? await res.json() : null;
+        const videos = data?.data || data?.videos || [];
+        if (videos.length === 0) {
+          document.getElementById('videoPlaceholderText').textContent = 'No hay videos disponibles para este ejercicio';
+          return;
+        }
+        // Load first video
+        playVideo(videos[0], mainVideo, placeholder);
+        // Render thumbnails
+        thumbsRow.innerHTML = videos.map((v, i) => `
+          <div class="video-thumb ${i === 0 ? 'active' : ''}" onclick="selectVideoThumb(${i})" data-idx="${i}" title="${v.title || v.name || 'Tutorial ' + (i+1)}">
+            ${v.thumbnailUrl ? `<img src="${v.thumbnailUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Miniatura ${i+1}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-size:1.2rem;">▶</div>`}
+            <div class="video-thumb-label">${v.title || 'Tutorial ' + (i+1)}</div>
+          </div>
+        `).join('');
+        window._exVideos = videos;
+      } catch {
+        document.getElementById('videoPlaceholderText').textContent = 'No hay videos disponibles para este ejercicio';
+      }
+    }
+
+    function playVideo(v, videoEl, placeholderEl) {
+      if (v.videoUrl || v.url) {
+        videoEl.src = v.videoUrl || v.url;
+        videoEl.style.display = 'block';
+        placeholderEl.style.display = 'none';
+      } else if (v.youtubeId) {
+        // Embed YouTube via iframe
+        placeholderEl.style.display = 'none';
+        videoEl.style.display = 'none';
+        const player = document.getElementById('videoPlayer');
+        const existing = player.querySelector('iframe');
+        if (existing) existing.remove();
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${v.youtubeId}?rel=0`;
+        iframe.style.cssText = 'width:100%;height:100%;border:none;';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        player.appendChild(iframe);
+      }
+    }
+
+    function selectVideoThumb(idx) {
+      const videos = window._exVideos || [];
+      if (!videos[idx]) return;
+      document.querySelectorAll('.video-thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+      const mainVideo = document.getElementById('mainVideo');
+      const placeholder = document.getElementById('videoPlaceholder');
+      // Remove any existing iframe
+      const player = document.getElementById('videoPlayer');
+      const existing = player.querySelector('iframe');
+      if (existing) existing.remove();
+      playVideo(videos[idx], mainVideo, placeholder);
+    }
+
+    function closeModal() {
+      document.getElementById('exModal').style.display = 'none';
+      // Stop any playing video
+      const v = document.getElementById('mainVideo');
+      v.pause(); v.src = '';
+      const player = document.getElementById('videoPlayer');
+      const iframe = player.querySelector('iframe');
+      if (iframe) iframe.remove();
+    }
+
+    function addToRoutineFromLibrary() {
+      if (!selectedExercise) return;
+      // Store in localStorage for workout-builder to pick up
+      const pending = JSON.parse(localStorage.getItem('waco_pending_exercise') || '[]');
+      pending.push(selectedExercise.id);
+      localStorage.setItem('waco_pending_exercise', JSON.stringify(pending));
+      closeModal();
+      window.showNotification('Añadido. Abre el Constructor de Rutinas para usarlo.', 'success');
+    }
+
+    function logPRFromModal() {
+      if (!selectedExercise) return;
+      closeModal();
+      showAddPR(selectedExercise.id);
+    }
+
+    // PR Management
+    function showAddPR(preselectedId) {
+      const sel = document.getElementById('prExercise');
+      sel.innerHTML = EXERCISES.map(ex =>
+        `<option value="${ex.id}" ${ex.id === preselectedId ? 'selected' : ''}>${ex.name}</option>`
+      ).join('');
+      document.getElementById('prDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('prWeight').value = '';
+      document.getElementById('prReps').value = '';
+      document.getElementById('prNotes').value = '';
+      document.getElementById('prModal').style.display = 'flex';
+    }
+
+    function closePRModal() { document.getElementById('prModal').style.display = 'none'; }
+
+    function savePR() {
+      const exerciseId = document.getElementById('prExercise').value;
+      const weight = document.getElementById('prWeight').value;
+      const reps = document.getElementById('prReps').value;
+      if (!exerciseId || (!weight && !reps)) {
+        window.showNotification('Ingresa al menos peso o repeticiones', 'warning'); return;
+      }
+      const ex = EXERCISES.find(e => e.id === exerciseId);
+      const prs = getPRs();
+      prs.push({
+        exerciseId, exerciseName: ex?.name || exerciseId,
+        weight: Number(weight) || null,
+        reps: Number(reps) || null,
+        date: document.getElementById('prDate').value,
+        notes: document.getElementById('prNotes').value,
+        savedAt: new Date().toISOString(),
+      });
+      savePRs(prs);
+      closePRModal();
+      renderPRs();
+      filterAll(); // refresh cards to show PR badge
+      window.showNotification('¡Récord personal guardado!', 'success');
+    }
+
+    function renderPRs() {
+      const prs = getPRs();
+      const list = document.getElementById('prList');
+      if (!prs.length) {
+        list.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:0.75rem;text-align:center;padding:0.5rem;">Sin récords aún</div>';
+        return;
+      }
+      const grouped = {};
+      prs.forEach(p => {
+        if (!grouped[p.exerciseName] || new Date(p.date) > new Date(grouped[p.exerciseName].date)) {
+          grouped[p.exerciseName] = p;
+        }
+      });
+      list.innerHTML = Object.values(grouped).map(p => `
+        <div style="padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.7);">⭐ ${p.exerciseName}</div>
+          <div style="font-size:0.6rem;font-family:'Orbitron',sans-serif;color:#f59e0b;">
+            ${p.weight ? p.weight + 'kg' : ''}${p.weight && p.reps ? ' × ' : ''}${p.reps ? p.reps + ' reps' : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Init
+    const u = window.api.getCurrentUser();
+    if (u) document.getElementById('navUserName').textContent = (u.name || u.email).split(' ')[0];
+    filterAll();
+    renderPRs();
+  </script>
+</body>
+</html>

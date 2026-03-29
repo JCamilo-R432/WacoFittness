@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil - WacoPro Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="grid-bg">
+
+  <!-- Navbar -->
+  <nav class="dash-nav">
+    <div class="dash-nav-inner">
+      <a href="/dashboard.html" class="nav-brand">
+        <div class="nav-brand-icon">W</div>
+        <span class="nav-brand-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">DASHBOARD</a>
+        <a href="/index.html" class="nav-link">API EXPLORER</a>
+        <a href="/profile.html" class="nav-link active">PERFIL</a>
+      </div>
+
+      <div class="nav-right">
+        <span class="nav-user-name" id="navUserName">...</span>
+        <button type="button" class="btn-logout" onclick="logout()">SALIR</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Body -->
+  <div class="dash-body">
+
+    <!-- Sidebar -->
+    <aside class="dash-sidebar">
+      <div class="sidebar-card">
+        <p class="sidebar-section-title">NAVEGACIÓN</p>
+        <ul class="sidebar-nav">
+          <li><a href="/dashboard.html" class="sidebar-nav-link">📊 Resumen</a></li>
+          <li><a href="/profile.html" class="sidebar-nav-link active">👤 Mi Perfil</a></li>
+          <li><a href="/index.html" class="sidebar-nav-link">🔧 API Explorer</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="dash-main">
+      <div class="page-header">
+        <h1 class="page-title">Mi Perfil</h1>
+        <p class="page-subtitle">Gestiona tu información personal</p>
+      </div>
+
+      <!-- Profile Header -->
+      <div class="profile-header">
+        <div class="profile-avatar" id="avatarInitial">?</div>
+        <div>
+          <div class="profile-info-name" id="profileName">Cargando...</div>
+          <div class="profile-info-email" id="profileEmail"></div>
+          <div class="profile-info-badge">
+            <span style="width:6px;height:6px;background:#10b981;border-radius:50%;display:inline-block;"></span>
+            CUENTA ACTIVA
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Form -->
+      <div class="dash-card profile-form">
+        <div class="card-header">
+          <span class="card-title">INFORMACIÓN PERSONAL</span>
+        </div>
+
+        <form id="profileForm">
+          <div class="form-grid" style="margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="nameInput">NOMBRE</label>
+              <div class="input-wrapper">
+                <span class="input-icon">👤</span>
+                <input type="text" id="nameInput" class="form-input" placeholder="Tu nombre">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="emailInput">EMAIL</label>
+              <div class="input-wrapper">
+                <span class="input-icon">✉</span>
+                <input type="email" id="emailInput" class="form-input" placeholder="tu@email.com" readonly
+                  style="opacity:0.5;cursor:not-allowed;">
+              </div>
+              <span style="font-size:0.7rem;color:rgba(255,255,255,0.3);margin-top:0.25rem;display:block;">El email no puede cambiarse</span>
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="phoneInput">TELÉFONO</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📱</span>
+                <input type="tel" id="phoneInput" class="form-input" placeholder="+34 600 000 000">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="genderInput">GÉNERO</label>
+              <div class="input-wrapper">
+                <span class="input-icon">⚧</span>
+                <select id="genderInput" class="form-input" style="padding-left:2.5rem;">
+                  <option value="">Seleccionar...</option>
+                  <option value="male">Masculino</option>
+                  <option value="female">Femenino</option>
+                  <option value="other">Otro</option>
+                  <option value="prefer_not_to_say">Prefiero no decir</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="dateOfBirthInput">FECHA DE NACIMIENTO</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🎂</span>
+              <input type="date" id="dateOfBirthInput" class="form-input">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;align-items:center;margin-top:1.5rem;">
+            <button type="submit" class="btn-save" id="saveBtn">
+              <span class="btn-text">GUARDAR CAMBIOS</span>
+              <span class="btn-loader" style="display:none;"><span class="spinner"></span></span>
+            </button>
+            <span id="saveStatus" style="font-size:0.75rem;color:rgba(255,255,255,0.4);"></span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Security Section -->
+      <div class="dash-card" style="margin-top:1rem;">
+        <div class="card-header">
+          <span class="card-title">SEGURIDAD</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
+            <div>
+              <div style="font-size:0.85rem;color:rgba(255,255,255,0.7);">Contraseña</div>
+              <div style="font-size:0.7rem;color:rgba(255,255,255,0.3);">Última actualización: Desconocida</div>
+            </div>
+            <a href="/forgot-password.html" style="font-size:0.75rem;font-family:'Orbitron',sans-serif;color:var(--neon-blue);text-decoration:none;padding:0.4rem 0.875rem;border:1px solid rgba(0,243,255,0.3);border-radius:6px;">
+              CAMBIAR
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="dash-card" style="margin-top:1rem;border-color:rgba(239,68,68,0.15);">
+        <div class="card-header">
+          <span class="card-title" style="color:#ef4444;">ZONA PELIGROSA</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);">Cerrar sesión en todos los dispositivos</div>
+            <div style="font-size:0.7rem;color:rgba(255,255,255,0.3);">Esto revocará todos los tokens activos</div>
+          </div>
+          <button type="button" onclick="logout()" style="font-size:0.75rem;font-family:'Orbitron',sans-serif;color:#ef4444;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:6px;padding:0.4rem 0.875rem;cursor:pointer;">
+            CERRAR SESIÓN
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    if (!requireAuth()) { /* redirected */ }
+
+    async function loadProfile() {
+      try {
+        const user = await window.api.getProfile();
+        if (!user) return;
+
+        const name = user.name || '';
+        document.getElementById('profileName').textContent = name || user.email;
+        document.getElementById('profileEmail').textContent = user.email;
+        document.getElementById('navUserName').textContent = (name || user.email).split(' ')[0];
+        document.getElementById('avatarInitial').textContent = (name || user.email || '?')[0].toUpperCase();
+        document.getElementById('nameInput').value = name;
+        document.getElementById('emailInput').value = user.email || '';
+        document.getElementById('phoneInput').value = user.phone || '';
+        document.getElementById('genderInput').value = user.gender || '';
+        if (user.dateOfBirth) {
+          document.getElementById('dateOfBirthInput').value = user.dateOfBirth.split('T')[0];
+        }
+      } catch (e) {
+        window.showNotification('Error al cargar perfil', 'error');
+      }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveBtn');
+      const status = document.getElementById('saveStatus');
+
+      btn.querySelector('.btn-text').style.display = 'none';
+      btn.querySelector('.btn-loader').style.display = 'flex';
+      btn.disabled = true;
+      status.textContent = '';
+
+      try {
+        const dobRaw = document.getElementById('dateOfBirthInput').value; // "YYYY-MM-DD" or ""
+        let dateOfBirth = undefined;
+        if (dobRaw) {
+          // Parse as local midnight UTC to avoid timezone shifts
+          const parsed = new Date(dobRaw + 'T00:00:00Z');
+          if (isNaN(parsed.getTime())) {
+            window.showNotification('Fecha de nacimiento inválida', 'error');
+            return;
+          }
+          if (parsed > new Date()) {
+            window.showNotification('La fecha de nacimiento no puede ser futura', 'warning');
+            return;
+          }
+          dateOfBirth = parsed.toISOString(); // "2004-01-30T00:00:00.000Z"
+        }
+
+        const data = {
+          name:        document.getElementById('nameInput').value.trim()  || undefined,
+          phone:       document.getElementById('phoneInput').value.trim() || undefined,
+          gender:      document.getElementById('genderInput').value       || undefined,
+          dateOfBirth,
+        };
+
+        // Remove undefined fields
+        Object.keys(data).forEach(k => data[k] === undefined && delete data[k]);
+
+        await window.api.updateProfile(data);
+        window.showNotification('Perfil actualizado correctamente', 'success');
+        status.textContent = '✓ Guardado';
+        status.style.color = '#10b981';
+
+        // Update displayed name
+        if (data.name) {
+          document.getElementById('profileName').textContent = data.name;
+          document.getElementById('navUserName').textContent = data.name.split(' ')[0];
+          document.getElementById('avatarInitial').textContent = data.name[0].toUpperCase();
+        }
+      } catch (e) {
+        window.showNotification('Error al actualizar perfil: ' + e.message, 'error');
+        status.textContent = '✗ Error al guardar';
+        status.style.color = '#ef4444';
+      } finally {
+        btn.querySelector('.btn-text').style.display = 'inline';
+        btn.querySelector('.btn-loader').style.display = 'none';
+        btn.disabled = false;
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      }
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

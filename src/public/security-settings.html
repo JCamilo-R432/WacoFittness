@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seguridad - WacoPro Fitness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0F172A; color: #E2E8F0; min-height: 100vh; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #1E293B; border-bottom: 1px solid #334155; }
+    .nav-logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg,#3B82F6,#8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav a { color: #94A3B8; text-decoration: none; margin-left: 20px; font-size: 14px; }
+    .container { max-width: 720px; margin: 40px auto; padding: 0 20px; }
+    h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { color: #94A3B8; margin-bottom: 40px; }
+    .section { background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .section-title { font-size: 18px; font-weight: 700; }
+    .section-desc { color: #94A3B8; font-size: 14px; margin-top: 4px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .badge-on { background: #064E3B; color: #10B981; }
+    .badge-off { background: #1E293B; color: #64748B; border: 1px solid #334155; }
+    .btn { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; }
+    .btn-primary { background: #3B82F6; color: #fff; }
+    .btn-primary:hover { background: #2563EB; }
+    .btn-danger { background: transparent; border: 1px solid #EF4444; color: #EF4444; }
+    .btn-danger:hover { background: #EF4444; color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid #475569; color: #E2E8F0; }
+    .btn-outline:hover { border-color: #94A3B8; }
+    .qr-container { text-align: center; margin: 20px 0; }
+    .qr-container img { border-radius: 12px; border: 4px solid #334155; max-width: 200px; }
+    .steps { list-style: none; }
+    .steps li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; font-size: 14px; color: #CBD5E1; }
+    .steps .step-num { background: #3B82F6; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .input-group { display: flex; gap: 12px; margin-top: 20px; }
+    .input-code { flex: 1; background: #0F172A; border: 1px solid #334155; border-radius: 10px; padding: 12px 16px; font-size: 24px; letter-spacing: 8px; color: #E2E8F0; text-align: center; font-family: monospace; }
+    .input-code:focus { outline: none; border-color: #3B82F6; }
+    .backup-codes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+    .backup-code { background: #0F172A; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 16px; letter-spacing: 2px; text-align: center; color: #E2E8F0; }
+    .audit-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #1E293B; font-size: 13px; }
+    .audit-item:last-child { border-bottom: none; }
+    .audit-action { font-weight: 600; color: #E2E8F0; }
+    .audit-meta { color: #64748B; margin-top: 2px; }
+    .audit-time { color: #64748B; text-align: right; flex-shrink: 0; margin-left: 16px; }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid #334155; border-top-color: #3B82F6; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 14px 20px; font-size: 14px; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all .3s; max-width: 360px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: #10B981; }
+    .toast.error { border-color: #EF4444; }
+    .hidden { display: none; }
+    #setup-step-2 { display: none; }
+    #setup-step-2.show { display: block; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">💪 WacoPro</div>
+  <div>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/billing">Facturación</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>🔐 Seguridad</h1>
+  <p class="subtitle">Gestiona la seguridad y privacidad de tu cuenta</p>
+
+  <!-- 2FA Section -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Autenticación de Dos Factores (2FA)</div>
+        <div class="section-desc">Añade una capa extra de seguridad usando tu app autenticadora</div>
+      </div>
+      <span class="badge badge-off" id="2fa-badge">Cargando...</span>
+    </div>
+
+    <!-- Estado: desactivado -->
+    <div id="2fa-disabled" class="hidden">
+      <p style="color:#94A3B8;font-size:14px;margin-bottom:16px;">
+        Con 2FA activo, necesitarás tu app autenticadora (Google Authenticator, Authy) además de tu contraseña para iniciar sesión.
+      </p>
+      <button type="button" class="btn btn-primary" onclick="startSetup2FA()">Activar 2FA</button>
+    </div>
+
+    <!-- Estado: setup paso 1 -->
+    <div id="setup-step-1" class="hidden">
+      <ul class="steps">
+        <li><span class="step-num">1</span> Descarga Google Authenticator o Authy en tu móvil</li>
+        <li><span class="step-num">2</span> Escanea este código QR con la app</li>
+        <li><span class="step-num">3</span> Introduce el código de 6 dígitos que muestra la app</li>
+      </ul>
+      <div class="qr-container">
+        <img id="qr-image" src="" alt="QR Code 2FA">
+        <p style="color:#64748B;font-size:12px;margin-top:8px;">O ingresa manualmente en la app</p>
+      </div>
+      <div class="input-group">
+        <input type="text" id="verify-code" class="input-code" maxlength="6" placeholder="000000">
+        <button type="button" class="btn btn-primary" onclick="verify2FA()">Verificar y activar</button>
+      </div>
+      <button type="button" class="btn btn-outline" style="margin-top:12px;width:100%" onclick="cancelSetup()">Cancelar</button>
+    </div>
+
+    <!-- Estado: activado -->
+    <div id="2fa-enabled" class="hidden">
+      <p style="color:#10B981;font-size:14px;margin-bottom:16px;">✅ 2FA está activo. Tu cuenta está protegida.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-outline" onclick="regenBackupCodes()">Regenerar códigos de respaldo</button>
+        <button type="button" class="btn btn-danger" onclick="showDisableModal()">Desactivar 2FA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actividad reciente -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Actividad Reciente</div>
+        <div class="section-desc">Últimas acciones en tu cuenta</div>
+      </div>
+    </div>
+    <div id="audit-content"><div class="spinner"></div> Cargando...</div>
+  </div>
+
+  <!-- Tickets de soporte -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Soporte</div>
+        <div class="section-desc">¿Necesitas ayuda? Abre un ticket</div>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="toggleTicketForm()">+ Nuevo ticket</button>
+    </div>
+
+    <div id="ticket-form" class="hidden" style="margin-bottom:24px;">
+      <div style="display:grid;gap:12px;">
+        <input type="text" id="ticket-subject" placeholder="Asunto" style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px 14px;color:#E2E8F0;font-size:14px;width:100%">
+        <textarea id="ticket-body" placeholder="Describe tu problema..." rows="4" style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px 14px;color:#E2E8F0;font-size:14px;resize:vertical;width:100%"></textarea>
+        <select id="ticket-category" style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px 14px;color:#E2E8F0;font-size:14px;">
+          <option value="general">General</option>
+          <option value="billing">Facturación</option>
+          <option value="technical">Técnico</option>
+          <option value="account">Cuenta</option>
+        </select>
+        <button type="button" class="btn btn-primary" onclick="submitTicket()" style="align-self:flex-start">Enviar ticket</button>
+      </div>
+    </div>
+
+    <div id="tickets-content"><div class="spinner"></div> Cargando...</div>
+  </div>
+</div>
+
+<!-- Modal disable 2FA -->
+<div id="disable-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#1E293B;border:1px solid #334155;border-radius:16px;padding:32px;max-width:400px;width:90%;text-align:center;">
+    <h3 style="margin-bottom:8px;">Desactivar 2FA</h3>
+    <p style="color:#94A3B8;font-size:14px;margin-bottom:20px;">Introduce tu código TOTP para confirmar</p>
+    <input type="text" id="disable-code" class="input-code" maxlength="6" placeholder="000000" style="width:100%">
+    <div style="display:flex;gap:12px;margin-top:20px;justify-content:center;">
+      <button type="button" class="btn btn-outline" onclick="document.getElementById('disable-modal').style.display='none'">Cancelar</button>
+      <button type="button" class="btn btn-danger" onclick="disable2FA()">Desactivar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login?redirect=security-settings';
+
+async function load2FAStatus() {
+  try {
+    const res = await fetch(`${API}/security/2fa/status`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    const enabled = data.data?.enabled;
+
+    document.getElementById('2fa-badge').textContent = enabled ? '🟢 Activo' : '🔴 Inactivo';
+    document.getElementById('2fa-badge').className = `badge ${enabled ? 'badge-on' : 'badge-off'}`;
+    document.getElementById('2fa-disabled').className = enabled ? 'hidden' : '';
+    document.getElementById('2fa-enabled').className = enabled ? '' : 'hidden';
+  } catch (e) { showToast('Error cargando estado 2FA', true); }
+}
+
+async function startSetup2FA() {
+  try {
+    const res = await fetch(`${API}/security/2fa/setup`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    document.getElementById('qr-image').src = data.data.qrCodeUrl;
+    document.getElementById('2fa-disabled').className = 'hidden';
+    document.getElementById('setup-step-1').className = '';
+  } catch (e) { showToast(e.message, true); }
+}
+
+async function verify2FA() {
+  const code = document.getElementById('verify-code').value.trim();
+  if (code.length !== 6) { showToast('Introduce un código de 6 dígitos', true); return; }
+  try {
+    const res = await fetch(`${API}/security/2fa/verify`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    document.getElementById('setup-step-1').className = 'hidden';
+    showToast('✅ 2FA activado. Backup codes enviados a tu email.', false);
+
+    // Mostrar backup codes
+    const codes = data.data.backupCodes;
+    document.getElementById('2fa-enabled').className = '';
+    document.getElementById('2fa-badge').textContent = '🟢 Activo';
+    document.getElementById('2fa-badge').className = 'badge badge-on';
+  } catch (e) { showToast(e.message, true); }
+}
+
+function cancelSetup() {
+  document.getElementById('setup-step-1').className = 'hidden';
+  document.getElementById('2fa-disabled').className = '';
+}
+
+function showDisableModal() {
+  document.getElementById('disable-modal').style.display = 'flex';
+}
+
+async function disable2FA() {
+  const code = document.getElementById('disable-code').value.trim();
+  try {
+    const res = await fetch(`${API}/security/2fa/disable`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    document.getElementById('disable-modal').style.display = 'none';
+    showToast('2FA desactivado', false);
+    load2FAStatus();
+  } catch (e) { showToast(e.message, true); }
+}
+
+async function regenBackupCodes() {
+  const code = prompt('Introduce tu código TOTP para regenerar los códigos de respaldo:');
+  if (!code) return;
+  try {
+    const res = await fetch(`${API}/security/2fa/backup-codes/regenerate`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    showToast(`✅ Nuevos códigos generados y enviados a tu email.`);
+  } catch (e) { showToast(e.message, true); }
+}
+
+async function loadAuditLog() {
+  try {
+    const res = await fetch(`${API}/security/audit-log?limit=10`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (!data.success) throw new Error();
+    const el = document.getElementById('audit-content');
+    if (!data.data.length) { el.innerHTML = '<p style="color:#64748B;font-size:14px;">Sin actividad registrada</p>'; return; }
+    el.innerHTML = data.data.map(log => `
+      <div class="audit-item">
+        <div>
+          <div class="audit-action">${formatAction(log.action)}</div>
+          <div class="audit-meta">${log.ipAddress || 'IP desconocida'}</div>
+        </div>
+        <div class="audit-time">${timeAgo(log.createdAt)}</div>
+      </div>
+    `).join('');
+  } catch { document.getElementById('audit-content').innerHTML = '<p style="color:#EF4444;">Error cargando actividad</p>'; }
+}
+
+async function loadTickets() {
+  try {
+    const res = await fetch(`${API}/security/tickets`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    const el = document.getElementById('tickets-content');
+    if (!data.data?.length) { el.innerHTML = '<p style="color:#64748B;font-size:14px;">No tienes tickets abiertos</p>'; return; }
+    el.innerHTML = data.data.map(t => `
+      <div style="padding:14px 0;border-bottom:1px solid #334155;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:600;">${t.subject}</span>
+          <span class="badge ${t.status === 'open' ? 'badge-off' : 'badge-on'}">${t.status}</span>
+        </div>
+        <div style="color:#64748B;font-size:12px;margin-top:4px;">${timeAgo(t.createdAt)} · ${t.replies?.length || 0} respuestas</div>
+      </div>
+    `).join('');
+  } catch { document.getElementById('tickets-content').innerHTML = ''; }
+}
+
+function toggleTicketForm() {
+  const f = document.getElementById('ticket-form');
+  f.className = f.className === 'hidden' ? '' : 'hidden';
+}
+
+async function submitTicket() {
+  const subject = document.getElementById('ticket-subject').value.trim();
+  const body = document.getElementById('ticket-body').value.trim();
+  const category = document.getElementById('ticket-category').value;
+  if (!subject || !body) { showToast('Subject y descripción requeridos', true); return; }
+  try {
+    const res = await fetch(`${API}/security/tickets`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, body, category }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    showToast('✅ Ticket enviado. Te responderemos pronto.');
+    toggleTicketForm();
+    loadTickets();
+  } catch (e) { showToast(e.message, true); }
+}
+
+function formatAction(action) {
+  const map = {
+    'user.login': '🔑 Inicio de sesión',
+    'security.2fa.enabled': '🔐 2FA activado',
+    'security.2fa.disabled': '🔓 2FA desactivado',
+    'payment.checkout.created': '💳 Checkout iniciado',
+    'payment.subscription.canceled': '❌ Suscripción cancelada',
+  };
+  return map[action] || action;
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Ahora';
+  if (mins < 60) return `Hace ${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `Hace ${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  return `Hace ${days}d`;
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${isError ? 'error' : 'success'}`;
+  setTimeout(() => t.className = 'toast', 5000);
+}
+
+load2FAStatus();
+loadAuditLog();
+loadTickets();
+</script>
+</body>
+</html>

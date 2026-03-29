@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coaches | WacoPro Fitness</title>
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --surface: #12122a;
+      --surface2: #1a1a35;
+      --primary: #6c63ff;
+      --accent: #00d9a6;
+      --secondary: #ff6b6b;
+      --warning: #ffd93d;
+      --text: #e8e8f0;
+      --text-muted: #6b6b8a;
+      --border: rgba(108,99,255,0.2);
+      --glow: 0 0 20px rgba(108,99,255,0.4);
+      --glow-accent: 0 0 20px rgba(0,217,166,0.4);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* NAV */
+    nav {
+      background: rgba(10,10,26,0.95); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: .9rem; transition: color .2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+    .nav-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .5rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: .85rem; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,166,0.08));
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 2rem 2rem; text-align: center;
+    }
+    .hero h1 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: .5rem; }
+    .hero p { color: var(--text-muted); max-width: 550px; margin: 0 auto 1.5rem; font-size: 1.05rem; }
+    .hero-stats { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; }
+    .hero-stat .val { font-size: 1.7rem; font-weight: 800; color: var(--accent); }
+    .hero-stat .lbl { font-size: .72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* SPECIALTY TABS */
+    .specialty-tabs { display: flex; gap: .5rem; padding: 1.5rem 2rem .5rem; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+    .specialty-tabs::-webkit-scrollbar { display: none; }
+    .spec-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: .45rem 1.1rem; border-radius: 20px; cursor: pointer; font-size: .82rem; white-space: nowrap; transition: all .2s; }
+    .spec-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .spec-btn.active { background: linear-gradient(135deg, var(--primary), var(--accent)); border-color: transparent; color: #fff; }
+
+    /* LAYOUT */
+    .page-layout { display: grid; grid-template-columns: 1fr; }
+    .coaches-section { padding: 2rem; }
+
+    /* SEARCH ROW */
+    .search-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .search-wrap { flex: 1; min-width: 220px; position: relative; }
+    .search-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .65rem 1rem .65rem 2.5rem; border-radius: 12px; font-size: .95rem; }
+    .search-wrap input:focus { outline: none; border-color: var(--primary); box-shadow: var(--glow); }
+    .search-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .filter-row-select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .65rem 1rem; border-radius: 12px; font-size: .85rem; }
+    .results-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+    .results-bar span { font-size: .85rem; color: var(--text-muted); }
+    .results-bar strong { color: var(--accent); }
+
+    /* COACHES GRID */
+    .coaches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+
+    /* COACH CARD */
+    .coach-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; cursor: pointer; transition: all .25s;
+    }
+    .coach-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--glow); }
+
+    .coach-card-header {
+      position: relative;
+      background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,217,166,0.1));
+      padding: 1.5rem 1.5rem 0;
+      display: flex; gap: 1rem; align-items: flex-end;
+    }
+    .coach-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid var(--primary); overflow: hidden; flex-shrink: 0;
+      background: var(--surface2); display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+    }
+    .coach-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .coach-header-info { flex: 1; padding-bottom: 1rem; }
+    .coach-name { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+    .coach-title { font-size: .8rem; color: var(--accent); margin-bottom: .4rem; }
+    .coach-rating { display: flex; align-items: center; gap: .5rem; }
+    .stars { color: var(--warning); font-size: .85rem; }
+    .rating-val { font-size: .8rem; font-weight: 700; color: var(--text); }
+    .review-count { font-size: .72rem; color: var(--text-muted); }
+    .availability-badge {
+      position: absolute; top: 1rem; right: 1rem;
+      font-size: .7rem; padding: .25rem .6rem; border-radius: 10px; font-weight: 700;
+    }
+    .available { background: rgba(0,217,166,0.2); color: var(--accent); border: 1px solid rgba(0,217,166,0.3); }
+    .unavailable { background: rgba(255,107,107,0.15); color: var(--secondary); border: 1px solid rgba(255,107,107,0.25); }
+
+    .coach-card-body { padding: 1.2rem 1.5rem; }
+    .coach-bio { font-size: .82rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .spec-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+    .spec-tag { background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.25); color: var(--primary); font-size: .72rem; padding: .2rem .6rem; border-radius: 6px; }
+    .lang-row { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .75rem; }
+    .lang-chip { background: var(--surface2); color: var(--text-muted); font-size: .7rem; padding: .15rem .5rem; border-radius: 5px; }
+    .coach-stats-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .coach-stat { display: flex; align-items: center; gap: .3rem; font-size: .78rem; color: var(--text-muted); }
+    .coach-stat strong { color: var(--text); }
+
+    .coach-card-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: .75rem; align-items: center; }
+    .price-tag { flex: 1; }
+    .price-session { font-size: 1.05rem; font-weight: 800; color: var(--accent); }
+    .price-label { font-size: .7rem; color: var(--text-muted); }
+    .btn-book {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none; color: #fff; padding: .55rem 1.3rem; border-radius: 10px;
+      cursor: pointer; font-weight: 700; font-size: .85rem; transition: all .2s;
+    }
+    .btn-book:hover { box-shadow: var(--glow); transform: translateY(-1px); }
+    .btn-book:disabled { opacity: .5; cursor: default; }
+    .btn-view { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: .5rem 1rem; border-radius: 10px; cursor: pointer; font-size: .82rem; transition: all .2s; }
+    .btn-view:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* MY SESSIONS */
+    .section-title { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 1.2rem; display: flex; align-items: center; gap: .5rem; }
+    .section-title span { color: var(--accent); }
+    .sessions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .session-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; }
+    .session-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
+    .session-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid var(--primary); }
+    .session-info h4 { font-size: .95rem; font-weight: 700; color: var(--text); }
+    .session-info p { font-size: .78rem; color: var(--text-muted); }
+    .status-badge { font-size: .7rem; padding: .2rem .55rem; border-radius: 8px; font-weight: 700; }
+    .status-scheduled { background: rgba(108,99,255,0.15); color: var(--primary); }
+    .status-completed { background: rgba(0,217,166,0.15); color: var(--accent); }
+    .status-cancelled { background: rgba(255,107,107,0.15); color: var(--secondary); }
+    .session-details { font-size: .8rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .75rem; }
+    .session-actions { display: flex; gap: .5rem; }
+    .btn-sm { padding: .4rem .85rem; border-radius: 8px; cursor: pointer; font-size: .78rem; font-weight: 600; border: 1px solid; transition: all .2s; }
+    .btn-sm-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); border-color: transparent; color: #fff; }
+    .btn-sm-danger { background: transparent; border-color: rgba(255,107,107,0.4); color: var(--secondary); }
+    .btn-sm-danger:hover { background: rgba(255,107,107,0.1); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+      backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto;
+      transform: translateY(30px); transition: transform .25s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-hero {
+      background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,217,166,0.1));
+      padding: 2rem; display: flex; gap: 1.5rem; align-items: center;
+      border-radius: 20px 20px 0 0;
+    }
+    .modal-avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--primary); background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; flex-shrink: 0; overflow: hidden; }
+    .modal-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .modal-coach-info h2 { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+    .modal-coach-info .coach-title { font-size: .9rem; color: var(--accent); margin-bottom: .5rem; }
+    .modal-rating { display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem; }
+    .modal-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--text); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .modal-close:hover { background: var(--secondary); }
+
+    .modal-body { padding: 1.5rem; }
+    .modal-tabs { display: flex; gap: .5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: .75rem; }
+    .modal-tab { background: none; border: none; color: var(--text-muted); padding: .4rem .85rem; cursor: pointer; font-size: .85rem; border-radius: 8px; transition: all .2s; }
+    .modal-tab:hover { color: var(--text); }
+    .modal-tab.active { background: var(--surface2); color: var(--primary); font-weight: 700; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
+    .info-item label { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); display: block; margin-bottom: .25rem; }
+    .info-item .val { font-size: .92rem; color: var(--text); font-weight: 600; }
+
+    .bio-text { font-size: .9rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.2rem; }
+    .cert-list { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+    .cert-list li { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--text-muted); }
+    .cert-list li::before { content: '✅'; }
+
+    /* BOOKING FORM */
+    .booking-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group label { display: block; font-size: .8rem; color: var(--text-muted); margin-bottom: .4rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: .65rem 1rem; border-radius: 10px; font-size: .9rem;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: var(--glow); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .booking-summary {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .booking-price { font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+    .booking-price-label { font-size: .75rem; color: var(--text-muted); }
+    .btn-book-confirm {
+      width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none; color: #fff; padding: .85rem; border-radius: 12px; font-size: 1rem;
+      font-weight: 800; cursor: pointer; transition: all .2s;
+    }
+    .btn-book-confirm:hover { box-shadow: var(--glow); }
+    .btn-book-confirm:disabled { opacity: .6; cursor: default; }
+
+    /* SCHEDULE GRID */
+    .schedule-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .4rem; margin-bottom: 1rem; }
+    .schedule-day { text-align: center; }
+    .schedule-day-name { font-size: .65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: .3rem; }
+    .time-slot {
+      background: rgba(0,217,166,0.1); border: 1px solid rgba(0,217,166,0.2);
+      color: var(--accent); border-radius: 6px; padding: .3rem .2rem;
+      font-size: .65rem; text-align: center; cursor: pointer; margin-bottom: .3rem; transition: all .2s;
+    }
+    .time-slot:hover, .time-slot.selected { background: var(--accent); color: #000; font-weight: 700; }
+    .time-slot.booked { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.2); color: var(--secondary); cursor: not-allowed; }
+
+    .loading { text-align: center; padding: 4rem; color: var(--text-muted); }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { text-align: center; padding: 3rem; }
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; opacity: .6; }
+    .empty-state p { color: var(--text-muted); font-size: .9rem; }
+
+    .toast { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; background: var(--surface2); border: 1px solid var(--accent); color: var(--text); padding: .75rem 1.25rem; border-radius: 10px; font-size: .9rem; box-shadow: var(--glow-accent); transform: translateY(100px); opacity: 0; transition: all .3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 768px) {
+      .info-grid, .form-row { grid-template-columns: 1fr; }
+      .modal-hero { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⚡ WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/virtual-classes">Clases</a>
+    <a href="/on-demand">Videos</a>
+    <a href="/programs">Programas</a>
+    <a href="/coaches" class="active">Coaches</a>
+    <a href="/progress-tracker">Progreso</a>
+    <a href="/fitness-challenges">Retos</a>
+  </div>
+  <button type="button" class="nav-btn" onclick="location.href='/profile'">Mi Cuenta</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🏆 Coaches Remotos</h1>
+  <p>Trabaja 1-a-1 con los mejores entrenadores y nutricionistas de manera virtual, desde donde estés.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="val" id="coachCount">–</div><div class="lbl">Coaches</div></div>
+    <div class="hero-stat"><div class="val" id="avgRating">–</div><div class="lbl">Rating promedio</div></div>
+    <div class="hero-stat"><div class="val" id="mySessions">–</div><div class="lbl">Mis sesiones</div></div>
+    <div class="hero-stat"><div class="val" id="availNow">–</div><div class="lbl">Disponibles ahora</div></div>
+  </div>
+</div>
+
+<!-- SPECIALTY TABS -->
+<div class="specialty-tabs">
+  <button type="button" class="spec-btn active" onclick="filterBySpec(null, this)">🎯 Todos</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('strength', this)">💪 Fuerza</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('weight_loss', this)">🔥 Pérdida de peso</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('muscle_building', this)">🏋️ Hipertrofia</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('yoga', this)">🧘 Yoga</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('nutrition', this)">🥗 Nutrición</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('hiit', this)">⚡ HIIT</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('running', this)">🏃 Running</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('flexibility', this)">🤸 Flexibilidad</button>
+  <button type="button" class="spec-btn" onclick="filterBySpec('mindfulness', this)">🧠 Mindfulness</button>
+</div>
+
+<div class="coaches-section">
+
+  <!-- MY SESSIONS -->
+  <div id="mySessionsSection">
+    <div class="section-title">📅 Mis Próximas Sesiones <span id="sessionsBadge"></span></div>
+    <div class="sessions-grid" id="sessionsGrid">
+      <div style="color:var(--text-muted);font-size:.85rem;padding:.5rem 0;">Cargando sesiones...</div>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-row">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, especialidad...">
+    </div>
+    <select class="filter-row-select" id="filterLanguage" onchange="applyFilters()">
+      <option value="">Todos los idiomas</option>
+      <option value="es">Español</option>
+      <option value="en">Inglés</option>
+      <option value="pt">Portugués</option>
+    </select>
+    <select class="filter-row-select" id="filterRate" onchange="applyFilters()">
+      <option value="">Cualquier precio</option>
+      <option value="30">Hasta $30/sesión</option>
+      <option value="50">Hasta $50/sesión</option>
+      <option value="80">Hasta $80/sesión</option>
+      <option value="100">Hasta $100/sesión</option>
+    </select>
+    <select class="filter-row-select" id="filterAvail" onchange="applyFilters()">
+      <option value="">Todos</option>
+      <option value="available">Disponibles ahora</option>
+    </select>
+  </div>
+
+  <div class="results-bar">
+    <span>Mostrando <strong id="coachResultCount">–</strong> coaches</span>
+  </div>
+
+  <div id="coachesGrid" class="coaches-grid">
+    <div class="loading"><div class="spinner"></div><p>Cargando coaches...</p></div>
+  </div>
+
+</div>
+
+<!-- COACH DETAIL + BOOKING MODAL -->
+<div class="modal-overlay" id="coachModal" onclick="handleOverlayClick(event)" style="position:fixed;">
+  <div class="modal" onclick="event.stopPropagation()" style="position:relative;">
+    <button type="button" class="modal-close" style="position:absolute;" onclick="closeModal()">✕</button>
+
+    <div class="modal-hero" id="modalHero">
+      <div class="modal-avatar" id="modalAvatar">👤</div>
+      <div class="modal-coach-info">
+        <h2 id="modalName">–</h2>
+        <div class="coach-title" id="modalSpecialty">–</div>
+        <div class="modal-rating">
+          <span class="stars" id="modalStars">–</span>
+          <span class="rating-val" id="modalRating">–</span>
+          <span class="review-count" id="modalReviews">–</span>
+        </div>
+        <div class="modal-tags" id="modalTags">–</div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab active" onclick="switchTab('about')">Sobre mí</button>
+        <button type="button" class="modal-tab" onclick="switchTab('schedule')">Horarios</button>
+        <button type="button" class="modal-tab" onclick="switchTab('book')">Reservar</button>
+        <button type="button" class="modal-tab" onclick="switchTab('classes')">Clases</button>
+      </div>
+
+      <!-- ABOUT TAB -->
+      <div class="tab-content active" id="tab-about">
+        <p class="bio-text" id="modalBio">–</p>
+        <div class="info-grid">
+          <div class="info-item"><label>Experiencia</label><div class="val" id="modalExp">–</div></div>
+          <div class="info-item"><label>Idiomas</label><div class="val" id="modalLangs">–</div></div>
+          <div class="info-item"><label>Zona horaria</label><div class="val" id="modalTz">–</div></div>
+          <div class="info-item"><label>Sesiones realizadas</label><div class="val" id="modalSessionCount">–</div></div>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <div style="font-size:.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:.6rem;">Certificaciones</div>
+          <ul class="cert-list" id="modalCerts"><li>Cargando...</li></ul>
+        </div>
+      </div>
+
+      <!-- SCHEDULE TAB -->
+      <div class="tab-content" id="tab-schedule">
+        <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1rem;">Horarios disponibles para los próximos 7 días. Los bloques rojos ya están reservados.</p>
+        <div id="scheduleGrid">
+          <div style="text-align:center;color:var(--text-muted);padding:2rem;">
+            <div class="spinner"></div>
+            <p>Cargando disponibilidad...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOK TAB -->
+      <div class="tab-content" id="tab-book">
+        <div class="booking-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fecha y hora</label>
+              <input type="datetime-local" id="bookDateTime" min="">
+            </div>
+            <div class="form-group">
+              <label>Tipo de sesión</label>
+              <select id="bookType">
+                <option value="personal_training">Entrenamiento personal</option>
+                <option value="nutrition_coaching">Consulta nutricional</option>
+                <option value="assessment">Evaluación inicial</option>
+                <option value="follow_up">Seguimiento</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Duración</label>
+            <select id="bookDuration">
+              <option value="30">30 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60" selected>60 minutos</option>
+              <option value="90">90 minutos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Notas para el coach (opcional)</label>
+            <textarea id="bookNotes" placeholder="Describe tu objetivo, lesiones previas, nivel actual..."></textarea>
+          </div>
+          <div class="booking-summary">
+            <div>
+              <div class="booking-price" id="bookPrice">$0</div>
+              <div class="booking-price-label">precio estimado</div>
+            </div>
+            <div style="font-size:.8rem;color:var(--text-muted);text-align:right;">
+              <div>📹 Sesión por videollamada</div>
+              <div>🔒 Cancela hasta 24h antes</div>
+            </div>
+          </div>
+          <button type="button" class="btn-book-confirm" id="bookConfirmBtn" onclick="confirmBooking()">🗓 Confirmar Reserva</button>
+        </div>
+      </div>
+
+      <!-- CLASSES TAB -->
+      <div class="tab-content" id="tab-classes">
+        <div id="coachClassesList">
+          <div style="text-align:center;color:var(--text-muted);padding:2rem;">Cargando clases del coach...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '/api';
+  const token = localStorage.getItem('token') || '';
+  const headers = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` });
+
+  let allCoaches = [];
+  let mySessions = [];
+  let activeSpec = null;
+  let currentCoach = null;
+  let searchTimer = null;
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    const si = document.getElementById('searchInput');
+    si.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(applyFilters, 400); });
+
+    const dtInput = document.getElementById('bookDateTime');
+    const now = new Date(); now.setMinutes(now.getMinutes() + 30);
+    dtInput.min = now.toISOString().slice(0, 16);
+    dtInput.value = now.toISOString().slice(0, 16);
+
+    document.getElementById('bookDuration').addEventListener('change', updateBookPrice);
+
+    await Promise.all([loadCoaches(), loadMySessions()]);
+    updateHeroStats();
+  });
+
+  // ── Loaders ──────────────────────────────────────────────────────────────────
+  async function loadCoaches() {
+    try {
+      const r = await fetch(`${API}/coaches?limit=50`, { headers: headers() });
+      const d = await r.json();
+      allCoaches = d.coaches || d.data || getMockCoaches();
+      renderCoaches(allCoaches);
+    } catch {
+      allCoaches = getMockCoaches();
+      renderCoaches(allCoaches);
+    }
+  }
+
+  async function loadMySessions() {
+    try {
+      const r = await fetch(`${API}/coaches/sessions/my`, { headers: headers() });
+      const d = await r.json();
+      mySessions = d.sessions || d.data || [];
+      renderMySessions();
+    } catch {
+      mySessions = [];
+      document.getElementById('mySessionsSection').style.display = 'none';
+    }
+  }
+
+  async function loadCoachSchedule(coachId) {
+    try {
+      const from = new Date().toISOString();
+      const to = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
+      const r = await fetch(`${API}/coaches/${coachId}/schedule?from=${from}&to=${to}`, { headers: headers() });
+      const d = await r.json();
+      return d.schedule || d.data || [];
+    } catch { return []; }
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────────
+  function renderCoaches(coaches) {
+    const grid = document.getElementById('coachesGrid');
+    document.getElementById('coachResultCount').textContent = coaches.length;
+
+    if (!coaches.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>No se encontraron coaches con los filtros seleccionados.</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = coaches.map(c => coachCardHTML(c)).join('');
+  }
+
+  function coachCardHTML(c) {
+    const stars = starString(c.rating || 0);
+    const specs = (c.specialties || []).slice(0, 3);
+    const langs = (c.languages || []).slice(0, 3);
+
+    return `
+      <div class="coach-card" onclick="openCoach('${c.id}')">
+        <div class="coach-card-header">
+          <div class="coach-avatar">
+            ${c.avatarUrl ? `<img src="${c.avatarUrl}" alt="${escHtml(c.user?.name || 'Coach')}" onerror="this.style.display='none'">` : '👤'}
+          </div>
+          <div class="coach-header-info">
+            <div class="coach-name">${escHtml(c.user?.name || 'Coach')}</div>
+            <div class="coach-title">${(specs[0] || 'Personal Trainer')}</div>
+            <div class="coach-rating">
+              <span class="stars">${stars}</span>
+              <span class="rating-val">${(c.rating || 0).toFixed(1)}</span>
+              <span class="review-count">(${c.reviewCount || 0})</span>
+            </div>
+          </div>
+          <div class="availability-badge ${c.isAvailable ? 'available' : 'unavailable'}">${c.isAvailable ? '● Disponible' : '● No disponible'}</div>
+        </div>
+        <div class="coach-card-body">
+          <p class="coach-bio">${escHtml(c.bio || 'Coach especializado en alcanzar tus objetivos de fitness.')}</p>
+          <div class="spec-tags">${specs.map(s => `<span class="spec-tag">${s}</span>`).join('')}</div>
+          <div class="lang-row">${langs.map(l => `<span class="lang-chip">🌐 ${l}</span>`).join('')}</div>
+          <div class="coach-stats-row">
+            <div class="coach-stat">📅 <strong>${c.experienceYears || 0}</strong> años exp.</div>
+            <div class="coach-stat">🕐 <strong>${c._count?.coachingSessions || 0}</strong> sesiones</div>
+            ${c.timezone ? `<div class="coach-stat">🌍 ${c.timezone}</div>` : ''}
+          </div>
+        </div>
+        <div class="coach-card-footer">
+          <div class="price-tag">
+            <div class="price-session">${c.sessionRate ? `$${Number(c.sessionRate).toFixed(0)}` : 'Consultar'}</div>
+            <div class="price-label">por sesión</div>
+          </div>
+          <button type="button" class="btn-view" onclick="event.stopPropagation(); openCoach('${c.id}')">Ver perfil</button>
+          <button type="button" class="btn-book ${!c.isAvailable ? 'disabled' : ''}" onclick="event.stopPropagation(); openCoachBook('${c.id}')" ${!c.isAvailable ? 'disabled' : ''}>Reservar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMySessions() {
+    const grid = document.getElementById('sessionsGrid');
+    const badge = document.getElementById('sessionsBadge');
+    const upcoming = mySessions.filter(s => s.status === 'scheduled');
+    badge.textContent = upcoming.length ? `(${upcoming.length} próximas)` : '';
+
+    if (!upcoming.length) {
+      document.getElementById('mySessionsSection').style.display = 'none';
+      return;
+    }
+
+    grid.innerHTML = upcoming.slice(0, 4).map(s => {
+      const date = new Date(s.scheduledAt);
+      const coach = s.coach?.user || {};
+      return `
+        <div class="session-card">
+          <div class="session-header">
+            <div class="session-avatar">👤</div>
+            <div class="session-info">
+              <h4>${escHtml(coach.name || 'Coach')}</h4>
+              <p>${sessionTypeLabel(s.type)}</p>
+            </div>
+            <span class="status-badge status-${s.status}">${statusLabel(s.status)}</span>
+          </div>
+          <div class="session-details">
+            📅 ${date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}<br>
+            🕐 ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}<br>
+            ⏱ ${s.durationMin || 60} minutos
+          </div>
+          <div class="session-actions">
+            ${s.meetingUrl ? `<button type="button" class="btn-sm btn-sm-primary" onclick="joinSession('${s.meetingUrl}')">📹 Unirse</button>` : ''}
+            <button type="button" class="btn-sm btn-sm-danger" onclick="cancelSession('${s.id}')">Cancelar</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    document.getElementById('mySessions').textContent = mySessions.length;
+  }
+
+  // ── Modal ─────────────────────────────────────────────────────────────────────
+  async function openCoach(coachId) {
+    document.getElementById('coachModal').classList.add('open');
+    document.getElementById('modalName').textContent = 'Cargando...';
+    switchTab('about');
+
+    try {
+      const r = await fetch(`${API}/coaches/${coachId}`, { headers: headers() });
+      const d = await r.json();
+      currentCoach = d.coach || d.data || d;
+      renderCoachModal(currentCoach);
+    } catch {
+      currentCoach = allCoaches.find(c => c.id === coachId);
+      if (currentCoach) renderCoachModal(currentCoach);
+    }
+  }
+
+  function openCoachBook(coachId) {
+    openCoach(coachId).then(() => setTimeout(() => switchTab('book'), 300));
+  }
+
+  function renderCoachModal(c) {
+    const name = c.user?.name || 'Coach';
+    const specs = c.specialties || [];
+
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('modalSpecialty').textContent = specs.slice(0, 2).join(' · ') || 'Personal Trainer';
+    document.getElementById('modalStars').textContent = starString(c.rating || 0);
+    document.getElementById('modalRating').textContent = (c.rating || 0).toFixed(1);
+    document.getElementById('modalReviews').textContent = `(${c.reviewCount || 0} reseñas)`;
+    document.getElementById('modalTags').innerHTML = specs.slice(0, 5).map(s => `<span class="spec-tag">${s}</span>`).join('');
+
+    if (c.avatarUrl) {
+      document.getElementById('modalAvatar').innerHTML = `<img src="${c.avatarUrl}" alt="${escHtml(name)}" onerror="this.innerHTML='👤'">`;
+    }
+
+    document.getElementById('modalBio').textContent = c.bio || 'Coach apasionado por ayudarte a alcanzar tus metas.';
+    document.getElementById('modalExp').textContent = `${c.experienceYears || 0} años`;
+    document.getElementById('modalLangs').textContent = (c.languages || ['es']).join(', ');
+    document.getElementById('modalTz').textContent = c.timezone || 'UTC';
+    document.getElementById('modalSessionCount').textContent = c._count?.coachingSessions || 0;
+    document.getElementById('modalCerts').innerHTML = (c.certifications || ['Certificado NSCA', 'CPR/AED']).map(cert => `<li>${escHtml(cert)}</li>`).join('');
+
+    // Classes tab
+    const classesContainer = document.getElementById('coachClassesList');
+    if (c.virtualClasses && c.virtualClasses.length) {
+      classesContainer.innerHTML = c.virtualClasses.map(cls => `
+        <div style="display:flex;gap:.75rem;align-items:center;padding:.75rem;background:var(--surface2);border-radius:10px;margin-bottom:.5rem;">
+          <div style="font-size:1.5rem;">📹</div>
+          <div style="flex:1;">
+            <div style="font-size:.9rem;font-weight:700;color:var(--text);">${escHtml(cls.title)}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">${cls.isLive ? '🔴 En vivo' : '▶ Bajo demanda'} · ${cls.durationMinutes} min</div>
+          </div>
+          <button type="button" class="btn-view" onclick="location.href='/virtual-classes'" style="white-space:nowrap;">Ver clase</button>
+        </div>
+      `).join('');
+    } else {
+      classesContainer.innerHTML = `<div class="empty-state"><div class="empty-icon">📹</div><p>Este coach aún no tiene clases publicadas.</p></div>`;
+    }
+
+    updateBookPrice();
+  }
+
+  async function loadAndRenderSchedule(coachId) {
+    document.getElementById('scheduleGrid').innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:2rem;"><div class="spinner"></div><p>Cargando disponibilidad...</p></div>`;
+    const schedule = await loadCoachSchedule(coachId);
+
+    // Generate next 7 days grid
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      days.push(d);
+    }
+
+    const bookedSlots = new Set(schedule.map(s => new Date(s.scheduledAt).toISOString().slice(0, 13)));
+
+    const gridHTML = `
+      <div class="schedule-grid">
+        ${days.map(day => {
+          const slots = [8, 9, 10, 11, 14, 15, 16, 17, 18, 19];
+          const dayName = day.toLocaleDateString('es-ES', { weekday: 'short' });
+          const dayNum = day.getDate();
+          return `
+            <div class="schedule-day">
+              <div class="schedule-day-name">${dayName} ${dayNum}</div>
+              ${slots.map(h => {
+                const slotKey = `${day.toISOString().slice(0, 10)}T${h.toString().padStart(2, '0')}`;
+                const isBooked = bookedSlots.has(slotKey);
+                return `<div class="time-slot ${isBooked ? 'booked' : ''}" onclick="${isBooked ? '' : `selectTimeSlot('${slotKey}:00', this)`}" title="${h}:00">${h}:00</div>`;
+              }).join('')}
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <p style="font-size:.75rem;color:var(--text-muted);">🟢 Disponible · 🔴 Reservado. Haz clic en un horario para pre-seleccionarlo en el formulario de reserva.</p>
+    `;
+
+    document.getElementById('scheduleGrid').innerHTML = gridHTML;
+  }
+
+  function selectTimeSlot(isoStr, el) {
+    document.querySelectorAll('.time-slot.selected').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    // Pre-fill booking form
+    document.getElementById('bookDateTime').value = isoStr.slice(0, 16);
+    updateBookPrice();
+    switchTab('book');
+  }
+
+  function closeModal() {
+    document.getElementById('coachModal').classList.remove('open');
+    currentCoach = null;
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('coachModal')) closeModal();
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.modal-tab').forEach((t, i) => {
+      const tabs = ['about', 'schedule', 'book', 'classes'];
+      t.classList.toggle('active', tabs[i] === tabId);
+    });
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+
+    if (tabId === 'schedule' && currentCoach) loadAndRenderSchedule(currentCoach.id);
+  }
+
+  // ── Booking ──────────────────────────────────────────────────────────────────
+  function updateBookPrice() {
+    if (!currentCoach) return;
+    const rate = Number(currentCoach.sessionRate || 0);
+    const dur = parseInt(document.getElementById('bookDuration').value) || 60;
+    const price = rate * (dur / 60);
+    document.getElementById('bookPrice').textContent = price > 0 ? `$${price.toFixed(2)}` : 'Gratis';
+  }
+
+  async function confirmBooking() {
+    if (!currentCoach) return;
+    const btn = document.getElementById('bookConfirmBtn');
+    const scheduledAt = document.getElementById('bookDateTime').value;
+    if (!scheduledAt) { showToast('⚠️ Selecciona una fecha y hora'); return; }
+
+    btn.disabled = true; btn.textContent = 'Reservando...';
+
+    try {
+      const r = await fetch(`${API}/coaches/sessions`, {
+        method: 'POST', headers: headers(),
+        body: JSON.stringify({
+          coachId: currentCoach.id,
+          scheduledAt: new Date(scheduledAt).toISOString(),
+          durationMin: parseInt(document.getElementById('bookDuration').value),
+          type: document.getElementById('bookType').value,
+          clientNotes: document.getElementById('bookNotes').value,
+        }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Error al reservar');
+
+      showToast('✅ ¡Sesión reservada! Recibirás el enlace de videoconferencia por email.');
+      closeModal();
+      await loadMySessions();
+    } catch (e) {
+      showToast(`❌ ${e.message}`);
+    } finally {
+      btn.disabled = false; btn.textContent = '🗓 Confirmar Reserva';
+    }
+  }
+
+  async function cancelSession(sessionId) {
+    if (!confirm('¿Cancelar esta sesión? Solo puedes cancelar hasta 24 horas antes.')) return;
+    try {
+      const r = await fetch(`${API}/coaches/sessions/${sessionId}/cancel`, { method: 'PUT', headers: headers() });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'No se pudo cancelar');
+      showToast('✅ Sesión cancelada');
+      await loadMySessions();
+    } catch (e) {
+      showToast(`❌ ${e.message}`);
+    }
+  }
+
+  function joinSession(url) {
+    window.open(url, '_blank', 'noopener');
+  }
+
+  // ── Filters ──────────────────────────────────────────────────────────────────
+  function filterBySpec(spec, btn) {
+    activeSpec = spec;
+    document.querySelectorAll('.spec-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    const lang = document.getElementById('filterLanguage').value;
+    const maxRate = parseFloat(document.getElementById('filterRate').value) || 0;
+    const availOnly = document.getElementById('filterAvail').value === 'available';
+
+    let filtered = [...allCoaches];
+    if (activeSpec) filtered = filtered.filter(c => (c.specialties || []).some(s => s.toLowerCase().includes(activeSpec)));
+    if (search) filtered = filtered.filter(c => (c.user?.name || '').toLowerCase().includes(search) || (c.bio || '').toLowerCase().includes(search) || (c.specialties || []).some(s => s.toLowerCase().includes(search)));
+    if (lang) filtered = filtered.filter(c => (c.languages || []).includes(lang));
+    if (maxRate) filtered = filtered.filter(c => !c.sessionRate || Number(c.sessionRate) <= maxRate);
+    if (availOnly) filtered = filtered.filter(c => c.isAvailable);
+
+    renderCoaches(filtered);
+  }
+
+  // ── Hero stats ────────────────────────────────────────────────────────────────
+  function updateHeroStats() {
+    document.getElementById('coachCount').textContent = allCoaches.length;
+    const ratings = allCoaches.filter(c => c.rating).map(c => c.rating);
+    const avg = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : '–';
+    document.getElementById('avgRating').textContent = avg;
+    document.getElementById('mySessions').textContent = mySessions.length;
+    document.getElementById('availNow').textContent = allCoaches.filter(c => c.isAvailable).length;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  function starString(rating) {
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.5;
+    return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - (half ? 1 : 0));
+  }
+
+  function sessionTypeLabel(t) {
+    const map = { personal_training: 'Entrenamiento personal', nutrition_coaching: 'Consulta nutricional', assessment: 'Evaluación inicial', follow_up: 'Seguimiento' };
+    return map[t] || t;
+  }
+
+  function statusLabel(s) {
+    return { scheduled: 'Programada', completed: 'Completada', cancelled: 'Cancelada' }[s] || s;
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function showToast(msg, dur = 3500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), dur);
+  }
+
+  // ── Mock data ─────────────────────────────────────────────────────────────────
+  function getMockCoaches() {
+    return [
+      { id: 'c1', user: { name: 'Carlos Mendez' }, bio: 'Especialista en transformación física con más de 10 años de experiencia. Experto en HIIT, fuerza y nutrición deportiva. He ayudado a más de 500 clientes a alcanzar sus objetivos.', specialties: ['strength', 'hiit', 'weight_loss'], languages: ['es', 'en'], experienceYears: 10, rating: 4.9, reviewCount: 234, sessionRate: 45, isAvailable: true, timezone: 'America/Mexico_City', certifications: ['NSCA-CPT', 'Precision Nutrition L1', 'CrossFit L2'], _count: { coachingSessions: 520 } },
+      { id: 'c2', user: { name: 'Ana García' }, bio: 'Instructora certificada de Yoga y Pilates. Especializada en mindfulness, recuperación y bienestar holístico. Sesiones relajantes pero efectivas.', specialties: ['yoga', 'flexibility', 'mindfulness'], languages: ['es'], experienceYears: 7, rating: 4.8, reviewCount: 178, sessionRate: 35, isAvailable: true, timezone: 'Europe/Madrid', certifications: ['RYT-500', 'Pilates Mat Certified', 'Mindfulness MBSR'], _count: { coachingSessions: 320 } },
+      { id: 'c3', user: { name: 'Miguel Torres' }, bio: 'Coach de fuerza y culturismo natural. Campeón regional de powerlifting. Especializado en hipertrofia muscular y técnica de levantamientos básicos.', specialties: ['muscle_building', 'strength', 'powerlifting'], languages: ['es', 'en'], experienceYears: 12, rating: 4.7, reviewCount: 312, sessionRate: 60, isAvailable: false, timezone: 'America/Buenos_Aires', certifications: ['NSCA-CSCS', 'ISSA Nutritionist'], _count: { coachingSessions: 750 } },
+      { id: 'c4', user: { name: 'Laura Sánchez' }, bio: 'Nutricionista deportiva y coach de wellness. Planifico dietas personalizadas y estrategias de alimentación para maximizar tu rendimiento y salud.', specialties: ['nutrition', 'weight_loss', 'wellness'], languages: ['es', 'pt'], experienceYears: 8, rating: 4.9, reviewCount: 189, sessionRate: 50, isAvailable: true, timezone: 'America/Sao_Paulo', certifications: ['Dietista-Nutricionista Col.', 'Sports Nutrition ISSN', 'Behavior Change Coaching'], _count: { coachingSessions: 440 } },
+      { id: 'c5', user: { name: 'Sofia Reyes' }, bio: 'Coach de running y triatlón. Preparadora de corredores para maratones y medias maratones. Planes de entrenamiento 100% personalizados.', specialties: ['running', 'hiit', 'endurance'], languages: ['es', 'en'], experienceYears: 6, rating: 4.6, reviewCount: 95, sessionRate: 40, isAvailable: true, timezone: 'America/Bogota', certifications: ['RRCA Running Coach', 'Triathlon Coaching Int.'], _count: { coachingSessions: 180 } },
+      { id: 'c6', user: { name: 'Diego Ruiz' }, bio: 'Especialista en calistenia y entrenamiento funcional sin equipamiento. Perfecto si entrenas en casa y quieres progresar con tu propio peso corporal.', specialties: ['calisthenics', 'strength', 'flexibility'], languages: ['es'], experienceYears: 5, rating: 4.7, reviewCount: 142, sessionRate: 30, isAvailable: true, timezone: 'America/Lima', certifications: ['CPT ACSM', 'FMS Specialist'], _count: { coachingSessions: 210 } },
+    ];
+  }
+</script>
+</body>
+</html>

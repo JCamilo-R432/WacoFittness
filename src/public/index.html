@@ -1,0 +1,321 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WacoPro Fitness | API Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/index.css">
+</head>
+<body class="grid-bg min-h-screen">
+    <div class="glow-circle top-0 -left-20"></div>
+    <div class="glow-circle bottom-0 -right-20" style="background: radial-gradient(circle, var(--neon-blue) 0%, transparent 70%);"></div>
+
+    <nav class="p-6 border-b border-white/10 glass sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-lg flex items-center justify-center font-bold text-xl orbitron">W</div>
+                <h1 class="text-2xl font-bold orbitron tracking-tighter">WACOPRO <span class="neon-text-blue">FITNESS</span></h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <a href="#dashboard" class="hover:neon-text-blue transition-colors">DASHBOARD</a>
+                <a href="#endpoints" class="hover:neon-text-blue transition-colors">ENDPOINTS</a>
+                <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs border border-green-500/30 flex items-center">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> SYSTEM ONLINE
+                </span>
+                <div id="navAuthArea" class="flex items-center space-x-2"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-8">
+        <!-- Hero Section -->
+        <section class="mb-16 text-center md:text-left">
+            <h2 class="text-5xl md:text-7xl font-bold orbitron mb-4 leading-tight">THE FUTURE OF <br> <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-400">FITNESS INTELLIGENCE</span></h2>
+            <p class="text-gray-400 text-lg max-w-2xl mb-8">Backend Core v1.0 activado. Procesando 66+ tablas y 5,800+ registros de alta precisión nutricional y de entrenamiento.</p>
+            <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+                <button type="button" onclick="testEndpoint('GET', '/api/health')" class="px-8 py-3 bg-cyan-500 text-black font-bold orbitron rounded-sm hover:bg-cyan-400 transition-all transform hover:scale-105">CHECK HEALTH</button>
+                <button type="button" onclick="testEndpoint('GET', '/api/nutrition/food', null, true)" class="px-8 py-3 border border-purple-500 text-purple-400 font-bold orbitron rounded-sm hover:bg-purple-500/10 transition-all">EXPLORE DATA</button>
+            </div>
+        </section>
+
+        <!-- Response Container -->
+        <section id="response-container" class="mb-12 glass p-6 neon-border relative" style="display: none;">
+            <button type="button" onclick="closeResponse()" class="absolute top-4 right-4 text-gray-500 hover:text-white orbitron">X</button>
+            <h3 class="text-xl font-bold orbitron mb-4 text-cyan-400">API RESPONSE</h3>
+            <pre id="response-content" class="bg-black/50 p-4 rounded-lg overflow-x-auto font-mono text-sm text-green-400 max-h-96"></pre>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16" id="dashboard">
+            <div class="feature-card glass p-6 neon-border">
+                <p class="text-gray-500 text-xs orbitron mb-2">DATABASE ENTITIES</p>
+                <h3 class="text-4xl font-bold orbitron neon-text-purple">66+</h3>
+                <p class="text-gray-400 text-sm mt-2">Tablas PostgreSQL</p>
+            </div>
+            <div class="feature-card glass p-6 border-white/10">
+                <p class="text-gray-500 text-xs orbitron mb-2">NUTRITION RECORDS</p>
+                <h3 class="text-4xl font-bold orbitron">2,800+</h3>
+                <p class="text-gray-400 text-sm mt-2">Alimentos & Recetas</p>
+            </div>
+            <div class="feature-card glass p-6 border-white/10">
+                <p class="text-gray-500 text-xs orbitron mb-2">TRAINING DATA</p>
+                <h3 class="text-4xl font-bold orbitron">2,000+</h3>
+                <p class="text-gray-400 text-sm mt-2">Ejercicios & Planes</p>
+            </div>
+            <div class="feature-card glass p-6 border-white/10">
+                <p class="text-gray-500 text-xs orbitron mb-2">API RESPONSE</p>
+                <h3 class="text-4xl font-bold orbitron text-green-400">< 45ms</h3>
+                <p class="text-gray-400 text-sm mt-2">Latencia Promedio</p>
+            </div>
+        </section>
+
+        <!-- Endpoints Table -->
+        <section id="endpoints" class="mb-16">
+            <h3 class="text-2xl font-bold orbitron mb-8 flex items-center">
+                <span class="w-8 h-1 bg-cyan-500 mr-4"></span> API ENDPOINTS
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- Auth Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-purple-400 mb-4 border-b border-purple-500/30 pb-2">AUTHENTICATION</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('POST', '/api/auth/register', {email:'test@wacopro.com', password:'password123', name:'WacoPro Test'})">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-green-600 text-white text-[10px] font-bold rounded w-10 text-center">POST</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/auth/register</span>
+                                <span class="text-gray-500 text-xs">Crear cuenta</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('POST', '/api/auth/login', {email:'test@wacopro.com', password:'password123'})">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-purple-500 text-white text-[10px] font-bold rounded w-10 text-center">POST</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/auth/login</span>
+                                <span class="text-gray-500 text-xs">Iniciar sesion</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/auth/profile', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/auth/profile</span>
+                                <span class="text-gray-500 text-xs">Mi perfil</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-cyan-400 mb-4 border-b border-cyan-500/30 pb-2">NUTRITION</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/nutrition/food', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/nutrition/food</span>
+                                <span class="text-gray-500 text-xs">2,000 alimentos</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/nutrition/recipes', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/nutrition/recipes</span>
+                                <span class="text-gray-500 text-xs">800 recetas</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/nutrition/meal-logs?date=2026-03-18', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/nutrition/meal-logs</span>
+                                <span class="text-gray-500 text-xs">Registro diario</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-orange-400 mb-4 border-b border-orange-500/30 pb-2">TRAINING</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/training/exercises', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/training/exercises</span>
+                                <span class="text-gray-500 text-xs">Ejercicios</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/training/workouts', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/training/workouts</span>
+                                <span class="text-gray-500 text-xs">Mis entrenos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supplements Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-green-400 mb-4 border-b border-green-500/30 pb-2">SUPPLEMENTS</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/supplements', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/supplements</span>
+                                <span class="text-gray-500 text-xs">Catalogo</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/supplements/stacks', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/supplements/stacks</span>
+                                <span class="text-gray-500 text-xs">Stacks</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/supplements/user/list', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/supplements/user/list</span>
+                                <span class="text-gray-500 text-xs">Mis suplementos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hydration Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-blue-400 mb-4 border-b border-blue-500/30 pb-2">HYDRATION</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/hydration/goal', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/hydration/goal</span>
+                                <span class="text-gray-500 text-xs">Meta diaria</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/hydration/logs', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/hydration/logs</span>
+                                <span class="text-gray-500 text-xs">Historial</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/hydration/stats', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/hydration/stats</span>
+                                <span class="text-gray-500 text-xs">Estadisticas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rest Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-violet-400 mb-4 border-b border-violet-500/30 pb-2">REST & RECOVERY</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/rest/sleep-logs', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/rest/sleep-logs</span>
+                                <span class="text-gray-500 text-xs">Registro de sueno</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/rest/recovery-score', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/rest/recovery-score</span>
+                                <span class="text-gray-500 text-xs">Score recuperacion</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/rest/relaxation-techniques', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/rest/relaxation-techniques</span>
+                                <span class="text-gray-500 text-xs">Tecnicas relax</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-yellow-400 mb-4 border-b border-yellow-500/30 pb-2">SHOPPING</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/shopping/lists', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/shopping/lists</span>
+                                <span class="text-gray-500 text-xs">Mis listas</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/shopping/stores', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/shopping/stores</span>
+                                <span class="text-gray-500 text-xs">Tiendas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Group -->
+                <div class="endpoint-group glass p-6 border-white/10">
+                    <h4 class="orbitron text-pink-400 mb-4 border-b border-pink-500/30 pb-2">NOTIFICATIONS</h4>
+                    <div class="space-y-3">
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/notifications', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/notifications</span>
+                                <span class="text-gray-500 text-xs">Mis notificaciones</span>
+                            </div>
+                        </div>
+                        <div class="endpoint-card p-3 bg-white/5 rounded border border-white/5 hover:neon-border transition-all cursor-pointer" onclick="testEndpoint('GET', '/api/notifications/preferences', null, true)">
+                            <div class="flex justify-between items-center">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded w-10 text-center">GET</span>
+                                <span class="font-mono text-cyan-300 text-xs">/api/notifications/preferences</span>
+                                <span class="text-gray-500 text-xs">Preferencias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="p-12 border-t border-white/10 glass text-center">
+        <p class="text-gray-500 text-sm mb-4 orbitron">WACOPRO FITNESS ECOSYSTEM &copy; 2026</p>
+        <div class="flex justify-center space-x-6">
+            <span class="text-xs text-gray-600">SUPABASE CLOUD</span>
+            <span class="text-xs text-gray-600">PRISMA ORM</span>
+            <span class="text-xs text-gray-600">EXPRESS 5.0</span>
+        </div>
+    </footer>
+
+    <script src="/js/api-client.js"></script>
+    <script src="/index.js"></script>
+    <script>
+      // Update nav based on auth state
+      document.addEventListener('DOMContentLoaded', function() {
+        const area = document.getElementById('navAuthArea');
+        if (!area) return;
+        if (window.api.isLoggedIn()) {
+          const user = window.api.getCurrentUser();
+          const name = user ? (user.name || user.email || '').split(' ')[0] : 'Usuario';
+          area.innerHTML = `
+            <a href="/dashboard.html" class="px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-sm text-xs orbitron hover:bg-cyan-500/20 transition-all">${name}</a>
+            <button type="button" onclick="window.api.logout()" class="px-3 py-1.5 border border-white/10 text-gray-400 rounded-sm text-xs orbitron hover:border-red-500/40 hover:text-red-400 transition-all">SALIR</button>
+          `;
+        } else {
+          area.innerHTML = `
+            <a href="/login.html" class="px-4 py-1.5 border border-white/20 text-gray-300 rounded-sm text-xs orbitron hover:neon-text-blue transition-all">LOGIN</a>
+            <a href="/register.html" class="px-4 py-1.5 bg-purple-600/80 text-white rounded-sm text-xs orbitron hover:bg-purple-500 transition-all">REGISTRO</a>
+          `;
+        }
+      });
+    </script>
+</body>
+</html>

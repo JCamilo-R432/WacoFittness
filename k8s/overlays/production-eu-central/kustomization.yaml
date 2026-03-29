@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: wacopro-production
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: Deployment
+      name: wacopro-backend
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/nodeSelector
+        value:
+          topology.kubernetes.io/region: eu-central-1
+          node.kubernetes.io/instance-type: t3.large
+      - op: add
+        path: /spec/template/metadata/annotations/wacopro.io~1data-residency
+        value: "eu-only"
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: wacopro-backend
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 3
+      - op: replace
+        path: /spec/maxReplicas
+        value: 50
+
+configMapGenerator:
+  - name: wacopro-config
+    behavior: merge
+    literals:
+      - REGION=eu-central-1
+      - API_URL=https://eu.wacopro.com
+      - CDN_ENDPOINT=https://eu.cdn.wacopro.com
+      - GDPR_STRICT=true
+      - DATA_RESIDENCY=eu-only
+
+images:
+  - name: ghcr.io/wacopro/backend
+    newTag: "latest"

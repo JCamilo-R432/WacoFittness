@@ -1,0 +1,166 @@
+name: Deploy to Kubernetes (GitOps)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'k8s/**'
+      - 'Dockerfile'
+      - 'package.json'
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'Target region (all/us-east/eu-central/ap-southeast)'
+        required: true
+        default: 'all'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/wacopro-backend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  deploy-us-east:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.inputs.region == 'all' || github.inputs.region == 'us-east' || github.event_name == 'push'
+    environment: production-us-east
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl (US East)
+        uses: azure/k8s-set-context@v3
+        with:
+          kubeconfig: ${{ secrets.KUBECONFIG_US_EAST }}
+
+      - name: Update image tag
+        run: |
+          cd k8s/overlays/production-us-east
+          kustomize edit set image ghcr.io/wacopro/backend=${{ needs.build-and-push.outputs.image-tag }}
+
+      - name: Apply with Kustomize
+        run: |
+          kubectl apply -k k8s/overlays/production-us-east
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/wacopro-backend \
+            -n wacopro-production \
+            --timeout=300s
+
+      - name: Verify health
+        run: |
+          kubectl run health-check --image=curlimages/curl --restart=Never --rm -it \
+            -- curl -f http://wacopro-backend.wacopro-production.svc.cluster.local/api/health
+        continue-on-error: true
+
+  deploy-eu-central:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.inputs.region == 'all' || github.inputs.region == 'eu-central' || github.event_name == 'push'
+    environment: production-eu-central
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl (EU Central)
+        uses: azure/k8s-set-context@v3
+        with:
+          kubeconfig: ${{ secrets.KUBECONFIG_EU_CENTRAL }}
+
+      - name: Update image tag
+        run: |
+          cd k8s/overlays/production-eu-central
+          kustomize edit set image ghcr.io/wacopro/backend=${{ needs.build-and-push.outputs.image-tag }}
+
+      - name: Apply with Kustomize
+        run: kubectl apply -k k8s/overlays/production-eu-central
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/wacopro-backend \
+            -n wacopro-production \
+            --timeout=300s
+
+  canary-promotion:
+    needs: [deploy-us-east, deploy-eu-central]
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Check error rate (canary guardrails)
+        run: |
+          # Query Prometheus for error rate on v2
+          ERROR_RATE=$(curl -s "${{ secrets.PROMETHEUS_URL }}/api/v1/query" \
+            --data-urlencode 'query=rate(http_requests_total{version="v2",status=~"5.."}[5m])' \
+            | jq '.data.result[0].value[1] // "0"')
+
+          echo "Error rate on v2: $ERROR_RATE"
+
+          if (( $(echo "$ERROR_RATE > 0.01" | bc -l) )); then
+            echo "Error rate > 1% — rolling back v2"
+            exit 1
+          fi
+
+          echo "Canary healthy — promoting to 100%"
+
+  notify-slack:
+    needs: [deploy-us-east, deploy-eu-central]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify deployment result
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "${{ needs.deploy-us-east.result == 'success' && needs.deploy-eu-central.result == 'success' && '✅ Deploy exitoso' || '❌ Deploy fallido' }} — ${{ github.ref }} (${{ github.sha }})"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

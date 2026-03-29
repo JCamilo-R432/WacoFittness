@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wacopro-config
+  namespace: wacopro-production
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+  REGION: "us-east-1"
+  # Override per overlay
+  CDN_ENDPOINT: "https://cdn.wacopro.com"
+  API_URL: "https://api.wacopro.com"

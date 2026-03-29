@@ -1,0 +1,45 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: wacopro-backend-authz
+  namespace: wacopro-production
+spec:
+  selector:
+    matchLabels:
+      app: wacopro-backend
+  action: ALLOW
+  rules:
+    # Allow ingress gateway
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+            paths: ["/api/*", "/metrics", "/"]
+
+    # Allow same-namespace service-to-service
+    - from:
+        - source:
+            namespaces: ["wacopro-production"]
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE"]
+            paths: ["/api/*"]
+
+    # Health checks from anywhere
+    - to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/api/health"]
+---
+# Peer Authentication: require mTLS within mesh
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: wacopro-mtls
+  namespace: wacopro-production
+spec:
+  mtls:
+    mode: STRICT

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - WacoPro Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="grid-bg">
+  <div class="auth-glow-left"></div>
+  <div class="auth-glow-right"></div>
+
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <a href="/" class="auth-logo">
+        <div class="auth-logo-icon">W</div>
+        <span class="auth-logo-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+
+      <h1 class="auth-title">Bienvenido de vuelta</h1>
+      <p class="auth-subtitle">Accede a tu cuenta para continuar</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="email">EMAIL</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉</span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="tu@email.com"
+              required
+              autocomplete="email"
+            >
+          </div>
+          <span class="error-message" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">CONTRASEÑA</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            >
+            <button type="button" class="toggle-password" id="togglePwd" title="Mostrar contraseña">👁</button>
+          </div>
+          <span class="error-message" id="passwordError"></span>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="rememberMe" name="rememberMe">
+            <span class="checkbox-label">Recordarme</span>
+          </label>
+          <a href="/forgot-password.html" class="forgot-link">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="submit" class="btn-auth btn-auth-primary" id="loginBtn">
+          <span class="btn-text">INICIAR SESIÓN</span>
+          <span class="btn-loader" style="display:none;"><span class="spinner"></span></span>
+        </button>
+      </form>
+
+      <div class="divider"><span>O CONTINÚA CON</span></div>
+
+      <a href="/" class="btn-auth" style="border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.5); font-size:0.75rem; font-family:'Orbitron',sans-serif; text-decoration:none; justify-content:center;">
+        ← VOLVER AL INICIO
+      </a>
+
+      <div class="auth-footer">
+        ¿No tienes cuenta? <a href="/register.html" class="auth-link">Regístrate gratis</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (window.api.isLoggedIn()) {
+      window.location.href = '/dashboard.html';
+    }
+
+    // Pre-fill saved email
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      document.getElementById('email').value = savedEmail;
+      document.getElementById('rememberMe').checked = true;
+    }
+
+    // Toggle password visibility
+    document.getElementById('togglePwd').addEventListener('click', function() {
+      const input = document.getElementById('password');
+      if (input.type === 'password') {
+        input.type = 'text';
+        this.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        this.textContent = '👁';
+      }
+    });
+
+    // Validation helpers
+    function showError(field, message) {
+      const el = document.getElementById(field + 'Error');
+      const input = document.getElementById(field);
+      if (el) { el.textContent = message; }
+      if (input) { input.classList.add('error'); }
+    }
+
+    function clearError(field) {
+      const el = document.getElementById(field + 'Error');
+      const input = document.getElementById(field);
+      if (el) { el.textContent = ''; }
+      if (input) { input.classList.remove('error'); }
+    }
+
+    function setLoading(isLoading) {
+      const btn = document.getElementById('loginBtn');
+      btn.querySelector('.btn-text').style.display = isLoading ? 'none' : 'inline';
+      btn.querySelector('.btn-loader').style.display = isLoading ? 'flex' : 'none';
+      btn.disabled = isLoading;
+    }
+
+    // Form submit
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      clearError('email');
+      clearError('password');
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      let valid = true;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('email', 'Ingresa un email válido');
+        valid = false;
+      }
+      if (!password || password.length < 6) {
+        showError('password', 'La contraseña debe tener al menos 6 caracteres');
+        valid = false;
+      }
+      if (!valid) return;
+
+      setLoading(true);
+
+      try {
+        await window.api.login(email, password);
+
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
+
+        window.showNotification('¡Bienvenido! Redirigiendo...', 'success');
+
+        const redirect = new URLSearchParams(window.location.search).get('redirect') || '/dashboard.html';
+        setTimeout(() => { window.location.href = redirect; }, 900);
+
+      } catch (error) {
+        const msg = error.message || '';
+        if (msg.toLowerCase().includes('credenciales') || msg.toLowerCase().includes('invalid')) {
+          showError('password', 'Email o contraseña incorrectos');
+        } else {
+          showError('email', msg || 'Error al iniciar sesión');
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Blur validation
+    document.getElementById('email').addEventListener('blur', function() {
+      const v = this.value.trim();
+      if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+        showError('email', 'Ingresa un email válido');
+      } else {
+        clearError('email');
+      }
+    });
+  </script>
+</body>
+</html>

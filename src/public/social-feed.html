@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social - WacoPro Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .feed-wrap { max-width: 680px; margin: 0 auto; }
+    .compose-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; }
+    .compose-textarea { width: 100%; background: transparent; border: none; color: rgba(255,255,255,0.85); font-family: 'Inter', sans-serif; font-size: 0.9rem; resize: none; outline: none; min-height: 80px; }
+    .compose-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; }
+    .category-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .chip { padding: 0.25rem 0.7rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12); background: transparent; color: rgba(255,255,255,0.5); font-size: 0.65rem; font-family: 'Orbitron', sans-serif; cursor: pointer; transition: all 0.2s; }
+    .chip.active, .chip:hover { border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(0,243,255,0.08); }
+    .post-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+    .post-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .post-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue)); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: white; flex-shrink: 0; }
+    .post-meta { flex: 1; }
+    .post-author { font-size: 0.85rem; color: rgba(255,255,255,0.8); font-weight: 600; }
+    .post-time { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+    .post-category { font-size: 0.6rem; font-family: 'Orbitron', sans-serif; padding: 0.15rem 0.5rem; border-radius: 10px; border: 1px solid rgba(0,243,255,0.3); color: var(--neon-blue); }
+    .post-content { font-size: 0.875rem; color: rgba(255,255,255,0.75); line-height: 1.6; margin-bottom: 0.75rem; }
+    .post-actions { display: flex; gap: 1rem; align-items: center; }
+    .action-btn { background: transparent; border: none; color: rgba(255,255,255,0.4); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.5rem; border-radius: 6px; transition: all 0.2s; }
+    .action-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); }
+    .action-btn.liked { color: #ef4444; }
+    .comments-section { margin-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem; display: none; }
+    .comment-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .comment-avatar { width: 24px; height: 24px; border-radius: 50%; background: rgba(188,19,254,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; flex-shrink: 0; }
+    .comment-body { flex: 1; background: rgba(255,255,255,0.04); border-radius: 8px; padding: 0.4rem 0.65rem; }
+    .comment-author { font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+    .comment-text { font-size: 0.78rem; color: rgba(255,255,255,0.6); }
+    .comment-input-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .comment-input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.4rem 0.65rem; color: rgba(255,255,255,0.8); font-size: 0.8rem; outline: none; font-family: 'Inter', sans-serif; }
+    .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .loading-spinner { text-align: center; padding: 2rem; color: rgba(255,255,255,0.3); font-size: 0.85rem; }
+    .my-own { border-color: rgba(188,19,254,0.2); }
+    .delete-btn { margin-left: auto; color: rgba(239,68,68,0.5); background: transparent; border: none; cursor: pointer; font-size: 0.75rem; }
+    .delete-btn:hover { color: #ef4444; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <nav class="dash-nav">
+    <div class="dash-nav-inner">
+      <a href="/dashboard.html" class="nav-brand">
+        <div class="nav-brand-icon">W</div>
+        <span class="nav-brand-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">DASHBOARD</a>
+        <a href="/analytics.html" class="nav-link">ANALÍTICAS</a>
+        <a href="/social-feed.html" class="nav-link active">SOCIAL</a>
+        <a href="/profile.html" class="nav-link">PERFIL</a>
+      </div>
+      <div class="nav-right">
+        <span class="nav-user-name" id="navUserName">...</span>
+        <button type="button" class="btn-logout" onclick="logout()">SALIR</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <aside class="dash-sidebar">
+      <div class="sidebar-card">
+        <p class="sidebar-section-title">NAVEGACIÓN</p>
+        <ul class="sidebar-nav">
+          <li><a href="/dashboard.html" class="sidebar-nav-link">📊 Dashboard</a></li>
+          <li><a href="/analytics.html" class="sidebar-nav-link">📈 Analíticas</a></li>
+          <li><a href="/social-feed.html" class="sidebar-nav-link active">🌐 Social</a></li>
+          <li><a href="/workout-builder.html" class="sidebar-nav-link">🏗️ Constructor</a></li>
+          <li><a href="/meal-planner.html" class="sidebar-nav-link">🥗 Plan Nutricional</a></li>
+          <li><a href="/challenges.html" class="sidebar-nav-link">🏆 Retos</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="page-header">
+        <h1 class="page-title">Feed Social</h1>
+        <p class="page-subtitle">Comparte tu progreso con la comunidad</p>
+      </div>
+
+      <div class="feed-wrap">
+        <!-- Compose -->
+        <div class="compose-card">
+          <textarea class="compose-textarea" id="composeText" placeholder="¿Qué lograste hoy? Comparte tu progreso..."></textarea>
+          <div class="compose-footer">
+            <div class="category-chips">
+              <button class="chip active" data-cat="general">General</button>
+              <button class="chip" data-cat="training">💪 Entrenamiento</button>
+              <button class="chip" data-cat="nutrition">🥗 Nutrición</button>
+              <button class="chip" data-cat="progress">📈 Progreso</button>
+            </div>
+            <button type="button" class="btn-neon" onclick="submitPost()" style="font-size:0.7rem;padding:0.4rem 1rem;">PUBLICAR</button>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <button type="button" class="chip active" data-filter="all" onclick="setFilter(this,'all')">Todos</button>
+          <button type="button" class="chip" data-filter="training" onclick="setFilter(this,'training')">💪 Entreno</button>
+          <button type="button" class="chip" data-filter="nutrition" onclick="setFilter(this,'nutrition')">🥗 Nutri</button>
+          <button type="button" class="chip" data-filter="progress" onclick="setFilter(this,'progress')">📈 Progreso</button>
+        </div>
+
+        <!-- Feed -->
+        <div id="feedContainer">
+          <div class="loading-spinner">Cargando feed...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    if (!requireAuth()) { /* redirected */ }
+
+    let selectedCategory = 'general';
+    let currentFilter = 'all';
+    let myUserId = null;
+
+    // Category chip selection in compose
+    document.querySelectorAll('.compose-footer .chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.compose-footer .chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCategory = btn.dataset.cat;
+      });
+    });
+
+    function setFilter(el, filter) {
+      document.querySelectorAll('.filter-bar .chip').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      currentFilter = filter;
+      loadFeed();
+    }
+
+    function timeAgo(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'ahora mismo';
+      if (mins < 60) return `hace ${mins}m`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `hace ${hrs}h`;
+      return `hace ${Math.floor(hrs / 24)}d`;
+    }
+
+    function catLabel(cat) {
+      const map = { general: '💬 General', training: '💪 Entreno', nutrition: '🥗 Nutri', progress: '📈 Progreso' };
+      return map[cat] || cat;
+    }
+
+    function renderPost(post) {
+      const isOwn = post.user?.id === myUserId;
+      const initials = (post.user?.name || post.user?.email || '?')[0].toUpperCase();
+      return `
+        <div class="post-card ${isOwn ? 'my-own' : ''}" id="post-${post.id}">
+          <div class="post-header">
+            <div class="post-avatar">${initials}</div>
+            <div class="post-meta">
+              <div class="post-author">${post.user?.name || 'Usuario'}</div>
+              <div class="post-time">${timeAgo(post.createdAt)}</div>
+            </div>
+            <span class="post-category">${catLabel(post.category)}</span>
+            ${isOwn ? `<button type="button" class="delete-btn" onclick="deletePost('${post.id}')">✕</button>` : ''}
+          </div>
+          <div class="post-content">${escHtml(post.content)}</div>
+          <div class="post-actions">
+            <button type="button" class="action-btn ${post.likedByMe ? 'liked' : ''}" id="like-${post.id}" onclick="toggleLike('${post.id}', this)">
+              ❤️ <span id="likeCount-${post.id}">${post.likesCount || 0}</span>
+            </button>
+            <button type="button" class="action-btn" onclick="toggleComments('${post.id}')">
+              💬 <span id="commentCount-${post.id}">${post.commentsCount || 0}</span>
+            </button>
+          </div>
+          <div class="comments-section" id="comments-${post.id}">
+            <div id="commentList-${post.id}"></div>
+            <div class="comment-input-row">
+              <input class="comment-input" id="commentInput-${post.id}" placeholder="Escribe un comentario..." onkeydown="if(event.key==='Enter')submitComment('${post.id}')">
+              <button type="button" class="btn-neon" style="font-size:0.65rem;padding:0.35rem 0.75rem;" onclick="submitComment('${post.id}')">→</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    }
+
+    async function loadFeed() {
+      const container = document.getElementById('feedContainer');
+      container.innerHTML = '<div class="loading-spinner">Cargando...</div>';
+      try {
+        const qs = currentFilter !== 'all' ? `?category=${currentFilter}` : '';
+        const res = await window.api.request(`/api/social/feed${qs}`);
+        const posts = res.data || [];
+        if (!posts.length) {
+          container.innerHTML = '<div class="loading-spinner">No hay publicaciones aún. ¡Sé el primero!</div>';
+          return;
+        }
+        container.innerHTML = posts.map(renderPost).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="loading-spinner">Error al cargar el feed</div>';
+      }
+    }
+
+    async function submitPost() {
+      const content = document.getElementById('composeText').value.trim();
+      if (!content) { window.showNotification('Escribe algo antes de publicar', 'warning'); return; }
+      try {
+        await window.api.request('/api/social/posts', {
+          method: 'POST',
+          body: JSON.stringify({ content, category: selectedCategory }),
+        });
+        document.getElementById('composeText').value = '';
+        window.showNotification('Publicado correctamente', 'success');
+        loadFeed();
+      } catch (e) {
+        window.showNotification('Error al publicar: ' + e.message, 'error');
+      }
+    }
+
+    async function deletePost(id) {
+      if (!confirm('¿Eliminar esta publicación?')) return;
+      try {
+        await window.api.request(`/api/social/posts/${id}`, { method: 'DELETE' });
+        document.getElementById(`post-${id}`)?.remove();
+        window.showNotification('Publicación eliminada', 'success');
+      } catch (e) {
+        window.showNotification('Error al eliminar', 'error');
+      }
+    }
+
+    async function toggleLike(id, btn) {
+      try {
+        const res = await window.api.request(`/api/social/posts/${id}/like`, { method: 'POST' });
+        btn.classList.toggle('liked', res.liked);
+        document.getElementById(`likeCount-${id}`).textContent = res.likesCount;
+      } catch (e) { /* silently fail */ }
+    }
+
+    async function toggleComments(id) {
+      const section = document.getElementById(`comments-${id}`);
+      const visible = section.style.display !== 'none' && section.style.display !== '';
+      section.style.display = visible ? 'none' : 'block';
+      if (!visible) loadComments(id);
+    }
+
+    async function loadComments(id) {
+      const list = document.getElementById(`commentList-${id}`);
+      try {
+        const res = await window.api.request(`/api/social/posts/${id}/comments`);
+        const comments = res.data || [];
+        list.innerHTML = comments.map(c => `
+          <div class="comment-row">
+            <div class="comment-avatar">${(c.user?.name || '?')[0].toUpperCase()}</div>
+            <div class="comment-body">
+              <div class="comment-author">${c.user?.name || 'Usuario'}</div>
+              <div class="comment-text">${escHtml(c.content)}</div>
+            </div>
+          </div>
+        `).join('') || '<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;padding:0.5rem;">Sin comentarios aún</div>';
+      } catch (e) {}
+    }
+
+    async function submitComment(postId) {
+      const input = document.getElementById(`commentInput-${postId}`);
+      const content = input.value.trim();
+      if (!content) return;
+      try {
+        await window.api.request(`/api/social/posts/${postId}/comments`, {
+          method: 'POST',
+          body: JSON.stringify({ content }),
+        });
+        input.value = '';
+        const countEl = document.getElementById(`commentCount-${postId}`);
+        countEl.textContent = Number(countEl.textContent) + 1;
+        loadComments(postId);
+      } catch (e) {
+        window.showNotification('Error al comentar', 'error');
+      }
+    }
+
+    // Init
+    const u = window.api.getCurrentUser();
+    if (u) {
+      myUserId = u.id;
+      document.getElementById('navUserName').textContent = (u.name || u.email).split(' ')[0];
+    }
+    loadFeed();
+  </script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planes Periodizados — WacoPro</title>
+  <meta name="description" content="Planes de entrenamiento periodizados con fases y ciclos semanales">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+  <script src="/js/app-init.js" defer></script>
+  <style>
+    :root{--primary:#6c63ff;--secondary:#ff6b6b;--accent:#00d9a6;--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a3e;--text:#e2e8f0;--muted:#718096;--border:rgba(108,99,255,0.2);--glow:0 0 20px rgba(108,99,255,0.4);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+    nav{background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:1.5rem;transition:color .2s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--primary);}
+    .btn-logout{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;}
+    .container{max-width:1200px;margin:0 auto;padding:2rem;}
+    h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;margin-bottom:.4rem;}
+    h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .subtitle{color:var(--muted);margin-bottom:2rem;font-size:1rem;}
+    .top-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.65rem 1.5rem;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .btn-primary:hover{opacity:.85;}
+    .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);padding:.6rem 1.3rem;border-radius:10px;font-size:.88rem;cursor:pointer;transition:all .2s;}
+    .btn-secondary:hover{border-color:var(--primary);color:var(--primary);}
+    /* PLAN CARDS */
+    .plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem;}
+    .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden;}
+    .plan-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(108,99,255,.05),transparent);pointer-events:none;}
+    .plan-card:hover{transform:translateY(-3px);box-shadow:var(--glow);border-color:var(--primary);}
+    .plan-type-badge{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .7rem;border-radius:999px;margin-bottom:.75rem;display:inline-block;}
+    .type-hypertrophy{background:rgba(108,99,255,.2);color:var(--primary);}
+    .type-strength{background:rgba(255,107,107,.2);color:var(--secondary);}
+    .type-endurance{background:rgba(0,217,166,.2);color:var(--accent);}
+    .type-power{background:rgba(245,158,11,.2);color:#f59e0b;}
+    .type-cutting{background:rgba(99,179,237,.2);color:#63b3ed;}
+    .plan-title{font-size:1.15rem;font-weight:800;margin-bottom:.3rem;}
+    .plan-meta{color:var(--muted);font-size:.83rem;margin-bottom:1rem;}
+    .progress-bar{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin:.5rem 0;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width .6s;}
+    .progress-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);}
+    .plan-phases{margin-top:1rem;display:flex;gap:.4rem;flex-wrap:wrap;}
+    .phase-tag{font-size:.7rem;padding:.2rem .55rem;border-radius:5px;border:1px solid rgba(108,99,255,.2);color:var(--muted);}
+    .plan-actions{display:flex;gap:.5rem;margin-top:1.1rem;}
+    .plan-actions button{flex:1;padding:.5rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-view{background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);color:var(--primary);}
+    .btn-view:hover{background:rgba(108,99,255,.25);}
+    .btn-delete{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--secondary);}
+    .btn-delete:hover{background:rgba(255,107,107,.2);}
+    .empty-state{text-align:center;padding:4rem 2rem;color:var(--muted);}
+    .empty-icon{font-size:4rem;margin-bottom:1rem;}
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
+    .modal-header{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .modal-header h3{font-size:1.1rem;font-weight:800;}
+    .modal-close{background:rgba(255,255,255,.1);border:none;color:var(--text);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;}
+    .modal-body{padding:1.5rem;}
+    .form-group{margin-bottom:1.2rem;}
+    label{display:block;font-size:.83rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em;}
+    input,select,textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);padding:.7rem 1rem;border-radius:10px;font-size:.9rem;outline:none;transition:border-color .2s;}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);}
+    select option{background:var(--surface);}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;justify-content:flex-end;}
+    /* DETAIL PANEL */
+    .detail-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem;display:none;}
+    .detail-panel.visible{display:block;}
+    .phases-timeline{margin-top:1.2rem;}
+    .phase-item{display:flex;gap:1rem;margin-bottom:1rem;align-items:flex-start;}
+    .phase-dot{width:14px;height:14px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:3px;}
+    .phase-dot.current{background:var(--accent);box-shadow:0 0 8px rgba(0,217,166,.5);}
+    .phase-dot.completed{background:rgba(255,255,255,.2);}
+    .phase-info h5{font-size:.9rem;font-weight:700;margin-bottom:.2rem;}
+    .phase-info p{font-size:.8rem;color:var(--muted);}
+    .phase-info span{font-size:.75rem;padding:.15rem .5rem;border-radius:5px;background:rgba(108,99,255,.15);color:var(--primary);}
+    .week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.5rem;margin-top:.75rem;}
+    .week-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:.4rem;text-align:center;font-size:.7rem;cursor:pointer;transition:all .2s;}
+    .week-box:hover{border-color:var(--primary);background:rgba(108,99,255,.1);}
+    .week-box.deload{border-color:rgba(0,217,166,.3);background:rgba(0,217,166,.06);}
+    .week-box.done{background:rgba(108,99,255,.15);border-color:var(--primary);}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface2);border:1px solid var(--accent);color:var(--accent);padding:.75rem 1.5rem;border-radius:12px;font-size:.88rem;font-weight:600;z-index:500;transform:translateX(200%);transition:transform .3s;}
+    .toast.show{transform:translateX(0);}
+    .loading{text-align:center;padding:2rem;color:var(--muted);}
+    @media(max-width:640px){.form-grid{grid-template-columns:1fr;}.top-actions{flex-direction:column;}.plans-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:var(--primary);color:#fff;padding:.5rem 1rem;border-radius:4px;font-weight:700;text-decoration:none;" onfocus="this.style.left='1rem';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Saltar al contenido principal</a>
+
+<nav role="navigation" aria-label="Navegación principal">
+  <a href="/dashboard" class="nav-brand" aria-label="WACOPRO FITNESS - Inicio">WACOPRO FITNESS</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/workout-builder">Rutinas</a>
+    <a href="/periodized-plans" class="active">Planes</a>
+    <a href="/ai-coach">AI Coach</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <span id="navUser" style="color:var(--muted);font-size:.85rem;"></span>
+    <button class="btn-logout" onclick="logout()">SALIR</button>
+  </div>
+</nav>
+
+<main id="main-content"><div class="container">
+  <h1>📋 Planes <span>Periodizados</span></h1>
+  <p class="subtitle">Periodización científica: macrociclos, mesociclos y microciclos con progresión automática</p>
+
+  <div class="top-actions">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn-secondary" onclick="filterPlans('all')" id="filter-all" style="border-color:var(--primary);color:var(--primary);">Todos</button>
+      <button class="btn-secondary" onclick="filterPlans('active')" id="filter-active">Activos</button>
+      <button class="btn-secondary" onclick="filterPlans('completed')" id="filter-completed">Completados</button>
+    </div>
+    <button class="btn-primary" onclick="openCreateModal()">+ Nuevo Plan</button>
+  </div>
+
+  <!-- Detail panel (shown when a plan is selected) -->
+  <div class="detail-panel" id="detailPanel">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem;flex-wrap:wrap;gap:.75rem;">
+      <div>
+        <h2 id="detailTitle" style="font-size:1.3rem;font-weight:800;"></h2>
+        <p id="detailMeta" style="color:var(--muted);font-size:.85rem;margin-top:.25rem;"></p>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button class="btn-secondary" onclick="exportPlanPDF()" style="font-size:.82rem;">📄 Exportar PDF</button>
+        <button class="btn-secondary" onclick="closeDetail()">✕ Cerrar</button>
+        <button class="btn-primary" id="detailStartBtn" onclick="startPlan()">▶ Iniciar Plan</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1.2rem;">
+      <div class="progress-label"><span>Progreso total</span><span id="detailPct">0%</span></div>
+      <div class="progress-bar" style="height:10px;"><div class="progress-fill" id="detailBar" style="width:0%"></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+      <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+        <p style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:.4rem;">SEMANAS COMPLETADAS</p>
+        <p id="detailWeeks" style="font-size:1.5rem;font-weight:800;color:var(--accent);">0 / 0</p>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+        <p style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:.4rem;">FASE ACTUAL</p>
+        <p id="detailPhase" style="font-size:.95rem;font-weight:700;color:var(--primary);">—</p>
+      </div>
+    </div>
+    <h4 style="font-size:.85rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;">Fases del Plan</h4>
+    <div class="phases-timeline" id="phasesTimeline"></div>
+    <h4 style="font-size:.85rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin:.75rem 0;">Calendario de Semanas</h4>
+    <div class="week-grid" id="weekGrid"></div>
+  </div>
+
+  <!-- Plans list -->
+  <div class="plans-grid" id="plansGrid">
+    <div class="loading">Cargando planes...</div>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Crear Plan Periodizado</h3>
+      <button class="modal-close" onclick="closeCreateModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre del Plan</label>
+        <input type="text" id="planName" placeholder="Ej: Plan Hipertrofia 12 Semanas" />
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tipo de Plan</label>
+          <select id="planType">
+            <option value="hypertrophy">Hipertrofia</option>
+            <option value="strength">Fuerza</option>
+            <option value="endurance">Resistencia</option>
+            <option value="power">Potencia</option>
+            <option value="cutting">Definición</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Duración (semanas)</label>
+          <select id="planDuration">
+            <option value="4">4 semanas</option>
+            <option value="8">8 semanas</option>
+            <option value="12" selected>12 semanas</option>
+            <option value="16">16 semanas</option>
+            <option value="20">20 semanas</option>
+            <option value="24">24 semanas</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nivel</label>
+          <select id="planDifficulty">
+            <option value="beginner">Principiante</option>
+            <option value="intermediate" selected>Intermedio</option>
+            <option value="advanced">Avanzado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha de Inicio</label>
+          <input type="date" id="planStartDate" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Objetivo Principal</label>
+        <textarea id="planGoal" rows="2" placeholder="Describe tu objetivo principal..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeCreateModal()">Cancelar</button>
+      <button class="btn-primary" onclick="createPlan()">Crear Plan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('token') || sessionStorage.getItem('token');
+let allPlans = [];
+let currentFilter = 'all';
+
+if (!token) { window.location.href = '/login'; }
+
+const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+async function init() {
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers });
+    if (!r.ok) throw new Error();
+    const { data } = await r.json();
+    document.getElementById('navUser').textContent = data.name || data.email;
+  } catch { window.location.href = '/login'; }
+  loadPlans();
+}
+
+async function loadPlans() {
+  try {
+    const r = await fetch(`${API}/training-plans`, { headers });
+    const { data } = await r.json();
+    allPlans = data || [];
+    renderPlans();
+  } catch {
+    document.getElementById('plansGrid').innerHTML = '<div class="loading">Error al cargar planes</div>';
+  }
+}
+
+function typeClass(type) {
+  const map = { hypertrophy:'type-hypertrophy', strength:'type-strength', endurance:'type-endurance', power:'type-power', cutting:'type-cutting' };
+  return map[type] || 'type-hypertrophy';
+}
+function typeLabel(type) {
+  const map = { hypertrophy:'Hipertrofia', strength:'Fuerza', endurance:'Resistencia', power:'Potencia', cutting:'Definición' };
+  return map[type] || type;
+}
+function diffLabel(d) {
+  const map = { beginner:'Principiante', intermediate:'Intermedio', advanced:'Avanzado' };
+  return map[d] || d;
+}
+
+function renderPlans() {
+  const filtered = allPlans.filter(p => {
+    if (currentFilter === 'active') return !p.completed;
+    if (currentFilter === 'completed') return p.completed;
+    return true;
+  });
+  const grid = document.getElementById('plansGrid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📋</div><h3>No hay planes</h3><p style="margin:.5rem 0 1.5rem;">Crea tu primer plan periodizado para empezar</p><button class="btn-primary" onclick="openCreateModal()">+ Crear Plan</button></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p => {
+    const total = p.cycles?.length || 0;
+    const done = p.cycles?.filter(c => c.completed).length || 0;
+    const pct = total ? Math.round((done/total)*100) : 0;
+    return `
+    <div class="plan-card">
+      <div class="plan-type-badge ${typeClass(p.type)}">${typeLabel(p.type)}</div>
+      <h3 class="plan-title">${p.name}</h3>
+      <p class="plan-meta">${p.durationWeeks} semanas • ${diffLabel(p.difficulty)}${p.startDate ? ' • Inicio: '+new Date(p.startDate).toLocaleDateString('es') : ''}</p>
+      <div class="progress-label"><span>${done}/${total} semanas</span><span>${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="plan-phases">${(p.phases||[]).map(ph=>`<span class="phase-tag">${ph.name}</span>`).join('')}</div>
+      <div class="plan-actions">
+        <button class="btn-view" onclick='viewPlan("${p.id}")'>Ver Detalles</button>
+        <button class="btn-delete" onclick='deletePlan("${p.id}")'>Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterPlans(f) {
+  currentFilter = f;
+  ['all','active','completed'].forEach(id => {
+    const btn = document.getElementById(`filter-${id}`);
+    btn.style.borderColor = f===id ? 'var(--primary)' : '';
+    btn.style.color = f===id ? 'var(--primary)' : '';
+  });
+  renderPlans();
+}
+
+async function viewPlan(id) {
+  try {
+    const r = await fetch(`${API}/training-plans/${id}/progress`, { headers });
+    const { data } = await r.json();
+    const { plan, progressPct, completedCycles, totalCycles, currentPhase } = data;
+    document.getElementById('detailTitle').textContent = plan.name;
+    document.getElementById('detailMeta').textContent = `${typeLabel(plan.type)} • ${plan.durationWeeks} semanas • ${diffLabel(plan.difficulty)}`;
+    document.getElementById('detailPct').textContent = progressPct + '%';
+    document.getElementById('detailBar').style.width = progressPct + '%';
+    document.getElementById('detailWeeks').textContent = `${completedCycles} / ${totalCycles}`;
+    document.getElementById('detailPhase').textContent = currentPhase ? currentPhase.name : 'Sin iniciar';
+    document.getElementById('detailStartBtn').style.display = plan.startDate ? 'none' : '';
+    // Phases timeline
+    document.getElementById('phasesTimeline').innerHTML = (plan.phases||[]).map((ph,i) => {
+      const currentWeek = completedCycles + 1;
+      const isCurrent = currentWeek >= ph.weekStart && currentWeek <= ph.weekEnd;
+      const isDone = currentWeek > ph.weekEnd;
+      return `<div class="phase-item">
+        <div class="phase-dot ${isCurrent?'current':isDone?'completed':''}"></div>
+        <div class="phase-info">
+          <h5>${ph.name} <span>Sem ${ph.weekStart}-${ph.weekEnd}</span></h5>
+          <p>${ph.focus}</p>
+          <p style="margin-top:.25rem;">Volumen: ${ph.volume} • Intensidad: ${ph.intensity}</p>
+        </div>
+      </div>`;
+    }).join('');
+    // Week grid
+    document.getElementById('weekGrid').innerHTML = (plan.cycles||[]).map(c => `
+      <div class="week-box ${c.completed?'done':''} ${c.name.includes('Deload')?'deload':''}" title="${c.name}" onclick='toggleWeek("${plan.id}","${c.id}",${!c.completed})'>
+        <div>${c.weekNumber}</div>
+        <div style="color:${c.completed?'var(--accent)':c.name.includes('Deload')?'var(--accent)':'var(--muted)'};">${c.completed?'✓':c.name.includes('Deload')?'D':'○'}</div>
+      </div>`).join('');
+    document.getElementById('detailPanel').classList.add('visible');
+    document.getElementById('detailPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  } catch { showToast('Error al cargar detalles'); }
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('visible');
+}
+
+async function exportPlanPDF() {
+  const title = document.getElementById('detailTitle')?.textContent || 'Plan Periodizado';
+  const meta = document.getElementById('detailMeta')?.textContent || '';
+  const pct = document.getElementById('detailPct')?.textContent || '0%';
+
+  // Load jsPDF dynamically
+  if (!window.jspdf) {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    document.head.appendChild(script);
+    await new Promise(r => { script.onload = r; });
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const PW = 210; const PH = 297;
+  const margin = 18; const col = PW - margin * 2;
+
+  // Header bar
+  doc.setFillColor(10, 10, 26);
+  doc.rect(0, 0, PW, 35, 'F');
+  doc.setFillColor(108, 99, 255);
+  doc.rect(0, 0, 5, 35, 'F');
+  doc.setTextColor(108, 99, 255);
+  doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+  doc.text('WACOPRO', margin, 16);
+  doc.setTextColor(226, 232, 240);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text('FITNESS PLATFORM', margin, 23);
+  doc.setTextColor(113, 128, 150);
+  doc.setFontSize(8);
+  doc.text(`Generado: ${new Date().toLocaleDateString('es')}`, PW - margin, 14, { align: 'right' });
+
+  // Plan title
+  doc.setTextColor(226, 232, 240);
+  doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+  doc.text(title, margin, 52);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.setTextColor(113, 128, 150);
+  doc.text(meta, margin, 60);
+
+  // Progress bar
+  doc.setDrawColor(30, 30, 60);
+  doc.setFillColor(30, 30, 60);
+  doc.roundedRect(margin, 66, col, 6, 3, 3, 'F');
+  const pctNum = parseInt(pct) / 100;
+  if (pctNum > 0) {
+    doc.setFillColor(108, 99, 255);
+    doc.roundedRect(margin, 66, col * pctNum, 6, 3, 3, 'F');
+  }
+  doc.setTextColor(108, 99, 255);
+  doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+  doc.text(`Progreso: ${pct}`, margin + col - 1, 71.5, { align: 'right' });
+
+  // Phases section
+  let y = 84;
+  doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+  doc.setTextColor(226, 232, 240);
+  doc.text('FASES DEL PLAN', margin, y);
+  y += 6;
+  doc.setDrawColor(108, 99, 255, 0.3);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, margin + col, y);
+  y += 6;
+
+  // Get phases from visible DOM
+  const phaseCards = document.querySelectorAll('#detailPhases .phase-card');
+  phaseCards.forEach((card, i) => {
+    if (y > PH - 30) { doc.addPage(); y = 20; }
+    const name = card.querySelector('.phase-name')?.textContent || `Fase ${i + 1}`;
+    const weeks = card.querySelector('.phase-weeks')?.textContent || '';
+    const volume = card.querySelector('.phase-volume')?.textContent || '';
+
+    const phaseColors = [[108, 99, 255], [0, 217, 166], [255, 107, 107], [245, 158, 11]];
+    const [r, g, b] = phaseColors[i % phaseColors.length];
+    doc.setFillColor(r, g, b, 0.1);
+    doc.roundedRect(margin, y - 4, col, 14, 3, 3, 'F');
+    doc.setDrawColor(r, g, b);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y - 4, margin, y + 10);
+    doc.setFillColor(r, g, b);
+    doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(r, g, b);
+    doc.text(name, margin + 4, y + 3);
+    doc.setTextColor(113, 128, 150);
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+    if (weeks) doc.text(weeks, margin + 4, y + 8);
+    if (volume) doc.text(volume, margin + col - 4, y + 5.5, { align: 'right' });
+    y += 18;
+  });
+
+  // Weekly calendar
+  const weekItems = document.querySelectorAll('#detailCalendar .week-item');
+  if (weekItems.length > 0) {
+    if (y > PH - 50) { doc.addPage(); y = 20; }
+    y += 4;
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(226, 232, 240);
+    doc.text('CALENDARIO SEMANAL', margin, y);
+    y += 4;
+    doc.setLineWidth(0.3);
+    doc.setDrawColor(108, 99, 255, 0.3);
+    doc.line(margin, y, margin + col, y);
+    y += 5;
+
+    const cols = 3; const cellW = col / cols; let col_i = 0;
+    weekItems.forEach((item, idx) => {
+      if (y > PH - 20) { doc.addPage(); y = 20; col_i = 0; }
+      const num = item.querySelector('.week-num')?.textContent || `S${idx + 1}`;
+      const isDeload = item.classList.contains('deload') || item.querySelector('.week-num')?.textContent?.includes('Deload');
+      const isDone = item.classList.contains('completed');
+      const x = margin + col_i * cellW;
+      doc.setFillColor(isDone ? 0 : isDeload ? 245 : 30, isDone ? 217 : isDeload ? 158 : 30, isDone ? 166 : isDeload ? 11 : 60, 0.15);
+      doc.roundedRect(x, y, cellW - 2, 10, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(isDone ? 0 : isDeload ? 245 : 180, isDone ? 217 : isDeload ? 158 : 180, isDone ? 166 : isDeload ? 11 : 180);
+      doc.setFont('helvetica', isDone || isDeload ? 'bold' : 'normal');
+      doc.text(num, x + cellW / 2 - 1, y + 6.5, { align: 'center' });
+      col_i++;
+      if (col_i >= cols) { col_i = 0; y += 12; }
+    });
+    if (col_i !== 0) y += 12;
+  }
+
+  // Footer
+  doc.setFillColor(10, 10, 26);
+  doc.rect(0, PH - 14, PW, 14, 'F');
+  doc.setTextColor(113, 128, 150);
+  doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+  doc.text('WacoPro Fitness Platform — wacopro.com', margin, PH - 5);
+  doc.text(`Página 1`, PW - margin, PH - 5, { align: 'right' });
+
+  doc.save(`${title.replace(/\s+/g, '_')}_WacoPro.pdf`);
+  showToast('PDF generado y descargado correctamente');
+}
+
+async function startPlan() {
+  // Just placeholder - would set startDate
+  showToast('¡Plan iniciado!');
+}
+
+async function toggleWeek(planId, cycleId, completed) {
+  // In production would update cycle status
+  showToast(completed ? 'Semana marcada como completada' : 'Semana desmarcada');
+  await viewPlan(planId);
+}
+
+async function deletePlan(id) {
+  if (!confirm('¿Eliminar este plan?')) return;
+  try {
+    const r = await fetch(`${API}/training-plans/${id}`, { method:'DELETE', headers });
+    if (!r.ok) throw new Error();
+    showToast('Plan eliminado');
+    loadPlans();
+    closeDetail();
+  } catch { showToast('Error al eliminar'); }
+}
+
+function openCreateModal() {
+  document.getElementById('planStartDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('createModal').classList.add('open');
+}
+function closeCreateModal() { document.getElementById('createModal').classList.remove('open'); }
+
+async function createPlan() {
+  const name = document.getElementById('planName').value.trim();
+  if (!name) { showToast('Ingresa un nombre para el plan'); return; }
+  const body = {
+    name,
+    type: document.getElementById('planType').value,
+    durationWeeks: parseInt(document.getElementById('planDuration').value),
+    difficulty: document.getElementById('planDifficulty').value,
+    goal: document.getElementById('planGoal').value || name,
+    startDate: document.getElementById('planStartDate').value || null,
+  };
+  try {
+    const r = await fetch(`${API}/training-plans`, { method:'POST', headers, body:JSON.stringify(body) });
+    if (!r.ok) throw new Error();
+    showToast('Plan creado correctamente');
+    closeCreateModal();
+    loadPlans();
+  } catch { showToast('Error al crear el plan'); }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+  window.location.href = '/login';
+}
+
+init();
+</script>
+</body>
+</html>

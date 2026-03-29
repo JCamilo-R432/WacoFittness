@@ -1,0 +1,56 @@
+name: Tests & Coverage
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+jobs:
+  unit-tests:
+    name: Unit Tests + Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run unit tests with coverage
+        run: npx jest --coverage --coverageReporters=text --coverageReporters=lcov --passWithNoTests
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_secret_for_ci
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+      - name: Comment PR with coverage
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          header: test-coverage
+          message: |
+            ## 🧪 Test Results
+            ✅ Unit tests passed — coverage report uploaded to Codecov
+
+  type-check:
+    name: TypeScript Strict Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: TypeScript check
+        run: npx tsc --noEmit
+      - name: Report failure
+        if: failure()
+        run: echo "::error::TypeScript compilation failed. Fix all type errors before merging."

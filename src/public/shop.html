@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda de Suplementos — WacoPro</title>
+  <meta name="description" content="Tienda de suplementos deportivos con recomendaciones personalizadas">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+  <script src="/js/app-init.js" defer></script>
+  <style>
+    :root{--primary:#6c63ff;--secondary:#ff6b6b;--accent:#00d9a6;--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a3e;--text:#e2e8f0;--muted:#718096;--border:rgba(108,99,255,0.2);--glow:0 0 20px rgba(108,99,255,0.4);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+    nav{background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:1.5rem;transition:color .2s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--primary);}
+    .btn-logout{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;}
+    .container{max-width:1200px;margin:0 auto;padding:2rem;}
+    h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;margin-bottom:.4rem;}
+    h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .subtitle{color:var(--muted);margin-bottom:2rem;font-size:1rem;}
+    /* SEARCH + FILTER */
+    .toolbar{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+    .search-box{flex:1;min-width:200px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);padding:.65rem 1rem;border-radius:10px;font-size:.9rem;outline:none;}
+    .search-box:focus{border-color:var(--primary);}
+    .cat-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.5rem 1rem;border-radius:999px;font-size:.82rem;cursor:pointer;transition:all .2s;}
+    .cat-btn.active,.cat-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+    /* RECOMMENDED BANNER */
+    .rec-banner{background:linear-gradient(135deg,rgba(108,99,255,.12),rgba(0,217,166,.06));border:1px solid rgba(108,99,255,.25);border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:2rem;}
+    .rec-banner h4{font-size:.85rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;letter-spacing:.05em;}
+    .rec-pills{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .rec-pill{background:rgba(0,217,166,.1);border:1px solid rgba(0,217,166,.25);color:var(--accent);padding:.3rem .85rem;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;}
+    /* PRODUCTS GRID */
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;}
+    .product-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;}
+    .product-card:hover{transform:translateY(-4px);border-color:var(--primary);box-shadow:var(--glow);}
+    .product-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:3.5rem;background:linear-gradient(135deg,rgba(108,99,255,.1),rgba(0,217,166,.06));}
+    .product-body{padding:1.1rem;}
+    .product-cat{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--primary);letter-spacing:.08em;margin-bottom:.3rem;}
+    .product-name{font-size:.95rem;font-weight:800;margin-bottom:.2rem;line-height:1.3;}
+    .product-brand{font-size:.78rem;color:var(--muted);margin-bottom:.6rem;}
+    .product-rating{display:flex;align-items:center;gap:.3rem;font-size:.78rem;margin-bottom:.75rem;}
+    .stars{color:#f59e0b;}
+    .product-macros{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.85rem;}
+    .macro-tag{font-size:.68rem;padding:.15rem .5rem;border-radius:5px;background:rgba(255,255,255,.06);color:var(--muted);}
+    .product-footer{display:flex;align-items:center;justify-content:space-between;}
+    .product-price{font-size:1.1rem;font-weight:800;color:var(--accent);}
+    .btn-buy{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.45rem 1rem;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .btn-buy:hover{opacity:.85;}
+    /* STACK SECTION */
+    .stack-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem;}
+    .stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-top:1rem;}
+    .stack-time{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:1rem;}
+    .stack-time h5{font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+    .stack-item{font-size:.82rem;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
+    .stack-item:last-child{border-bottom:none;}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface2);border:1px solid var(--accent);color:var(--accent);padding:.75rem 1.5rem;border-radius:12px;font-size:.88rem;font-weight:600;z-index:500;transform:translateX(200%);transition:transform .3s;}
+    .toast.show{transform:translateX(0);}
+    .empty-state{text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;}
+    @media(max-width:640px){.products-grid{grid-template-columns:repeat(2,1fr)}.toolbar{flex-direction:column}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/dashboard" class="nav-brand">WACOPRO FITNESS</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/shop" class="active">Tienda</a>
+    <a href="/ai-coach">AI Coach</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <span id="navUser" style="color:var(--muted);font-size:.85rem;"></span>
+    <button class="btn-logout" onclick="logout()">SALIR</button>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>🏪 Tienda de <span>Suplementos</span></h1>
+  <p class="subtitle">Suplementos recomendados según tus objetivos con comparativa de precios</p>
+
+  <!-- Recommended for you -->
+  <div class="rec-banner">
+    <h4>⭐ Recomendados para ti</h4>
+    <div class="rec-pills" id="recPills">
+      <span class="rec-pill" onclick="filterByName('Creatina')">💪 Creatina Monohidrato</span>
+      <span class="rec-pill" onclick="filterByName('Proteína')">🥛 Proteína Whey</span>
+      <span class="rec-pill" onclick="filterByName('Pre-Entreno')">⚡ Pre-Entreno</span>
+      <span class="rec-pill" onclick="filterByName('Omega')">🐟 Omega-3</span>
+      <span class="rec-pill" onclick="filterByName('Vitamina')">💊 Vitamina D3</span>
+    </div>
+  </div>
+
+  <!-- Stack Section -->
+  <div class="stack-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="font-size:.9rem;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:.05em;">Mi Stack Recomendado</h3>
+      <a href="/ai-coach" style="font-size:.82rem;color:var(--primary);">Personalizar con IA →</a>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-time"><h5>🌅 Mañana</h5><div class="stack-item">Multivitamínico</div><div class="stack-item">Omega-3 (2g)</div><div class="stack-item">Vitamina D (2000 IU)</div></div>
+      <div class="stack-time"><h5>⚡ Pre-Entreno</h5><div class="stack-item">Pre-Entreno (1 scoop)</div><div class="stack-item">Creatina (5g)</div><div class="stack-item">Beta-Alanina (3g)</div></div>
+      <div class="stack-time"><h5>💪 Post-Entreno</h5><div class="stack-item">Proteína Whey (30g)</div><div class="stack-item">Creatina (5g)</div></div>
+      <div class="stack-time"><h5>🌙 Noche</h5><div class="stack-item">Caseína o ZMA</div><div class="stack-item">Magnesio</div></div>
+    </div>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="toolbar">
+    <input class="search-box" type="text" id="searchBox" placeholder="Buscar suplemento..." oninput="filterProducts()" />
+  </div>
+  <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem;" id="catFilter">
+    <button class="cat-btn active" onclick="filterCat(this,'')">Todos</button>
+    <button class="cat-btn" onclick="filterCat(this,'protein')">Proteínas</button>
+    <button class="cat-btn" onclick="filterCat(this,'creatine')">Creatina</button>
+    <button class="cat-btn" onclick="filterCat(this,'preworkout')">Pre-Entreno</button>
+    <button class="cat-btn" onclick="filterCat(this,'vitamins')">Vitaminas</button>
+    <button class="cat-btn" onclick="filterCat(this,'fat-burner')">Fat Burners</button>
+    <button class="cat-btn" onclick="filterCat(this,'recovery')">Recuperación</button>
+  </div>
+
+  <div class="products-grid" id="productsGrid">
+    <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2rem;">Cargando productos...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('token') || sessionStorage.getItem('token');
+if (!token) window.location.href = '/login';
+const headers = { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` };
+let allProducts = [];
+let selectedCat = '';
+let searchText = '';
+
+const catLabels = {protein:'Proteína',creatine:'Creatina',preworkout:'Pre-Entreno',vitamins:'Vitaminas','fat-burner':'Fat Burner',recovery:'Recuperación',omega:'Omega-3',minerals:'Minerales'};
+const catIcons = {protein:'🥛',creatine:'💪',preworkout:'⚡',vitamins:'💊','fat-burner':'🔥',recovery:'😴',omega:'🐟',minerals:'⚗️'};
+
+const localProducts = [
+  {id:'p1',name:'Whey Protein Gold Standard',brand:'Optimum Nutrition',category:'protein',icon:'🥛',price:54.99,rating:4.8,reviews:2847,macros:{protein:'24g/scoop',calories:'120 kcal'},tags:['Alta proteína','Sin azúcar'],affiliateUrl:'#'},
+  {id:'p2',name:'Creatine Monohydrate Powder',brand:'Bulk Supplements',category:'creatine',icon:'💪',price:19.99,rating:4.7,reviews:1256,macros:{creatine:'5g/dosis',form:'Monohidrato'},tags:['Fuerza','Volumen'],affiliateUrl:'#'},
+  {id:'p3',name:'Pre-Workout C4 Original',brand:'Cellucor',category:'preworkout',icon:'⚡',price:29.99,rating:4.6,reviews:3421,macros:{caffeine:'150mg',beta:'1.6g'},tags:['Energía','Foco'],affiliateUrl:'#'},
+  {id:'p4',name:'Casein Protein MuscleTech',brand:'MuscleTech',category:'protein',icon:'🌙',price:49.99,rating:4.5,reviews:892,macros:{protein:'25g/scoop',digestion:'Lenta'},tags:['Noche','Anti-catabolismo'],affiliateUrl:'#'},
+  {id:'p5',name:'Fish Oil Omega-3 1000mg',brand:'NOW Foods',category:'recovery',icon:'🐟',price:14.99,rating:4.9,reviews:5612,macros:{epa:'180mg',dha:'120mg'},tags:['Antiinflamatorio','Corazón'],affiliateUrl:'#'},
+  {id:'p6',name:'Vitamin D3 5000 IU',brand:'Sports Research',category:'vitamins',icon:'☀️',price:16.99,rating:4.8,reviews:2341,macros:{vitD:'5000 IU',form:'D3+K2'},tags:['Huesos','Inmunidad'],affiliateUrl:'#'},
+  {id:'p7',name:'L-Carnitine Liquid 3000mg',brand:'NutraKey',category:'fat-burner',icon:'🔥',price:22.99,rating:4.4,reviews:678,macros:{carnitine:'3000mg',calories:'0 kcal'},tags:['Oxidación grasa','Energía'],affiliateUrl:'#'},
+  {id:'p8',name:'Beta-Alanine 3200mg',brand:'Jarrow Formulas',category:'preworkout',icon:'💥',price:18.49,rating:4.5,reviews:445,macros:{betaAlanine:'3.2g'},tags:['Resistencia','Anti-fatiga'],affiliateUrl:'#'},
+  {id:'p9',name:'ZMA Sleep & Recovery',brand:'MuscleMeds',category:'recovery',icon:'😴',price:24.99,rating:4.6,reviews:1123,macros:{zinc:'30mg',magnesium:'450mg'},tags:['Sueño','Testosterona'],affiliateUrl:'#'},
+  {id:'p10',name:'BCAA 2:1:1 Powder',brand:'Scivation Xtend',category:'recovery',icon:'🌿',price:27.99,rating:4.7,reviews:2156,macros:{bcaa:'7g',leucine:'3.5g'},tags:['Anti-catabolismo','Recuperación'],affiliateUrl:'#'},
+  {id:'p11',name:'Magnesium Glycinate 400mg',brand:'Doctor\'s Best',category:'minerals',icon:'⚗️',price:12.99,rating:4.9,reviews:3892,macros:{magnesium:'400mg',form:'Glicinato'},tags:['Sueño','Relajación'],affiliateUrl:'#'},
+  {id:'p12',name:'Multivitamin Sport Daily',brand:'Optimum Nutrition',category:'vitamins',icon:'💊',price:24.99,rating:4.6,reviews:1678,macros:{vitamins:'28+',form:'Tableta'},tags:['Completo','Diario'],affiliateUrl:'#'},
+];
+
+function filterCat(btn, cat) {
+  selectedCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+}
+
+function filterByName(name) {
+  document.getElementById('searchBox').value = name;
+  searchText = name;
+  renderProducts();
+}
+
+function filterProducts() {
+  searchText = document.getElementById('searchBox').value.toLowerCase();
+  renderProducts();
+}
+
+function renderProducts() {
+  let filtered = localProducts;
+  if (selectedCat) filtered = filtered.filter(p => p.category === selectedCat);
+  if (searchText) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchText) || p.brand.toLowerCase().includes(searchText) || p.tags.some(t=>t.toLowerCase().includes(searchText)));
+  const grid = document.getElementById('productsGrid');
+  if (!filtered.length){grid.innerHTML='<div class="empty-state">Sin productos para esta búsqueda</div>';return;}
+  grid.innerHTML = filtered.map(p=>`
+    <div class="product-card">
+      <div class="product-img">${p.icon}</div>
+      <div class="product-body">
+        <div class="product-cat">${catLabels[p.category]||p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-brand">${p.brand}</div>
+        <div class="product-rating">
+          <span class="stars">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5-Math.round(p.rating))}</span>
+          <span style="color:var(--muted);">${p.rating} (${p.reviews.toLocaleString()})</span>
+        </div>
+        <div class="product-macros">${Object.entries(p.macros).map(([k,v])=>`<span class="macro-tag">${v}</span>`).join('')}</div>
+        <div class="product-footer">
+          <span class="product-price">$${p.price}</span>
+          <button class="btn-buy" onclick="buyProduct('${p.id}','${p.name.replace(/'/g,"&apos;")}','${p.affiliateUrl}')">Comprar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function buyProduct(id, name, url) {
+  showToast(`Redirigiendo a: ${name}`);
+  // In production: track affiliate click, then redirect
+  setTimeout(() => { if (url && url !== '#') window.open(url, '_blank'); }, 500);
+}
+
+async function loadRecommendations() {
+  try {
+    const r = await fetch(`${API}/shop/recommendations`, { headers });
+    if (!r.ok) return;
+    const { data } = await r.json();
+    // Could update rec-pills based on user goals
+  } catch {}
+}
+
+async function init() {
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers });
+    if (!r.ok) throw new Error();
+    const { data } = await r.json();
+    document.getElementById('navUser').textContent = data.name || data.email;
+  } catch { window.location.href = '/login'; }
+  renderProducts();
+  loadRecommendations();
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');window.location.href='/login';}
+init();
+</script>
+</body>
+</html>

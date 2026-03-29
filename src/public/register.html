@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro - WacoPro Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="grid-bg">
+  <div class="auth-glow-left"></div>
+  <div class="auth-glow-right"></div>
+
+  <div class="auth-page" style="padding: 1.5rem 1rem;">
+    <div class="auth-card" style="max-width: 500px;">
+
+      <a href="/" class="auth-logo">
+        <div class="auth-logo-icon">W</div>
+        <span class="auth-logo-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+
+      <h1 class="auth-title">Crea tu cuenta</h1>
+      <p class="auth-subtitle">Únete al ecosistema de fitness más avanzado</p>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label class="form-label" for="name">NOMBRE COMPLETO</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="form-input"
+              placeholder="Tu nombre"
+              required
+              autocomplete="name"
+            >
+          </div>
+          <span class="error-message" id="nameError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">EMAIL</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉</span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="tu@email.com"
+              required
+              autocomplete="email"
+            >
+          </div>
+          <span class="error-message" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">CONTRASEÑA</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="Mínimo 8 caracteres"
+              required
+              autocomplete="new-password"
+            >
+            <button type="button" class="toggle-password" id="togglePwd" title="Mostrar contraseña">👁</button>
+          </div>
+          <div class="password-strength" id="strengthBars">
+            <div class="strength-bar" id="bar1"></div>
+            <div class="strength-bar" id="bar2"></div>
+            <div class="strength-bar" id="bar3"></div>
+            <div class="strength-bar" id="bar4"></div>
+          </div>
+          <span class="strength-text" id="strengthText"></span>
+          <span class="error-message" id="passwordError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">CONFIRMAR CONTRASEÑA</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔐</span>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              class="form-input"
+              placeholder="Repite tu contraseña"
+              required
+              autocomplete="new-password"
+            >
+          </div>
+          <span class="error-message" id="confirmError"></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="checkbox-wrapper" style="align-items:flex-start;">
+            <input type="checkbox" id="terms" name="terms" required style="margin-top:2px;">
+            <span class="checkbox-label" style="line-height:1.5;">
+              Acepto los <a href="#" class="auth-link">Términos de Servicio</a> y la <a href="#" class="auth-link">Política de Privacidad</a>
+            </span>
+          </label>
+          <span class="error-message" id="termsError"></span>
+        </div>
+
+        <button type="submit" class="btn-auth btn-auth-primary" id="registerBtn">
+          <span class="btn-text">CREAR CUENTA</span>
+          <span class="btn-loader" style="display:none;"><span class="spinner"></span></span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        ¿Ya tienes cuenta? <a href="/login.html" class="auth-link">Inicia sesión</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (window.api.isLoggedIn()) {
+      window.location.href = '/dashboard.html';
+    }
+
+    // Toggle password visibility
+    document.getElementById('togglePwd').addEventListener('click', function() {
+      const input = document.getElementById('password');
+      if (input.type === 'password') {
+        input.type = 'text';
+        this.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        this.textContent = '👁';
+      }
+    });
+
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function() {
+      const pwd = this.value;
+      let score = 0;
+      if (pwd.length >= 8) score++;
+      if (/[A-Z]/.test(pwd)) score++;
+      if (/[0-9]/.test(pwd)) score++;
+      if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+      const bars = ['bar1','bar2','bar3','bar4'];
+      const levels = ['weak','medium','strong','strong'];
+      const texts = { 0: '', 1: 'Débil', 2: 'Regular', 3: 'Fuerte', 4: 'Muy fuerte' };
+
+      bars.forEach((id, i) => {
+        const bar = document.getElementById(id);
+        bar.className = 'strength-bar';
+        if (i < score) bar.classList.add(levels[score - 1]);
+      });
+
+      document.getElementById('strengthText').textContent = pwd.length > 0 ? texts[score] : '';
+    });
+
+    // Validation helpers
+    function showError(field, message) {
+      const el = document.getElementById(field + 'Error');
+      const input = document.getElementById(field);
+      if (el) el.textContent = message;
+      if (input && input.tagName === 'INPUT') input.classList.add('error');
+    }
+
+    function clearError(field) {
+      const el = document.getElementById(field + 'Error');
+      const input = document.getElementById(field);
+      if (el) el.textContent = '';
+      if (input && input.tagName === 'INPUT') input.classList.remove('error');
+    }
+
+    function setLoading(isLoading) {
+      const btn = document.getElementById('registerBtn');
+      btn.querySelector('.btn-text').style.display = isLoading ? 'none' : 'inline';
+      btn.querySelector('.btn-loader').style.display = isLoading ? 'flex' : 'none';
+      btn.disabled = isLoading;
+    }
+
+    // Form submit
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      ['name','email','password','confirm','terms'].forEach(f => clearError(f));
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const terms = document.getElementById('terms').checked;
+
+      let valid = true;
+
+      if (!name || name.length < 2) {
+        showError('name', 'El nombre debe tener al menos 2 caracteres');
+        valid = false;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('email', 'Ingresa un email válido');
+        valid = false;
+      }
+      if (!password || password.length < 8) {
+        showError('password', 'La contraseña debe tener al menos 8 caracteres');
+        valid = false;
+      }
+      if (password !== confirmPassword) {
+        showError('confirm', 'Las contraseñas no coinciden');
+        document.getElementById('confirmPassword').classList.add('error');
+        valid = false;
+      }
+      if (!terms) {
+        showError('terms', 'Debes aceptar los términos');
+        valid = false;
+      }
+      if (!valid) return;
+
+      setLoading(true);
+
+      try {
+        await window.api.register({ name, email, password });
+
+        window.showNotification('¡Cuenta creada! Bienvenido a WacoPro', 'success');
+        setTimeout(() => { window.location.href = '/dashboard.html'; }, 900);
+
+      } catch (error) {
+        const msg = error.message || '';
+        if (msg.toLowerCase().includes('ya existe') || msg.toLowerCase().includes('already')) {
+          showError('email', 'Este email ya está registrado');
+        } else {
+          showError('email', msg || 'Error al crear la cuenta');
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>

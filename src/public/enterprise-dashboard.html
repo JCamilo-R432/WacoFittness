@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise — WacoPro Fitness</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f13; color: #e2e8f0; min-height: 100vh; }
+
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: #16161e; border-bottom: 1px solid #2d2d3a; }
+    .nav-logo { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #6c63ff, #48bb78); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: #a0aec0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: #6c63ff; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .page-header h1 { font-size: 1.75rem; font-weight: 700; }
+
+    /* Org selector */
+    .org-selector { display: flex; align-items: center; gap: 0.75rem; }
+    .org-selector label { font-size: 0.85rem; color: #718096; }
+    .org-selector select { background: #1e1e2d; border: 1px solid #2d2d3a; border-radius: 8px; padding: 0.5rem 0.9rem; color: #e2e8f0; font-size: 0.875rem; outline: none; }
+    .org-selector select:focus { border-color: #6c63ff; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0.25rem; background: #16161e; border-bottom: 1px solid #2d2d3a; padding: 0 2rem; margin: 0 -2rem 1.5rem; }
+    .tab { padding: 0.75rem 1.25rem; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: #718096; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab:hover { color: #a0aec0; }
+    .tab.active { color: #6c63ff; border-bottom-color: #6c63ff; }
+
+    /* Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Cards */
+    .card { background: #16161e; border: 1px solid #2d2d3a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem; }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+    .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Forms */
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    .form-group label { font-size: 0.78rem; font-weight: 500; color: #a0aec0; }
+    .form-group input, .form-group select, .form-group textarea {
+      background: #1e1e2d; border: 1px solid #2d2d3a; border-radius: 8px;
+      padding: 0.6rem 0.9rem; color: #e2e8f0; font-size: 0.875rem; outline: none; font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #6c63ff; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
+    /* Buttons */
+    .btn { padding: 0.6rem 1.25rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, #6c63ff, #5a52d5); color: white; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger { background: transparent; border: 1px solid #fc8181; color: #fc8181; }
+    .btn-danger:hover { background: rgba(252,129,129,0.1); }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+    .btn-outline { background: transparent; border: 1px solid #2d2d3a; color: #a0aec0; }
+    .btn-outline:hover { border-color: #6c63ff; color: #6c63ff; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { text-align: left; padding: 0.6rem 0.75rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #718096; border-bottom: 1px solid #2d2d3a; }
+    td { padding: 0.75rem; border-bottom: 1px solid #1e1e2d; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(108,99,255,0.03); }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .badge-free { background: rgba(113,128,150,0.2); color: #a0aec0; }
+    .badge-pro { background: rgba(72,187,120,0.15); color: #48bb78; }
+    .badge-business { background: rgba(108,99,255,0.15); color: #a78bfa; }
+    .badge-enterprise { background: rgba(246,173,85,0.15); color: #f6ad55; }
+    .badge-active { background: rgba(72,187,120,0.15); color: #48bb78; }
+    .badge-inactive { background: rgba(113,128,150,0.15); color: #718096; }
+
+    /* Color preview */
+    .color-preview { display: flex; align-items: center; gap: 0.5rem; }
+    .color-swatch { width: 28px; height: 28px; border-radius: 6px; border: 2px solid #2d2d3a; cursor: pointer; }
+
+    /* Checkboxes / scopes */
+    .scope-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; }
+    .scope-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: #1e1e2d; border: 1px solid #2d2d3a; border-radius: 8px; cursor: pointer; }
+    .scope-item input { accent-color: #6c63ff; }
+    .scope-item label { font-size: 0.8rem; color: #a0aec0; cursor: pointer; }
+
+    /* Key display */
+    .key-display { background: #0f0f13; border: 1px solid #48bb78; border-radius: 8px; padding: 0.75rem 1rem; font-family: monospace; font-size: 0.85rem; color: #48bb78; word-break: break-all; margin: 0.75rem 0; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 2.5rem; color: #718096; font-size: 0.875rem; }
+
+    /* Spinner */
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 10px; background: #1e1e2d; border: 1px solid; font-size: 0.875rem; z-index: 9999; transform: translateY(100px); transition: transform 0.3s; max-width: 360px; }
+    .toast.show { transform: translateY(0); }
+    .toast.success { border-color: #48bb78; color: #48bb78; }
+    .toast.error { border-color: #fc8181; color: #fc8181; }
+
+    /* Section divider */
+    .section-divider { border: none; border-top: 1px solid #2d2d3a; margin: 1.25rem 0; }
+
+    @media (max-width: 700px) { .card-row { grid-template-columns: 1fr; } .tabs { padding: 0 1rem; overflow-x: auto; } }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">WacoPro Enterprise</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/ai-coach">AI Coach</a>
+    <a href="/billing-enterprise">Billing</a>
+    <a href="/compliance-dashboard">Compliance</a>
+    <a href="/enterprise-dashboard" class="active">Enterprise</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1>🏢 Panel Enterprise</h1>
+    <div class="org-selector">
+      <label>Organización:</label>
+      <select id="orgSelect" onchange="selectOrg(this.value)">
+        <option value="">— Seleccionar —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('orgs', this)">Organizaciones</div>
+    <div class="tab" onclick="switchTab('whitelabel', this)">White-Label</div>
+    <div class="tab" onclick="switchTab('apikeys', this)">API Keys</div>
+    <div class="tab" onclick="switchTab('sso', this)">SSO / SCIM</div>
+    <div class="tab" onclick="switchTab('members', this)">Miembros</div>
+  </div>
+
+  <!-- ── Organizations ─────────────────────────────────────────────────── -->
+  <div id="panel-orgs" class="panel active">
+    <div class="card">
+      <h3>➕ Crear Organización</h3>
+      <div class="card-row">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" id="orgName" placeholder="Ej: Acme Corp" />
+        </div>
+        <div class="form-group">
+          <label>Email de contacto *</label>
+          <input type="email" id="orgEmail" placeholder="admin@acme.com" />
+        </div>
+        <div class="form-group">
+          <label>Slug (auto-generado si vacío)</label>
+          <input type="text" id="orgSlug" placeholder="acme-corp" />
+        </div>
+        <div class="form-group">
+          <label>Plan</label>
+          <select id="orgPlan">
+            <option value="business">Business ($499/mo)</option>
+            <option value="enterprise">Enterprise (custom)</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="createOrgBtn" onclick="createOrg()">Crear Organización</button>
+    </div>
+
+    <div class="card">
+      <h3>Mis Organizaciones</h3>
+      <div id="orgsList"><div class="empty">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- ── White-Label ────────────────────────────────────────────────────── -->
+  <div id="panel-whitelabel" class="panel">
+    <div class="card">
+      <h3>🎨 Configuración de Marca</h3>
+      <p style="font-size:0.85rem;color:#718096;margin-bottom:1rem">Personaliza la apariencia de la plataforma para tu organización.</p>
+
+      <div class="card-row">
+        <div class="form-group">
+          <label>Nombre de la App</label>
+          <input type="text" id="wlAppName" placeholder="WacoPro" />
+        </div>
+        <div class="form-group">
+          <label>Dominio personalizado</label>
+          <input type="text" id="wlDomain" placeholder="fitness.acme.com" />
+        </div>
+        <div class="form-group">
+          <label>Color primario</label>
+          <div class="color-preview">
+            <input type="color" id="wlPrimaryInput" value="#6c63ff" oninput="document.getElementById('wlPrimaryHex').value=this.value" class="color-swatch" style="padding:0;border:none;background:none;width:36px;height:36px" />
+            <input type="text" id="wlPrimaryHex" value="#6c63ff" placeholder="#6c63ff" oninput="document.getElementById('wlPrimaryInput').value=this.value" style="flex:1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Color secundario</label>
+          <div class="color-preview">
+            <input type="color" id="wlSecondaryInput" value="#48bb78" oninput="document.getElementById('wlSecondaryHex').value=this.value" class="color-swatch" style="padding:0;border:none;background:none;width:36px;height:36px" />
+            <input type="text" id="wlSecondaryHex" value="#48bb78" placeholder="#48bb78" oninput="document.getElementById('wlSecondaryInput').value=this.value" style="flex:1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>URL del Logo</label>
+          <input type="url" id="wlLogoUrl" placeholder="https://acme.com/logo.png" />
+        </div>
+        <div class="form-group">
+          <label>Email de soporte</label>
+          <input type="email" id="wlSupportEmail" placeholder="soporte@acme.com" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>CSS personalizado (avanzado)</label>
+        <textarea id="wlCustomCSS" placeholder=":root { --primary: #0066cc; } .nav { background: #001133; }"></textarea>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+        <input type="checkbox" id="wlHideBranding" style="accent-color:#6c63ff;width:16px;height:16px" />
+        <label for="wlHideBranding" style="font-size:0.875rem">Ocultar branding de WacoPro</label>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="saveWLBtn" onclick="saveWhiteLabel()">Guardar Cambios</button>
+    </div>
+
+    <div class="card" id="wlPreviewCard" style="display:none">
+      <h3>Vista previa</h3>
+      <div id="wlPreview" style="border:1px solid #2d2d3a;border-radius:8px;padding:1rem;font-size:0.8rem;color:#718096">
+        Los cambios se reflejan después de guardar.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── API Keys ───────────────────────────────────────────────────────── -->
+  <div id="panel-apikeys" class="panel">
+    <div class="card">
+      <h3>🔑 Crear API Key</h3>
+      <div class="card-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Nombre de la key *</label>
+          <input type="text" id="keyName" placeholder="Ej: Integración ERP, App móvil" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Scopes (permisos)</label>
+        <div class="scope-grid">
+          <div class="scope-item"><input type="checkbox" id="s1" value="read:workouts"><label for="s1">read:workouts</label></div>
+          <div class="scope-item"><input type="checkbox" id="s2" value="write:workouts"><label for="s2">write:workouts</label></div>
+          <div class="scope-item"><input type="checkbox" id="s3" value="read:nutrition"><label for="s3">read:nutrition</label></div>
+          <div class="scope-item"><input type="checkbox" id="s4" value="write:nutrition"><label for="s4">write:nutrition</label></div>
+          <div class="scope-item"><input type="checkbox" id="s5" value="ai:*"><label for="s5">ai:* (todo)</label></div>
+          <div class="scope-item"><input type="checkbox" id="s6" value="read:analytics"><label for="s6">read:analytics</label></div>
+          <div class="scope-item"><input type="checkbox" id="s7" value="write:users"><label for="s7">write:users</label></div>
+          <div class="scope-item"><input type="checkbox" id="s8" value="admin:*"><label for="s8">admin:* (todo)</label></div>
+        </div>
+      </div>
+      <div class="card-row">
+        <div class="form-group">
+          <label>Rate limit (calls/hour)</label>
+          <input type="number" id="keyRateLimit" value="1000" min="100" max="100000" />
+        </div>
+        <div class="form-group">
+          <label>Expiración (opcional)</label>
+          <input type="date" id="keyExpiry" />
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="createKeyBtn" onclick="createAPIKey()">Generar API Key</button>
+
+      <div id="newKeyDisplay" style="display:none">
+        <hr class="section-divider" />
+        <p style="font-size:0.85rem;color:#f6ad55;margin-bottom:0.5rem">⚠️ Guarda esta clave ahora. No se mostrará de nuevo.</p>
+        <div class="key-display" id="rawKeyDisplay"></div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="copyKey()">📋 Copiar clave</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>API Keys activas</h3>
+      <div id="keysList"><div class="empty">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- ── SSO / SCIM ─────────────────────────────────────────────────────── -->
+  <div id="panel-sso" class="panel">
+    <div class="card">
+      <h3>🔐 Configurar SSO / SAML</h3>
+      <p style="font-size:0.85rem;color:#718096;margin-bottom:1rem">Permite que los miembros inicien sesión con sus credenciales corporativas.</p>
+      <div class="card-row">
+        <div class="form-group">
+          <label>Proveedor *</label>
+          <select id="ssoProvider">
+            <option value="okta">Okta</option>
+            <option value="azure_ad">Azure AD</option>
+            <option value="google_workspace">Google Workspace</option>
+            <option value="onelogin">OneLogin</option>
+            <option value="saml">SAML genérico</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Entity ID</label>
+          <input type="text" id="ssoEntityId" placeholder="https://acme.okta.com" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>SSO URL *</label>
+          <input type="url" id="ssoUrl" placeholder="https://acme.okta.com/app/wacopro/sso/saml" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Certificado X.509 *</label>
+        <textarea id="ssoCert" placeholder="MIIDBTCCAe2gAw..." style="font-family:monospace;font-size:0.75rem"></textarea>
+      </div>
+      <button type="button" class="btn btn-primary" id="saveSSOBtn" onclick="saveSSO()">Guardar SSO</button>
+    </div>
+
+    <div class="card">
+      <h3>📥 SCIM Provisioning</h3>
+      <p style="font-size:0.85rem;color:#718096;margin-bottom:1rem">Sincroniza usuarios automáticamente desde tu directorio corporativo.</p>
+      <div style="background:#1e1e2d;border:1px solid #2d2d3a;border-radius:8px;padding:1rem;margin-bottom:1rem">
+        <div style="font-size:0.78rem;color:#718096;margin-bottom:0.35rem">SCIM Base URL</div>
+        <div style="font-family:monospace;font-size:0.85rem" id="scimBaseUrl">Selecciona una organización primero</div>
+      </div>
+      <p style="font-size:0.8rem;color:#718096">Configura este endpoint en tu IdP (Okta, Azure AD) junto con el token de tu API key para activar SCIM.</p>
+    </div>
+
+    <div class="card">
+      <h3>🔗 Probar SSO Login</h3>
+      <p style="font-size:0.85rem;color:#718096;margin-bottom:1rem">Inicia el flujo de autenticación SSO para tu organización.</p>
+      <button type="button" class="btn btn-outline" onclick="testSSO()">Probar SSO →</button>
+    </div>
+  </div>
+
+  <!-- ── Members ────────────────────────────────────────────────────────── -->
+  <div id="panel-members" class="panel">
+    <div class="card">
+      <h3>➕ Invitar Miembro</h3>
+      <div class="card-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="inviteEmail" placeholder="usuario@acme.com" />
+        </div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select id="inviteRole">
+            <option value="member">Miembro</option>
+            <option value="coach">Coach</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="inviteBtn" onclick="inviteMember()">Enviar Invitación</button>
+    </div>
+
+    <div class="card">
+      <h3>Miembros del equipo</h3>
+      <div id="membersList"><div class="empty">Selecciona una organización para ver sus miembros.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login';
+
+let currentOrgId = null;
+let currentOrgSlug = null;
+let rawKeyValue = null;
+
+// ── Org selection ──────────────────────────────────────────────────────────
+
+async function loadMyOrgs() {
+  try {
+    const res = await fetchAPI('/enterprise/my-orgs');
+    const data = await res.json();
+    const select = document.getElementById('orgSelect');
+    const orgs = data.organizations || [];
+
+    orgs.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.organization.id;
+      opt.dataset.slug = m.organization.slug;
+      opt.textContent = m.organization.name;
+      select.appendChild(opt);
+    });
+
+    renderOrgsList(orgs);
+
+    if (orgs.length === 1) {
+      select.value = orgs[0].organization.id;
+      selectOrg(orgs[0].organization.id);
+    }
+  } catch {}
+}
+
+function selectOrg(orgId) {
+  currentOrgId = orgId;
+  const select = document.getElementById('orgSelect');
+  const opt = select.querySelector(`option[value="${orgId}"]`);
+  currentOrgSlug = opt?.dataset.slug || '';
+
+  if (orgId) {
+    document.getElementById('scimBaseUrl').textContent =
+      `${window.location.origin}/api/enterprise/org/scim  (X-Organization-Id: ${orgId})`;
+    loadWhiteLabel();
+    loadAPIKeys();
+  }
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+
+  if (tab === 'members' && currentOrgId) loadMembers();
+}
+
+// ── Organizations ──────────────────────────────────────────────────────────
+
+function renderOrgsList(orgs) {
+  const el = document.getElementById('orgsList');
+  if (!orgs.length) { el.innerHTML = '<div class="empty">No tienes organizaciones aún.</div>'; return; }
+
+  el.innerHTML = `<table>
+    <thead><tr><th>Nombre</th><th>Plan</th><th>Slug</th><th>Rol</th></tr></thead>
+    <tbody>${orgs.map(m => `
+      <tr>
+        <td><strong>${esc(m.organization.name)}</strong></td>
+        <td><span class="badge badge-${m.organization.plan}">${m.organization.plan}</span></td>
+        <td style="color:#718096;font-family:monospace;font-size:0.8rem">${esc(m.organization.slug)}</td>
+        <td>${esc(m.role)}</td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+async function createOrg() {
+  const name = document.getElementById('orgName').value.trim();
+  const contactEmail = document.getElementById('orgEmail').value.trim();
+  const slug = document.getElementById('orgSlug').value.trim() || undefined;
+  const plan = document.getElementById('orgPlan').value;
+
+  if (!name || !contactEmail) { showToast('Nombre y email son requeridos', 'error'); return; }
+
+  const btn = document.getElementById('createOrgBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const res = await fetchAPI('/enterprise', { method: 'POST', body: { name, contactEmail, slug, plan } });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Error al crear', 'error'); return; }
+
+    showToast(`Organización "${data.organization.name}" creada`, 'success');
+    document.getElementById('orgName').value = '';
+    document.getElementById('orgEmail').value = '';
+    document.getElementById('orgSlug').value = '';
+
+    const select = document.getElementById('orgSelect');
+    const opt = document.createElement('option');
+    opt.value = data.organization.id;
+    opt.dataset.slug = data.organization.slug;
+    opt.textContent = data.organization.name;
+    select.appendChild(opt);
+    select.value = data.organization.id;
+    selectOrg(data.organization.id);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Crear Organización';
+  }
+}
+
+// ── White-Label ────────────────────────────────────────────────────────────
+
+async function loadWhiteLabel() {
+  if (!currentOrgId) return;
+  try {
+    const res = await fetchOrgAPI('/enterprise/org/white-label');
+    const data = await res.json();
+    const c = data.config;
+    if (!c) return;
+
+    document.getElementById('wlAppName').value = c.appName || '';
+    document.getElementById('wlDomain').value = c.customDomain || '';
+    document.getElementById('wlPrimaryHex').value = c.primaryColor || '#6c63ff';
+    document.getElementById('wlPrimaryInput').value = c.primaryColor || '#6c63ff';
+    document.getElementById('wlSecondaryHex').value = c.secondaryColor || '#48bb78';
+    document.getElementById('wlSecondaryInput').value = c.secondaryColor || '#48bb78';
+    document.getElementById('wlLogoUrl').value = c.logoUrl || '';
+    document.getElementById('wlSupportEmail').value = c.supportEmail || '';
+    document.getElementById('wlCustomCSS').value = c.customCSS || '';
+    document.getElementById('wlHideBranding').checked = c.hideWacoProBranding || false;
+  } catch {}
+}
+
+async function saveWhiteLabel() {
+  if (!currentOrgId) { showToast('Selecciona una organización', 'error'); return; }
+  const btn = document.getElementById('saveWLBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const payload = {
+      appName: document.getElementById('wlAppName').value.trim() || undefined,
+      customDomain: document.getElementById('wlDomain').value.trim() || undefined,
+      primaryColor: document.getElementById('wlPrimaryHex').value || '#6c63ff',
+      secondaryColor: document.getElementById('wlSecondaryHex').value || '#48bb78',
+      logoUrl: document.getElementById('wlLogoUrl').value.trim() || undefined,
+      supportEmail: document.getElementById('wlSupportEmail').value.trim() || undefined,
+      customCSS: document.getElementById('wlCustomCSS').value || undefined,
+      hideWacoProBranding: document.getElementById('wlHideBranding').checked,
+    };
+
+    const res = await fetchOrgAPI('/enterprise/org/white-label', { method: 'PUT', body: payload });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Error al guardar', 'error'); return; }
+    showToast('Configuración de marca guardada', 'success');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar Cambios';
+  }
+}
+
+// ── API Keys ───────────────────────────────────────────────────────────────
+
+async function loadAPIKeys() {
+  if (!currentOrgId) return;
+  try {
+    const res = await fetchOrgAPI('/enterprise/org/api-keys');
+    const data = await res.json();
+    renderKeysList(data.apiKeys || []);
+  } catch {}
+}
+
+function renderKeysList(keys) {
+  const el = document.getElementById('keysList');
+  if (!keys.length) { el.innerHTML = '<div class="empty">No hay API keys creadas.</div>'; return; }
+
+  el.innerHTML = `<table>
+    <thead><tr><th>Nombre</th><th>Prefijo</th><th>Scopes</th><th>Rate Limit</th><th>Último uso</th><th></th></tr></thead>
+    <tbody>${keys.map(k => `
+      <tr>
+        <td><strong>${esc(k.name)}</strong></td>
+        <td><code style="font-size:0.8rem;color:#a78bfa">${esc(k.keyPrefix)}...</code></td>
+        <td>${(k.scopes || []).map(s => `<span class="badge badge-business" style="margin-right:2px;font-size:0.65rem">${esc(s)}</span>`).join('')}</td>
+        <td>${k.rateLimit}/h</td>
+        <td style="color:#718096;font-size:0.8rem">${k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString('es-ES') : 'Nunca'}</td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="revokeKey('${k.id}')">Revocar</button></td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+async function createAPIKey() {
+  if (!currentOrgId) { showToast('Selecciona una organización', 'error'); return; }
+
+  const name = document.getElementById('keyName').value.trim();
+  if (!name) { showToast('Nombre requerido', 'error'); return; }
+
+  const scopes = Array.from(document.querySelectorAll('.scope-item input:checked')).map(el => el.value);
+  if (!scopes.length) { showToast('Selecciona al menos un scope', 'error'); return; }
+
+  const rateLimit = parseInt(document.getElementById('keyRateLimit').value) || 1000;
+  const expiryVal = document.getElementById('keyExpiry').value;
+  const expiresAt = expiryVal || undefined;
+
+  const btn = document.getElementById('createKeyBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const res = await fetchOrgAPI('/enterprise/org/api-keys', {
+      method: 'POST',
+      body: { name, scopes, rateLimit, expiresAt },
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Error al crear', 'error'); return; }
+
+    rawKeyValue = data.apiKey.rawKey;
+    document.getElementById('rawKeyDisplay').textContent = rawKeyValue;
+    document.getElementById('newKeyDisplay').style.display = 'block';
+    document.getElementById('keyName').value = '';
+    document.querySelectorAll('.scope-item input').forEach(i => i.checked = false);
+
+    showToast('API Key creada. Guárdala ahora.', 'success');
+    loadAPIKeys();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Generar API Key';
+  }
+}
+
+function copyKey() {
+  if (rawKeyValue) {
+    navigator.clipboard.writeText(rawKeyValue).then(() => showToast('Clave copiada al portapapeles', 'success'));
+  }
+}
+
+async function revokeKey(keyId) {
+  if (!confirm('¿Revocar esta API Key? Las integraciones que la usen dejarán de funcionar.')) return;
+
+  const res = await fetchOrgAPI(`/enterprise/org/api-keys/${keyId}`, { method: 'DELETE' });
+  if (res.ok) {
+    showToast('API Key revocada', 'success');
+    loadAPIKeys();
+  }
+}
+
+// ── SSO ────────────────────────────────────────────────────────────────────
+
+async function saveSSO() {
+  if (!currentOrgId) { showToast('Selecciona una organización', 'error'); return; }
+
+  const provider = document.getElementById('ssoProvider').value;
+  const ssoUrl = document.getElementById('ssoUrl').value.trim();
+  const x509Cert = document.getElementById('ssoCert').value.trim();
+  const entityId = document.getElementById('ssoEntityId').value.trim();
+
+  if (!ssoUrl || !x509Cert) { showToast('SSO URL y certificado son requeridos', 'error'); return; }
+
+  const btn = document.getElementById('saveSSOBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const res = await fetchOrgAPI('/enterprise/org/sso/saml', {
+      method: 'POST',
+      body: { provider, ssoUrl, x509Cert, entityId: entityId || undefined },
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Error al guardar SSO', 'error'); return; }
+    showToast(`SSO con ${provider} configurado correctamente`, 'success');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar SSO';
+  }
+}
+
+async function testSSO() {
+  if (!currentOrgSlug) { showToast('Selecciona una organización', 'error'); return; }
+  const res = await fetchAPI(`/enterprise/sso/init?org=${currentOrgSlug}`);
+  const data = await res.json();
+  if (data.redirectUrl) {
+    window.open(data.redirectUrl, '_blank');
+  } else {
+    showToast(data.error || 'SSO no configurado', 'error');
+  }
+}
+
+// ── Members ────────────────────────────────────────────────────────────────
+
+async function loadMembers() {
+  if (!currentOrgId) return;
+  // Use SCIM endpoint for member list
+  try {
+    const res = await fetchOrgAPI('/enterprise/org/scim/users');
+    const data = await res.json();
+    renderMembersList(data.Resources || []);
+  } catch {}
+}
+
+function renderMembersList(members) {
+  const el = document.getElementById('membersList');
+  if (!members.length) { el.innerHTML = '<div class="empty">No hay miembros.</div>'; return; }
+
+  el.innerHTML = `<table>
+    <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th></tr></thead>
+    <tbody>${members.map(m => `
+      <tr>
+        <td>${esc(m.name?.givenName || '')} ${esc(m.name?.familyName || '')}</td>
+        <td style="color:#718096">${esc(m.emails?.[0]?.value || '')}</td>
+        <td>${esc(m.roles?.[0]?.value || 'member')}</td>
+        <td><span class="badge ${m.active ? 'badge-active' : 'badge-inactive'}">${m.active ? 'Activo' : 'Inactivo'}</span></td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+async function inviteMember() {
+  if (!currentOrgId) { showToast('Selecciona una organización', 'error'); return; }
+  const email = document.getElementById('inviteEmail').value.trim();
+  const role = document.getElementById('inviteRole').value;
+
+  if (!email) { showToast('Email requerido', 'error'); return; }
+
+  const btn = document.getElementById('inviteBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const res = await fetchOrgAPI('/enterprise/org/members', {
+      method: 'POST',
+      body: { email, role },
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Error', 'error'); return; }
+
+    showToast(`${email} ${data.status === 'pending' ? 'invitado (pendiente de registro)' : 'añadido al equipo'}`, 'success');
+    document.getElementById('inviteEmail').value = '';
+    loadMembers();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar Invitación';
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function fetchAPI(path, opts = {}) {
+  const headers = { Authorization: `Bearer ${token}`, ...(opts.body ? { 'Content-Type': 'application/json' } : {}) };
+  return fetch(API + path, {
+    method: opts.method || 'GET',
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+}
+
+function fetchOrgAPI(path, opts = {}) {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    ...(currentOrgId ? { 'X-Organization-Id': currentOrgId } : {}),
+    ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+  };
+  return fetch(API + path, {
+    method: opts.method || 'GET',
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// Init
+loadMyOrgs();
+</script>
+</body>
+</html>

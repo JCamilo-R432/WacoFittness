@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meal Delivery — WacoPro</title>
+  <meta name="description" content="Pedidos de comida saludable con macros optimizados para tus objetivos">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+  <script src="/js/app-init.js" defer></script>
+  <style>
+    :root{--primary:#6c63ff;--secondary:#ff6b6b;--accent:#00d9a6;--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a3e;--text:#e2e8f0;--muted:#718096;--border:rgba(108,99,255,0.2);--glow:0 0 20px rgba(108,99,255,0.4);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+    nav{background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:1.5rem;transition:color .2s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--primary);}
+    .btn-logout{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;}
+    .container{max-width:1200px;margin:0 auto;padding:2rem;}
+    h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;margin-bottom:.4rem;}
+    h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .subtitle{color:var(--muted);margin-bottom:2rem;font-size:1rem;}
+    /* MACRO REMAINING */
+    .macro-banner{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:2rem;display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center;}
+    .macro-banner h4{font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;width:100%;}
+    .macro-item{text-align:center;}
+    .macro-val{font-size:1.3rem;font-weight:800;}
+    .macro-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;}
+    .macro-cal{color:var(--primary);}
+    .macro-prot{color:var(--secondary);}
+    .macro-carb{color:#f59e0b;}
+    .macro-fat{color:var(--accent);}
+    /* FILTERS */
+    .filter-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem;}
+    .filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.45rem 1rem;border-radius:999px;font-size:.83rem;cursor:pointer;transition:all .2s;}
+    .filter-btn.active,.filter-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+    /* TABS */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.5rem;}
+    .tab{padding:.75rem 1.5rem;font-size:.88rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+    .tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+    /* RESTAURANTS */
+    .restaurants-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;}
+    .restaurant-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .2s,border-color .2s;}
+    .restaurant-card:hover{transform:translateY(-3px);border-color:var(--primary);}
+    .rest-header{padding:1.2rem;background:linear-gradient(135deg,rgba(108,99,255,.12),transparent);}
+    .rest-icon{font-size:2.5rem;margin-bottom:.4rem;}
+    .rest-name{font-size:1rem;font-weight:800;}
+    .rest-type{font-size:.78rem;color:var(--muted);margin-bottom:.5rem;}
+    .rest-tags{display:flex;gap:.3rem;flex-wrap:wrap;}
+    .rest-tag{font-size:.68rem;padding:.15rem .5rem;border-radius:5px;background:rgba(0,217,166,.1);color:var(--accent);border:1px solid rgba(0,217,166,.2);}
+    .rest-body{padding:1rem 1.2rem;}
+    .meal-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
+    .meal-item:last-child{border-bottom:none;}
+    .meal-name{font-size:.85rem;font-weight:600;}
+    .meal-macros{font-size:.72rem;color:var(--muted);}
+    .meal-price{font-size:.85rem;font-weight:700;color:var(--accent);}
+    .btn-order{width:100%;margin-top:1rem;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.6rem;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .btn-order:hover{opacity:.85;}
+    /* ORDERS */
+    .orders-list{display:flex;flex-direction:column;gap:.75rem;}
+    .order-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.1rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+    .order-status{font-size:.72rem;font-weight:700;padding:.2rem .65rem;border-radius:999px;}
+    .status-delivered{background:rgba(0,217,166,.15);color:var(--accent);}
+    .status-pending{background:rgba(245,158,11,.15);color:#f59e0b;}
+    .status-preparing{background:rgba(108,99,255,.15);color:var(--primary);}
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;max-width:480px;width:100%;position:relative;}
+    .modal-header{padding:1.4rem 1.5rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    .modal-close{background:rgba(255,255,255,.1);border:none;color:var(--text);width:30px;height:30px;border-radius:50%;cursor:pointer;}
+    .modal-body{padding:1.4rem;}
+    .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.5rem;justify-content:flex-end;}
+    .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);padding:.6rem 1.2rem;border-radius:10px;cursor:pointer;}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface2);border:1px solid var(--accent);color:var(--accent);padding:.75rem 1.5rem;border-radius:12px;font-size:.88rem;font-weight:600;z-index:500;transform:translateX(200%);transition:transform .3s;}
+    .toast.show{transform:translateX(0);}
+    @media(max-width:640px){.restaurants-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/dashboard" class="nav-brand">WACOPRO FITNESS</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/meal-planner">Plan Comidas</a>
+    <a href="/meal-delivery" class="active">Delivery</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <span id="navUser" style="color:var(--muted);font-size:.85rem;"></span>
+    <button class="btn-logout" onclick="logout()">SALIR</button>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>🛵 Meal <span>Delivery</span></h1>
+  <p class="subtitle">Pide comida saludable con macros calculados, compatibles con tus objetivos del día</p>
+
+  <!-- Macro Remaining Banner -->
+  <div class="macro-banner">
+    <h4>Macros disponibles hoy</h4>
+    <div class="macro-item"><div class="macro-val macro-cal" id="remCal">—</div><div class="macro-lbl">kcal</div></div>
+    <div class="macro-item"><div class="macro-val macro-prot" id="remProt">—g</div><div class="macro-lbl">Proteínas</div></div>
+    <div class="macro-item"><div class="macro-val macro-carb" id="remCarb">—g</div><div class="macro-lbl">Carbohidratos</div></div>
+    <div class="macro-item"><div class="macro-val macro-fat" id="remFat">—g</div><div class="macro-lbl">Grasas</div></div>
+    <div style="margin-left:auto;font-size:.78rem;color:var(--muted);">Basado en tu perfil nutricional</div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="applyFilter(this,'all')">Todos</button>
+    <button class="filter-btn" onclick="applyFilter(this,'high-protein')">🥩 Alto en Proteína</button>
+    <button class="filter-btn" onclick="applyFilter(this,'low-carb')">🥑 Bajo en Carbs</button>
+    <button class="filter-btn" onclick="applyFilter(this,'keto')">⚡ Keto</button>
+    <button class="filter-btn" onclick="applyFilter(this,'vegan')">🌿 Vegano</button>
+    <button class="filter-btn" onclick="applyFilter(this,'balanced')">⚖️ Balanceado</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('restaurants',this)">Restaurantes</div>
+    <div class="tab" onclick="showTab('orders',this)">Mis Pedidos</div>
+  </div>
+
+  <!-- Restaurants Tab -->
+  <div id="restaurantsTab">
+    <div class="restaurants-grid" id="restaurantsGrid">
+      <div style="color:var(--muted);font-size:.88rem;grid-column:1/-1;">Cargando restaurantes...</div>
+    </div>
+  </div>
+
+  <!-- Orders Tab -->
+  <div id="ordersTab" style="display:none;">
+    <div class="orders-list" id="ordersList">
+      <div style="color:var(--muted);font-size:.88rem;">Cargando pedidos...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="orderModalTitle">Confirmar Pedido</h3>
+      <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    </div>
+    <div class="modal-body" id="orderModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeOrderModal()">Cancelar</button>
+      <button class="btn-order" onclick="confirmOrder()" style="width:auto;padding:.6rem 1.5rem;">Confirmar Pedido</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('token') || sessionStorage.getItem('token');
+if (!token) window.location.href = '/login';
+const headers = { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` };
+let currentFilter = 'all';
+let pendingOrder = null;
+
+const restaurants = [
+  { id:'r1', name:'FitBowl Express', icon:'🥗', type:'Bowls saludables', tags:['Alto Proteína','Bajo Carbos','Sin Gluten'], meals:[
+    {name:'Bowl Pollo & Quinoa', cal:420, prot:38, carbs:32, fat:12, price:12.99},
+    {name:'Bowl Salmón Aguacate', cal:480, prot:35, carbs:18, fat:28, price:15.99},
+    {name:'Bowl Tofu Vegano', cal:350, prot:22, carbs:38, fat:14, price:11.50},
+  ]},
+  { id:'r2', name:'Protein House', icon:'🥩', type:'Carnes & Proteínas', tags:['Alto Proteína','Keto','Sin Azúcar'], meals:[
+    {name:'Pechuga + Brócoli + Papa', cal:550, prot:52, carbs:40, fat:15, price:13.50},
+    {name:'Carne Magra + Espárragos', cal:490, prot:48, carbs:12, fat:22, price:16.00},
+    {name:'Tilapia + Arroz Integral', cal:440, prot:40, carbs:45, fat:10, price:12.00},
+  ]},
+  { id:'r3', name:'Green & Lean', icon:'🥦', type:'Vegetariano & Vegano', tags:['Vegano','Bajo Carbos','Orgánico'], meals:[
+    {name:'Wrap de Falafel', cal:380, prot:16, carbs:52, fat:14, price:10.99},
+    {name:'Buddha Bowl Vegano', cal:420, prot:18, carbs:58, fat:16, price:12.50},
+    {name:'Smoothie Bowl Proteico', cal:310, prot:24, carbs:42, fat:8, price:9.99},
+  ]},
+  { id:'r4', name:'Keto Kitchen', icon:'🥑', type:'Dieta Cetogénica', tags:['Keto','Sin Carbos','Alto Grasa'], meals:[
+    {name:'Wrap de Lechuga con Carne', cal:520, prot:40, carbs:6, fat:38, price:14.50},
+    {name:'Salmon + Aguacate + Nueces', cal:600, prot:38, carbs:8, fat:48, price:18.00},
+    {name:'Omelette 4 Quesos + Tocino', cal:480, prot:34, carbs:4, fat:36, price:13.00},
+  ]},
+  { id:'r5', name:'Macro Meals', icon:'📊', type:'Macros Exactos', tags:['Balanceado','Meal Prep','Sin Azúcar'], meals:[
+    {name:'Meal Prep Equilibrado A', cal:500, prot:42, carbs:45, fat:16, price:14.00},
+    {name:'Meal Prep Equilibrado B', cal:460, prot:38, carbs:42, fat:14, price:13.00},
+    {name:'Pack Semana (5 días)', cal:500, prot:42, carbs:45, fat:16, price:55.00},
+  ]},
+  { id:'r6', name:'Recovery Nutrition', icon:'💪', type:'Post-entrenamiento', tags:['Alto Proteína','Recuperación','Sin Lactosa'], meals:[
+    {name:'Pollo + Arroz + Verduras', cal:480, prot:50, carbs:48, fat:10, price:13.50},
+    {name:'Batido Proteico + Banana', cal:340, prot:36, carbs:38, fat:6, price:9.50},
+    {name:'Tuna Bowl Mediterráneo', cal:400, prot:44, carbs:30, fat:12, price:12.00},
+  ]},
+];
+
+function applyFilter(btn, filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRestaurants();
+}
+
+const filterMap = {
+  'high-protein': r => r.tags.some(t => t.includes('Proteína')),
+  'low-carb': r => r.tags.some(t => t.includes('Bajo Carb') || t.includes('Sin Carbos')),
+  'keto': r => r.tags.some(t => t.includes('Keto')),
+  'vegan': r => r.tags.some(t => t.includes('Vegan')),
+  'balanced': r => r.tags.some(t => t.includes('Balanceado')),
+};
+
+function renderRestaurants() {
+  const filtered = currentFilter === 'all' ? restaurants : restaurants.filter(filterMap[currentFilter] || (()=>true));
+  const grid = document.getElementById('restaurantsGrid');
+  if (!filtered.length){grid.innerHTML='<div style="color:var(--muted);">Sin resultados para este filtro</div>';return;}
+  grid.innerHTML = filtered.map(r => `
+    <div class="restaurant-card">
+      <div class="rest-header">
+        <div class="rest-icon">${r.icon}</div>
+        <div class="rest-name">${r.name}</div>
+        <div class="rest-type">${r.type}</div>
+        <div class="rest-tags">${r.tags.map(t=>`<span class="rest-tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="rest-body">
+        ${r.meals.map(m=>`
+          <div class="meal-item">
+            <div>
+              <div class="meal-name">${m.name}</div>
+              <div class="meal-macros">${m.cal}kcal · ${m.prot}g P · ${m.carbs}g C · ${m.fat}g G</div>
+            </div>
+            <div class="meal-price">$${m.price.toFixed(2)}</div>
+          </div>`).join('')}
+        <button class="btn-order" onclick='openOrderModal(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Ver Menú & Pedir</button>
+      </div>
+    </div>`).join('');
+}
+
+let selectedRestaurant = null;
+function openOrderModal(rest) {
+  selectedRestaurant = rest;
+  document.getElementById('orderModalTitle').textContent = `Pedir en ${rest.name}`;
+  document.getElementById('orderModalBody').innerHTML = `
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;">Selecciona los platos que quieres pedir:</p>
+    ${rest.meals.map((m,i)=>`
+      <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.5rem;cursor:pointer;">
+        <input type="checkbox" id="meal${i}" value="${i}" style="accent-color:var(--primary);" />
+        <div style="flex:1;">
+          <div style="font-size:.88rem;font-weight:600;">${m.name}</div>
+          <div style="font-size:.75rem;color:var(--muted);">${m.cal}kcal · ${m.prot}g prot · $${m.price.toFixed(2)}</div>
+        </div>
+      </label>`).join('')}
+    <div style="margin-top:1rem;padding:1rem;background:rgba(255,255,255,.03);border-radius:10px;">
+      <p style="font-size:.8rem;color:var(--muted);">📍 Entrega estimada: 30-45 minutos</p>
+    </div>`;
+  document.getElementById('orderModal').classList.add('open');
+}
+function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
+
+async function confirmOrder() {
+  if (!selectedRestaurant) return;
+  const checked = [...document.querySelectorAll('#orderModalBody input:checked')].map(i => parseInt(i.value));
+  if (!checked.length) { showToast('Selecciona al menos un plato'); return; }
+  const items = checked.map(i => selectedRestaurant.meals[i]);
+  const totalCal = items.reduce((s,m)=>s+m.cal,0);
+  const totalProt = items.reduce((s,m)=>s+m.prot,0);
+  const totalCarbs = items.reduce((s,m)=>s+m.carbs,0);
+  const totalFat = items.reduce((s,m)=>s+m.fat,0);
+  const totalPrice = items.reduce((s,m)=>s+m.price,0);
+  try {
+    const r = await fetch(`${API}/meal-delivery/order`, {
+      method:'POST', headers,
+      body: JSON.stringify({
+        restaurantName: selectedRestaurant.name,
+        provider: 'manual',
+        totalCalories: totalCal,
+        totalProteinG: totalProt,
+        totalCarbsG: totalCarbs,
+        totalFatG: totalFat,
+        totalPrice,
+        items: items.map(m=>({name:m.name,quantity:1,calories:m.cal,proteinG:m.prot,carbsG:m.carbs,fatG:m.fat,price:m.price})),
+      })
+    });
+    if (!r.ok) throw new Error();
+    closeOrderModal();
+    showToast('¡Pedido realizado! Llegará en 30-45 min 🛵');
+    loadOrders();
+  } catch { showToast('Error al procesar pedido'); }
+}
+
+async function loadOrders() {
+  try {
+    const r = await fetch(`${API}/meal-delivery/orders`, { headers });
+    if (!r.ok) throw new Error();
+    const { data } = await r.json();
+    const list = document.getElementById('ordersList');
+    if (!data?.length){list.innerHTML='<div style="color:var(--muted);font-size:.88rem;">No tienes pedidos aún.</div>';return;}
+    const statusMap = {pending:'⏳ Pendiente',confirmed:'✅ Confirmado',preparing:'👨‍🍳 Preparando',delivered:'🎉 Entregado',cancelled:'❌ Cancelado'};
+    const statusCls = {pending:'status-pending',confirmed:'status-preparing',preparing:'status-preparing',delivered:'status-delivered',cancelled:'status-rest'};
+    list.innerHTML = data.map(o=>`
+      <div class="order-card">
+        <div style="font-size:2rem;">🛵</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;">
+            <span style="font-weight:700;">${o.restaurantName}</span>
+            <span class="order-status ${statusCls[o.status]||'status-pending'}">${statusMap[o.status]||o.status}</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--muted);">${o.totalCalories??'—'}kcal · ${o.totalProteinG??'—'}g prot · $${o.totalPrice?.toFixed(2)||'—'}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:.15rem;">${new Date(o.orderedAt).toLocaleDateString('es',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+      </div>`).join('');
+  } catch {
+    document.getElementById('ordersList').innerHTML='<div style="color:var(--muted);">Error al cargar pedidos</div>';
+  }
+}
+
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('restaurantsTab').style.display = tab==='restaurants' ? '' : 'none';
+  document.getElementById('ordersTab').style.display = tab==='orders' ? '' : 'none';
+  if (tab === 'orders') loadOrders();
+}
+
+async function init() {
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers });
+    if (!r.ok) throw new Error();
+    const { data } = await r.json();
+    document.getElementById('navUser').textContent = data.name || data.email;
+  } catch { window.location.href = '/login'; }
+  // Load macro remaining (from nutrition profile)
+  try {
+    const r = await fetch(`${API}/nutrition/dashboard`, { headers });
+    const { data } = await r.json();
+    document.getElementById('remCal').textContent = data?.remainingCalories ?? '—';
+    document.getElementById('remProt').textContent = (data?.remainingProtein ?? '—') + 'g';
+    document.getElementById('remCarb').textContent = (data?.remainingCarbs ?? '—') + 'g';
+    document.getElementById('remFat').textContent = (data?.remainingFat ?? '—') + 'g';
+  } catch {
+    document.getElementById('remCal').textContent = '1500';
+    document.getElementById('remProt').textContent = '120g';
+    document.getElementById('remCarb').textContent = '150g';
+    document.getElementById('remFat').textContent = '50g';
+  }
+  renderRestaurants();
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');window.location.href='/login';}
+init();
+</script>
+</body>
+</html>

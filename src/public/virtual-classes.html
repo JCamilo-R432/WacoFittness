@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clases Virtuales — WacoPro</title>
+  <style>
+    :root {
+      --primary: #6c63ff; --secondary: #ff6b6b; --accent: #00d9a6;
+      --bg: #0a0a1a; --surface: #12122a; --surface2: #1a1a3e;
+      --text: #e2e8f0; --muted: #718096; --border: rgba(108,99,255,0.2);
+      --glow: 0 0 20px rgba(108,99,255,0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+
+    /* NAV */
+    nav { background: rgba(10,10,26,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--primary); }
+
+    /* HERO */
+    .hero { padding: 3rem 2rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; }
+    .hero h1 span { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { color: var(--muted); margin-top: .75rem; font-size: 1.1rem; }
+    .live-badge { display: inline-flex; align-items: center; gap: .4rem; background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); color: var(--secondary); padding: .3rem .8rem; border-radius: 999px; font-size: .8rem; font-weight: 700; margin-top: 1rem; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--secondary); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+    /* FILTERS */
+    .filters { max-width: 1200px; margin: 1.5rem auto; padding: 0 2rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+    .filter-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: .45rem 1rem; border-radius: 999px; font-size: .85rem; cursor: pointer; transition: all .2s; }
+    .filter-btn.active, .filter-btn:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .search-box { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .5rem 1rem; border-radius: 999px; font-size: .9rem; outline: none; width: 220px; transition: border-color .2s; }
+    .search-box:focus { border-color: var(--primary); box-shadow: var(--glow); }
+    .filter-select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .45rem .8rem; border-radius: 8px; font-size: .85rem; outline: none; cursor: pointer; }
+
+    /* LIVE CLASSES STRIP */
+    .section { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+    .section-title::before { content: ''; width: 4px; height: 1.2rem; background: linear-gradient(var(--primary), var(--accent)); border-radius: 2px; }
+
+    .live-strip { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .5rem; scrollbar-width: none; }
+    .live-strip::-webkit-scrollbar { display: none; }
+    .live-card { min-width: 240px; background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(108,99,255,0.1)); border: 1px solid rgba(255,107,107,0.3); border-radius: 12px; padding: 1rem; cursor: pointer; transition: transform .2s, box-shadow .2s; flex-shrink: 0; }
+    .live-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,107,0.2); }
+    .live-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .75rem; }
+    .live-tag { background: var(--secondary); color: #fff; font-size: .7rem; font-weight: 800; padding: .2rem .5rem; border-radius: 4px; letter-spacing: .05em; }
+    .live-time { font-size: .75rem; color: var(--muted); }
+    .live-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: .3rem; }
+    .live-card p { font-size: .8rem; color: var(--muted); }
+    .live-meta { display: flex; gap: .75rem; margin-top: .75rem; }
+    .live-meta span { font-size: .75rem; color: var(--muted); display: flex; align-items: center; gap: .25rem; }
+
+    /* CLASS GRID */
+    .classes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+    .class-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+    .class-card:hover { transform: translateY(-4px); box-shadow: var(--glow); border-color: var(--primary); }
+    .class-thumb { height: 160px; background: linear-gradient(135deg, var(--surface2), var(--primary)20); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .class-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .class-thumb-placeholder { font-size: 3rem; opacity: .4; }
+    .class-difficulty { position: absolute; top: .5rem; left: .5rem; font-size: .7rem; font-weight: 700; padding: .25rem .6rem; border-radius: 999px; }
+    .diff-beginner { background: rgba(0,217,166,0.2); color: var(--accent); border: 1px solid var(--accent); }
+    .diff-intermediate { background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+    .diff-advanced { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444; }
+    .class-duration { position: absolute; bottom: .5rem; right: .5rem; background: rgba(0,0,0,.7); color: #fff; font-size: .75rem; padding: .2rem .5rem; border-radius: 4px; }
+    .class-body { padding: 1rem; }
+    .class-category { font-size: .75rem; color: var(--primary); font-weight: 600; margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .05em; }
+    .class-title { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; }
+    .class-instructor { font-size: .8rem; color: var(--muted); margin-bottom: .75rem; }
+    .class-footer { display: flex; justify-content: space-between; align-items: center; }
+    .class-stats { display: flex; gap: .75rem; font-size: .78rem; color: var(--muted); }
+    .enroll-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .4rem .9rem; border-radius: 8px; font-size: .8rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .enroll-btn:hover { opacity: .85; }
+    .enroll-btn.enrolled { background: rgba(0,217,166,0.2); color: var(--accent); border: 1px solid var(--accent); }
+
+    /* PAGINATION */
+    .pagination { display: flex; justify-content: center; gap: .5rem; margin: 2rem 0; }
+    .page-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: .9rem; transition: all .2s; }
+    .page-btn.active, .page-btn:hover { background: var(--primary); border-color: var(--primary); }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,.1); border: none; color: var(--text); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; }
+    .modal-hero { height: 200px; background: linear-gradient(135deg, var(--surface2), rgba(108,99,255,0.3)); border-radius: 20px 20px 0 0; display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+    .modal-body { padding: 1.5rem; }
+    .modal-body h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: .5rem; }
+    .modal-meta { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.25rem; }
+    .meta-chip { background: rgba(108,99,255,0.1); border: 1px solid var(--border); color: var(--primary); font-size: .78rem; padding: .3rem .7rem; border-radius: 999px; }
+    .modal-desc { color: var(--muted); font-size: .9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .modal-equip { margin-bottom: 1.25rem; }
+    .modal-equip h4 { font-size: .85rem; font-weight: 700; margin-bottom: .5rem; }
+    .equip-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .equip-tag { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: .78rem; padding: .25rem .6rem; border-radius: 6px; }
+    .modal-enroll-btn { width: 100%; padding: .9rem; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .modal-enroll-btn:hover { opacity: .85; }
+    .modal-enroll-btn.enrolled { background: rgba(0,217,166,0.2); color: var(--accent); border: 2px solid var(--accent); }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 4rem; color: var(--muted); }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; padding: 4rem; color: var(--muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: .5; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">⚡ WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/virtual-classes" style="color:var(--primary)">Clases</a>
+    <a href="/programs">Programas</a>
+    <a href="/on-demand">Videos</a>
+    <a href="/coaches">Coaches</a>
+    <a href="/fitness-challenges">Retos</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Clases <span>Virtuales</span> en Vivo</h1>
+  <p>Entrena desde casa con instructores profesionales. En vivo o bajo demanda.</p>
+  <div class="live-badge"><span class="live-dot"></span> Clases en vivo disponibles</div>
+</div>
+
+<!-- LIVE STRIP -->
+<div class="section">
+  <div class="section-title">🔴 Próximas clases en vivo</div>
+  <div class="live-strip" id="liveStrip">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <input class="search-box" id="searchInput" placeholder="🔍 Buscar clases..." />
+  <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+    <option value="">Todas las categorías</option>
+  </select>
+  <select class="filter-select" id="difficultyFilter" onchange="applyFilters()">
+    <option value="">Dificultad</option>
+    <option value="beginner">Principiante</option>
+    <option value="intermediate">Intermedio</option>
+    <option value="advanced">Avanzado</option>
+  </select>
+  <select class="filter-select" id="durationFilter" onchange="applyFilters()">
+    <option value="">Duración</option>
+    <option value="20">≤ 20 min</option>
+    <option value="30">≤ 30 min</option>
+    <option value="45">≤ 45 min</option>
+    <option value="60">≤ 60 min</option>
+  </select>
+  <button type="button" class="filter-btn active" onclick="setTypeFilter('all', this)">Todas</button>
+  <button type="button" class="filter-btn" onclick="setTypeFilter('live', this)">En Vivo</button>
+  <button type="button" class="filter-btn" onclick="setTypeFilter('ondemand', this)">Bajo Demanda</button>
+</div>
+
+<!-- CLASSES GRID -->
+<div class="section">
+  <div class="section-title">📚 Todas las clases</div>
+  <div class="classes-grid" id="classesGrid">
+    <div class="loading"><div class="spinner"></div><p>Cargando clases...</p></div>
+  </div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<!-- CLASS MODAL -->
+<div class="modal-overlay" id="classModal">
+  <div class="modal">
+    <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-hero" id="modalHero">🏋️</div>
+    <div class="modal-body">
+      <div style="display:flex;gap:.5rem;margin-bottom:.75rem;" id="modalBadges"></div>
+      <h2 id="modalTitle"></h2>
+      <div class="modal-meta" id="modalMeta"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-equip" id="modalEquip"></div>
+      <button type="button" class="modal-enroll-btn" id="modalEnrollBtn" onclick="handleEnroll()">
+        Inscribirme a esta clase
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '/api';
+  const token = localStorage.getItem('token');
+  let currentPage = 1;
+  let currentClassId = null;
+  let liveFilter = 'all';
+  let searchTimer;
+
+  const CATEGORY_ICONS = { HIIT:'🔥', Yoga:'🧘', Strength:'💪', Cardio:'🏃', Pilates:'🌀', Stretching:'🤸', default:'⚡' };
+  const DIFF_LABELS = { beginner:'Principiante', intermediate:'Intermedio', advanced:'Avanzado' };
+
+  async function api(path, opts = {}) {
+    const r = await fetch(API + path, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...opts.headers }, ...opts });
+    return r.json();
+  }
+
+  function setTypeFilter(type, btn) {
+    liveFilter = type;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPage = 1;
+    loadClasses();
+  }
+
+  async function loadCategories() {
+    const { categories } = await api('/classes/categories');
+    const sel = document.getElementById('categoryFilter');
+    (categories || []).forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.id; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  }
+
+  async function loadLive() {
+    const { classes } = await api('/classes/live/upcoming?limit=8');
+    const strip = document.getElementById('liveStrip');
+    if (!classes?.length) { strip.innerHTML = '<p style="color:var(--muted);font-size:.9rem;padding:.5rem">No hay clases en vivo próximamente</p>'; return; }
+    strip.innerHTML = classes.map(c => `
+      <div class="live-card" onclick="openModal('${c.id}')">
+        <div class="live-card-header">
+          <span class="live-tag">EN VIVO</span>
+          <span class="live-time">${c.scheduledAt ? new Date(c.scheduledAt).toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'}) : 'Hoy'}</span>
+        </div>
+        <h3>${c.title}</h3>
+        <p>${c.category?.name || ''}</p>
+        <div class="live-meta">
+          <span>⏱ ${c.durationMinutes} min</span>
+          <span>👥 ${c.enrollmentCount}</span>
+          <span>⭐ ${c.rating?.toFixed(1) || '–'}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function buildParams() {
+    const params = new URLSearchParams();
+    params.set('page', currentPage);
+    params.set('limit', '12');
+    const cat = document.getElementById('categoryFilter').value;
+    const diff = document.getElementById('difficultyFilter').value;
+    const dur = document.getElementById('durationFilter').value;
+    const q = document.getElementById('searchInput').value.trim();
+    if (cat) params.set('categoryId', cat);
+    if (diff) params.set('difficulty', diff);
+    if (dur) params.set('maxDuration', dur);
+    if (q) params.set('search', q);
+    if (liveFilter === 'live') params.set('isLive', 'true');
+    if (liveFilter === 'ondemand') params.set('isLive', 'false');
+    return params;
+  }
+
+  async function loadClasses() {
+    const grid = document.getElementById('classesGrid');
+    grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>';
+    const data = await api('/classes?' + buildParams());
+    if (!data.classes?.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>No hay clases con esos filtros</p></div>'; renderPagination(0, 0); return; }
+    grid.innerHTML = data.classes.map(renderClassCard).join('');
+    renderPagination(data.total, data.pages);
+  }
+
+  function renderClassCard(c) {
+    const diffClass = `diff-${c.difficulty}`;
+    const icon = CATEGORY_ICONS[c.category?.name] || CATEGORY_ICONS.default;
+    return `
+    <div class="class-card" onclick="openModal('${c.id}')">
+      <div class="class-thumb">
+        ${c.thumbnailUrl ? `<img src="${c.thumbnailUrl}" alt="${c.title}" />` : `<div class="class-thumb-placeholder">${icon}</div>`}
+        <span class="class-difficulty ${diffClass}">${DIFF_LABELS[c.difficulty] || c.difficulty}</span>
+        <span class="class-duration">⏱ ${c.durationMinutes} min</span>
+        ${c.isLive ? '<span style="position:absolute;top:.5rem;right:.5rem;background:var(--secondary);color:#fff;font-size:.65rem;font-weight:800;padding:.2rem .4rem;border-radius:4px">🔴 VIVO</span>' : ''}
+      </div>
+      <div class="class-body">
+        <div class="class-category">${c.category?.name || 'General'}</div>
+        <div class="class-title">${c.title}</div>
+        <div class="class-instructor">por ${c.instructor?.userId?.slice(0,8) || 'Instructor'}</div>
+        <div class="class-footer">
+          <div class="class-stats">
+            <span>👥 ${c.enrollmentCount}</span>
+            <span>⭐ ${c.rating?.toFixed(1) || '–'}</span>
+            ${c.caloriesBurned ? `<span>🔥 ${c.caloriesBurned} kcal</span>` : ''}
+          </div>
+          <button type="button" class="enroll-btn ${c.enrollment ? 'enrolled' : ''}" onclick="event.stopPropagation();quickEnroll('${c.id}', this)">
+            ${c.enrollment ? '✓ Inscrito' : 'Inscribirse'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderPagination(total, pages) {
+    const p = document.getElementById('pagination');
+    if (pages <= 1) { p.innerHTML = ''; return; }
+    p.innerHTML = Array.from({length: pages}, (_, i) => i + 1)
+      .slice(Math.max(0, currentPage-3), currentPage+2)
+      .map(n => `<button type="button" class="page-btn ${n === currentPage ? 'active' : ''}" onclick="goPage(${n})">${n}</button>`)
+      .join('');
+  }
+
+  function goPage(n) { currentPage = n; loadClasses(); window.scrollTo({top:300, behavior:'smooth'}); }
+
+  async function openModal(classId) {
+    currentClassId = classId;
+    const { class: c } = await api(`/classes/${classId}`);
+    const modal = document.getElementById('classModal');
+    document.getElementById('modalHero').textContent = CATEGORY_ICONS[c.category?.name] || '⚡';
+    document.getElementById('modalTitle').textContent = c.title;
+    document.getElementById('modalBadges').innerHTML = `
+      <span class="class-difficulty diff-${c.difficulty}" style="position:static">${DIFF_LABELS[c.difficulty]}</span>
+      ${c.isLive ? '<span style="background:var(--secondary);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .6rem;border-radius:999px">🔴 EN VIVO</span>' : '<span style="background:rgba(108,99,255,0.15);color:var(--primary);font-size:.7rem;font-weight:700;padding:.25rem .6rem;border-radius:999px">📹 BAJO DEMANDA</span>'}`;
+    document.getElementById('modalMeta').innerHTML = `
+      <span class="meta-chip">⏱ ${c.durationMinutes} min</span>
+      <span class="meta-chip">🏷 ${c.category?.name || 'General'}</span>
+      <span class="meta-chip">⭐ ${c.rating?.toFixed(1) || '–'} (${c.reviewCount})</span>
+      <span class="meta-chip">👥 ${c.enrollmentCount} inscritos</span>
+      ${c.caloriesBurned ? `<span class="meta-chip">🔥 ${c.caloriesBurned} kcal</span>` : ''}`;
+    document.getElementById('modalDesc').textContent = c.description || 'Sin descripción disponible.';
+    const equip = c.equipmentNeeded?.length ? `<h4>🏠 Equipamiento necesario</h4><div class="equip-tags">${c.equipmentNeeded.map(e => `<span class="equip-tag">${e}</span>`).join('')}</div>` : '';
+    document.getElementById('modalEquip').innerHTML = equip;
+    const btn = document.getElementById('modalEnrollBtn');
+    if (c.enrollment) { btn.textContent = '✓ Ya estás inscrito'; btn.className = 'modal-enroll-btn enrolled'; }
+    else { btn.textContent = 'Inscribirme a esta clase'; btn.className = 'modal-enroll-btn'; }
+    modal.classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('classModal').classList.remove('open'); }
+
+  async function handleEnroll() {
+    if (!token) { alert('Inicia sesión para inscribirte'); return; }
+    const res = await api(`/classes/${currentClassId}/enroll`, { method: 'POST' });
+    if (res.success) {
+      const btn = document.getElementById('modalEnrollBtn');
+      btn.textContent = '✓ Inscrito exitosamente'; btn.className = 'modal-enroll-btn enrolled';
+      loadClasses();
+    } else { alert(res.error || 'Error al inscribirse'); }
+  }
+
+  async function quickEnroll(classId, btn) {
+    if (!token) { alert('Inicia sesión para inscribirte'); return; }
+    const res = await api(`/classes/${classId}/enroll`, { method: 'POST' });
+    if (res.success) { btn.textContent = '✓ Inscrito'; btn.className = 'enroll-btn enrolled'; }
+  }
+
+  function applyFilters() { currentPage = 1; loadClasses(); }
+
+  document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { currentPage = 1; loadClasses(); }, 400);
+  });
+
+  document.getElementById('classModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  loadCategories();
+  loadLive();
+  loadClasses();
+</script>
+</body>
+</html>

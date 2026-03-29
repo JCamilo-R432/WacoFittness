@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analíticas - WacoPro Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; }
+    .chart-card h3 { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem; letter-spacing: 0.1em; }
+    .chart-wrap { position: relative; height: 200px; }
+    .stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .stat-pill { flex: 1; min-width: 120px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1rem; text-align: center; }
+    .stat-pill .val { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: var(--neon-blue); }
+    .stat-pill .lbl { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .measure-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    .measure-form .form-group { margin: 0; }
+    .tab-bar { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .tab-btn { padding: 0.4rem 0.9rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12); background: transparent; color: rgba(255,255,255,0.5); font-family: 'Orbitron', sans-serif; font-size: 0.65rem; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: rgba(0,243,255,0.12); border-color: var(--neon-blue); color: var(--neon-blue); }
+    .measure-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .measure-table th { color: rgba(255,255,255,0.4); font-family: 'Orbitron', sans-serif; font-size: 0.6rem; text-align: left; padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .measure-table td { color: rgba(255,255,255,0.7); padding: 0.6rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .period-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 0.75rem; padding: 0.35rem 0.6rem; cursor: pointer; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <!-- Navbar -->
+  <nav class="dash-nav">
+    <div class="dash-nav-inner">
+      <a href="/dashboard.html" class="nav-brand">
+        <div class="nav-brand-icon">W</div>
+        <span class="nav-brand-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">DASHBOARD</a>
+        <a href="/analytics.html" class="nav-link active">ANALÍTICAS</a>
+        <a href="/social-feed.html" class="nav-link">SOCIAL</a>
+        <a href="/profile.html" class="nav-link">PERFIL</a>
+      </div>
+      <div class="nav-right">
+        <span class="nav-user-name" id="navUserName">...</span>
+        <button type="button" class="btn-logout" onclick="logout()">SALIR</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <!-- Sidebar -->
+    <aside class="dash-sidebar">
+      <div class="sidebar-card">
+        <p class="sidebar-section-title">ANALÍTICAS</p>
+        <ul class="sidebar-nav">
+          <li><a href="/dashboard.html" class="sidebar-nav-link">📊 Dashboard</a></li>
+          <li><a href="/analytics.html" class="sidebar-nav-link active">📈 Analíticas</a></li>
+          <li><a href="/social-feed.html" class="sidebar-nav-link">🌐 Social</a></li>
+          <li><a href="/workout-builder.html" class="sidebar-nav-link">🏗️ Constructor</a></li>
+          <li><a href="/meal-planner.html" class="sidebar-nav-link">🥗 Plan Nutricional</a></li>
+          <li><a href="/challenges.html" class="sidebar-nav-link">🏆 Retos</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="page-header">
+        <h1 class="page-title">Analíticas</h1>
+        <p class="page-subtitle">Seguimiento de tu progreso</p>
+      </div>
+
+      <!-- Period selector -->
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;">
+        <span style="font-size:0.75rem;color:rgba(255,255,255,0.4);">PERÍODO:</span>
+        <select class="period-select" id="periodSelect" onchange="loadAll()">
+          <option value="7">Últimos 7 días</option>
+          <option value="14">Últimos 14 días</option>
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="90">Últimos 90 días</option>
+        </select>
+      </div>
+
+      <!-- Stat pills -->
+      <div class="stat-row" id="statPills">
+        <div class="stat-pill"><div class="val" id="statWorkouts">-</div><div class="lbl">Entrenamientos</div></div>
+        <div class="stat-pill"><div class="val" id="statMeals">-</div><div class="lbl">Comidas</div></div>
+        <div class="stat-pill"><div class="val" id="statWater">-</div><div class="lbl">Registros Agua</div></div>
+        <div class="stat-pill"><div class="val" id="statSleep">-</div><div class="lbl">Registros Sueño</div></div>
+        <div class="stat-pill"><div class="val" id="statAvgCal">-</div><div class="lbl">Kcal/día promedio</div></div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <h3>CALORÍAS POR DÍA</h3>
+          <div class="chart-wrap"><canvas id="chartNutrition"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>MINUTOS DE ENTRENAMIENTO</h3>
+          <div class="chart-wrap"><canvas id="chartWorkouts"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>HIDRATACIÓN (ml)</h3>
+          <div class="chart-wrap"><canvas id="chartHydration"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Body measurements -->
+      <div class="dash-card" style="margin-top:0;">
+        <div class="card-header" style="margin-bottom:1rem;">
+          <span class="card-title">MEDIDAS CORPORALES</span>
+          <button type="button" class="btn-neon" onclick="toggleMeasureForm()" style="font-size:0.65rem;padding:0.35rem 0.75rem;">+ AÑADIR</button>
+        </div>
+
+        <!-- Add form (hidden by default) -->
+        <div id="measureForm" style="display:none;margin-bottom:1.25rem;padding:1rem;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
+          <div class="measure-form">
+            <div class="form-group"><label class="form-label">FECHA</label><input type="date" id="mDate" class="form-input"></div>
+            <div class="form-group"><label class="form-label">PESO (kg)</label><input type="number" step="0.1" id="mWeight" class="form-input" placeholder="70.5"></div>
+            <div class="form-group"><label class="form-label">GRASA CORPORAL (%)</label><input type="number" step="0.1" id="mBodyFat" class="form-input" placeholder="20.5"></div>
+            <div class="form-group"><label class="form-label">MASA MUSCULAR (%)</label><input type="number" step="0.1" id="mMuscle" class="form-input" placeholder="35.0"></div>
+            <div class="form-group"><label class="form-label">PECHO (cm)</label><input type="number" step="0.1" id="mChest" class="form-input" placeholder="95"></div>
+            <div class="form-group"><label class="form-label">CINTURA (cm)</label><input type="number" step="0.1" id="mWaist" class="form-input" placeholder="80"></div>
+            <div class="form-group"><label class="form-label">CADERAS (cm)</label><input type="number" step="0.1" id="mHips" class="form-input" placeholder="90"></div>
+            <div class="form-group"><label class="form-label">BRAZO (cm)</label><input type="number" step="0.1" id="mArm" class="form-input" placeholder="35"></div>
+            <div class="form-group"><label class="form-label">MUSLO (cm)</label><input type="number" step="0.1" id="mThigh" class="form-input" placeholder="55"></div>
+          </div>
+          <div style="display:flex;gap:0.75rem;">
+            <button type="button" class="btn-neon" onclick="saveMeasurement()" style="font-size:0.7rem;">GUARDAR</button>
+            <button type="button" onclick="toggleMeasureForm()" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);border-radius:6px;padding:0.4rem 0.875rem;font-size:0.7rem;cursor:pointer;">CANCELAR</button>
+          </div>
+        </div>
+
+        <!-- Weight chart -->
+        <div class="chart-card" style="margin-bottom:1rem;">
+          <h3>EVOLUCIÓN DEL PESO</h3>
+          <div class="chart-wrap"><canvas id="chartWeight"></canvas></div>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x:auto;">
+          <table class="measure-table">
+            <thead>
+              <tr>
+                <th>FECHA</th><th>PESO</th><th>GRASA %</th><th>MÚSCULO %</th><th>CINTURA</th><th>PECHO</th><th>BRAZO</th>
+              </tr>
+            </thead>
+            <tbody id="measureTableBody">
+              <tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.3);padding:1.5rem;">Sin registros aún</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    if (!requireAuth()) { /* redirected */ }
+
+    let charts = {};
+
+    const CHART_DEFAULTS = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      },
+    };
+
+    function makeChart(id, type, labels, data, color) {
+      if (charts[id]) charts[id].destroy();
+      const ctx = document.getElementById(id).getContext('2d');
+      charts[id] = new Chart(ctx, {
+        type,
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: color + '33',
+            borderColor: color,
+            borderWidth: 2,
+            fill: type === 'line',
+            tension: 0.4,
+            pointRadius: 3,
+          }],
+        },
+        options: CHART_DEFAULTS,
+      });
+    }
+
+    function fmtDate(d) {
+      return new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+    }
+
+    async function loadAll() {
+      const period = document.getElementById('periodSelect').value;
+      try {
+        const [overview, nutrition, training] = await Promise.all([
+          window.api.request(`/api/analytics/overview`),
+          window.api.request(`/api/analytics/nutrition-summary?days=${period}`),
+          window.api.request(`/api/analytics/training-summary?days=${period}`),
+        ]);
+
+        const d = overview.data;
+
+        // Stat pills
+        document.getElementById('statWorkouts').textContent = training.data.totalWorkouts;
+        document.getElementById('statMeals').textContent = nutrition.data.totalMeals;
+        document.getElementById('statWater').textContent = d.totals.waterLogs;
+        document.getElementById('statSleep').textContent = d.totals.sleepLogs;
+        document.getElementById('statAvgCal').textContent = nutrition.data.avgCaloriesPerDay;
+
+        // Charts
+        makeChart('chartNutrition', 'bar',
+          d.nutrition.map(x => fmtDate(x.date)), d.nutrition.map(x => x.value), '#bc13fe');
+        makeChart('chartWorkouts', 'bar',
+          d.workouts.map(x => fmtDate(x.date)), d.workouts.map(x => x.value), '#00f3ff');
+        makeChart('chartHydration', 'line',
+          d.hydration.map(x => fmtDate(x.date)), d.hydration.map(x => x.value), '#10b981');
+      } catch (e) {
+        console.error('Error loading analytics:', e);
+      }
+
+      loadMeasurements();
+    }
+
+    async function loadMeasurements() {
+      try {
+        const res = await window.api.request('/api/analytics/body-measurements');
+        const data = res.data || [];
+
+        // Weight chart
+        makeChart('chartWeight', 'line',
+          data.map(m => fmtDate(m.date)), data.map(m => Number(m.weightKg) || null), '#f59e0b');
+
+        // Table
+        const tbody = document.getElementById('measureTableBody');
+        if (!data.length) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.3);padding:1.5rem;">Sin registros aún</td></tr>';
+          return;
+        }
+        tbody.innerHTML = [...data].reverse().map(m => `
+          <tr>
+            <td>${fmtDate(m.date)}</td>
+            <td>${m.weightKg ? m.weightKg + ' kg' : '-'}</td>
+            <td>${m.bodyFatPct ? m.bodyFatPct + '%' : '-'}</td>
+            <td>${m.muscleMassPct ? m.muscleMassPct + '%' : '-'}</td>
+            <td>${m.waistCm ? m.waistCm + ' cm' : '-'}</td>
+            <td>${m.chestCm ? m.chestCm + ' cm' : '-'}</td>
+            <td>${m.armCm ? m.armCm + ' cm' : '-'}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error('Error loading measurements:', e);
+      }
+    }
+
+    function toggleMeasureForm() {
+      const form = document.getElementById('measureForm');
+      const shown = form.style.display !== 'none';
+      form.style.display = shown ? 'none' : 'block';
+      if (!shown) {
+        document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
+      }
+    }
+
+    async function saveMeasurement() {
+      const date = document.getElementById('mDate').value;
+      if (!date) { window.showNotification('Selecciona una fecha', 'error'); return; }
+
+      const data = {
+        date,
+        weightKg: document.getElementById('mWeight').value || undefined,
+        bodyFatPct: document.getElementById('mBodyFat').value || undefined,
+        muscleMassPct: document.getElementById('mMuscle').value || undefined,
+        chestCm: document.getElementById('mChest').value || undefined,
+        waistCm: document.getElementById('mWaist').value || undefined,
+        hipsCm: document.getElementById('mHips').value || undefined,
+        armCm: document.getElementById('mArm').value || undefined,
+        thighCm: document.getElementById('mThigh').value || undefined,
+      };
+
+      try {
+        await window.api.request('/api/analytics/body-measurements', { method: 'POST', body: JSON.stringify(data) });
+        window.showNotification('Medida guardada correctamente', 'success');
+        toggleMeasureForm();
+        loadMeasurements();
+      } catch (e) {
+        window.showNotification('Error al guardar: ' + e.message, 'error');
+      }
+    }
+
+    // Init navbar
+    const u = window.api.getCurrentUser();
+    if (u) document.getElementById('navUserName').textContent = (u.name || u.email).split(' ')[0];
+
+    loadAll();
+  </script>
+</body>
+</html>

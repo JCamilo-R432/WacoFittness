@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constructor de Rutinas - WacoPro Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .builder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 768px) { .builder-grid { grid-template-columns: 1fr; } }
+    .exercise-pool { max-height: 500px; overflow-y: auto; }
+    .ex-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); margin-bottom: 0.4rem; cursor: pointer; transition: all 0.2s; }
+    .ex-item:hover { border-color: rgba(0,243,255,0.3); background: rgba(0,243,255,0.04); }
+    .ex-item .ex-name { font-size: 0.82rem; color: rgba(255,255,255,0.8); }
+    .ex-item .ex-meta { font-size: 0.65rem; color: rgba(255,255,255,0.35); font-family: 'Orbitron', sans-serif; }
+    .ex-add-btn { background: rgba(0,243,255,0.12); border: 1px solid rgba(0,243,255,0.3); color: var(--neon-blue); border-radius: 6px; padding: 0.2rem 0.5rem; font-size: 0.65rem; cursor: pointer; }
+    .routine-exercise { padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(188,19,254,0.2); background: rgba(188,19,254,0.04); margin-bottom: 0.5rem; }
+    .routine-ex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .routine-ex-name { font-size: 0.82rem; color: rgba(255,255,255,0.85); font-weight: 600; }
+    .sets-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .set-pill { display: flex; gap: 0.3rem; align-items: center; background: rgba(255,255,255,0.04); border-radius: 6px; padding: 0.25rem 0.5rem; }
+    .set-input { width: 48px; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); font-size: 0.75rem; text-align: center; outline: none; }
+    .set-lbl { font-size: 0.65rem; color: rgba(255,255,255,0.3); font-family: 'Orbitron', sans-serif; }
+    .remove-ex { color: rgba(239,68,68,0.5); background: transparent; border: none; cursor: pointer; font-size: 0.8rem; }
+    .remove-ex:hover { color: #ef4444; }
+    .filter-group { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .search-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.5rem 0.75rem; color: rgba(255,255,255,0.8); font-size: 0.8rem; outline: none; margin-bottom: 0.75rem; font-family: 'Inter', sans-serif; }
+    .empty-routine { text-align: center; padding: 3rem 1rem; color: rgba(255,255,255,0.2); font-size: 0.85rem; }
+    .save-bar { display: flex; gap: 0.75rem; align-items: center; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; }
+    .routine-name-input { flex: 1; min-width: 180px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem 0.75rem; color: rgba(255,255,255,0.85); font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; }
+    .chip-sm { padding: 0.2rem 0.55rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.45); font-size: 0.6rem; cursor: pointer; transition: all 0.2s; }
+    .chip-sm.active { border-color: var(--neon-purple); color: var(--neon-purple); background: rgba(188,19,254,0.08); }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <nav class="dash-nav">
+    <div class="dash-nav-inner">
+      <a href="/dashboard.html" class="nav-brand">
+        <div class="nav-brand-icon">W</div>
+        <span class="nav-brand-text">WACOPRO <span>FITNESS</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">DASHBOARD</a>
+        <a href="/analytics.html" class="nav-link">ANALÍTICAS</a>
+        <a href="/social-feed.html" class="nav-link">SOCIAL</a>
+        <a href="/profile.html" class="nav-link">PERFIL</a>
+      </div>
+      <div class="nav-right">
+        <span class="nav-user-name" id="navUserName">...</span>
+        <button type="button" class="btn-logout" onclick="logout()">SALIR</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <aside class="dash-sidebar">
+      <div class="sidebar-card">
+        <p class="sidebar-section-title">HERRAMIENTAS</p>
+        <ul class="sidebar-nav">
+          <li><a href="/dashboard.html" class="sidebar-nav-link">📊 Dashboard</a></li>
+          <li><a href="/analytics.html" class="sidebar-nav-link">📈 Analíticas</a></li>
+          <li><a href="/social-feed.html" class="sidebar-nav-link">🌐 Social</a></li>
+          <li><a href="/workout-builder.html" class="sidebar-nav-link active">🏗️ Constructor</a></li>
+          <li><a href="/meal-planner.html" class="sidebar-nav-link">🥗 Plan Nutricional</a></li>
+          <li><a href="/challenges.html" class="sidebar-nav-link">🏆 Retos</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="page-header">
+        <h1 class="page-title">Constructor de Rutinas</h1>
+        <p class="page-subtitle">Diseña tu plan de entrenamiento personalizado</p>
+      </div>
+
+      <div class="builder-grid">
+        <!-- Exercise library panel -->
+        <div class="dash-card">
+          <div class="card-header" style="margin-bottom:0.75rem;">
+            <span class="card-title">BIBLIOTECA DE EJERCICIOS</span>
+          </div>
+          <input class="search-input" id="exSearch" placeholder="Buscar ejercicio..." oninput="filterExercises()">
+          <div class="filter-group" id="muscleFilters">
+            <button type="button" class="chip-sm active" data-muscle="all" onclick="setMuscle(this,'all')">Todos</button>
+            <button type="button" class="chip-sm" data-muscle="chest" onclick="setMuscle(this,'chest')">Pecho</button>
+            <button type="button" class="chip-sm" data-muscle="back" onclick="setMuscle(this,'back')">Espalda</button>
+            <button type="button" class="chip-sm" data-muscle="shoulders" onclick="setMuscle(this,'shoulders')">Hombros</button>
+            <button type="button" class="chip-sm" data-muscle="arms" onclick="setMuscle(this,'arms')">Brazos</button>
+            <button type="button" class="chip-sm" data-muscle="legs" onclick="setMuscle(this,'legs')">Piernas</button>
+            <button type="button" class="chip-sm" data-muscle="core" onclick="setMuscle(this,'core')">Core</button>
+          </div>
+          <div class="exercise-pool" id="exercisePool">
+            <div style="color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;padding:1rem;">Cargando ejercicios...</div>
+          </div>
+        </div>
+
+        <!-- Routine builder panel -->
+        <div class="dash-card">
+          <div class="card-header" style="margin-bottom:0.75rem;">
+            <span class="card-title">MI RUTINA</span>
+            <span style="font-size:0.7rem;color:rgba(255,255,255,0.3);" id="exCount">0 ejercicios</span>
+          </div>
+
+          <div id="routineExercises">
+            <div class="empty-routine">
+              <div style="font-size:2rem;margin-bottom:0.5rem;">🏗️</div>
+              <div>Añade ejercicios desde la biblioteca</div>
+            </div>
+          </div>
+
+          <div class="save-bar">
+            <input class="routine-name-input" id="routineName" placeholder="Nombre de la rutina...">
+            <select class="form-input" id="routineDay" style="max-width:160px;padding:0.5rem;">
+              <option value="monday">Lunes</option>
+              <option value="tuesday">Martes</option>
+              <option value="wednesday">Miércoles</option>
+              <option value="thursday">Jueves</option>
+              <option value="friday">Viernes</option>
+              <option value="saturday">Sábado</option>
+              <option value="sunday">Domingo</option>
+            </select>
+            <button type="button" class="btn-neon" onclick="saveRoutine()">GUARDAR RUTINA</button>
+            <button type="button" class="btn-neon" onclick="exportCurrentToPDF()" style="background:rgba(0,217,166,.15);border-color:rgba(0,217,166,.4);color:#00d9a6;" title="Exportar a PDF">📄 PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved routines -->
+      <div class="dash-card" style="margin-top:1rem;">
+        <div class="card-header" style="margin-bottom:0.75rem;">
+          <span class="card-title">MIS RUTINAS GUARDADAS</span>
+        </div>
+        <div id="savedRoutines">
+          <div style="color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;padding:1rem;">Cargando...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script>
+    if (!requireAuth()) { /* redirected */ }
+
+    const EXERCISES = [
+      { id:'bench-press',    name:'Press de Banca',        muscle:'chest',     equipment:'Barra' },
+      { id:'incline-press',  name:'Press Inclinado',       muscle:'chest',     equipment:'Mancuernas' },
+      { id:'chest-fly',      name:'Aperturas Pecho',       muscle:'chest',     equipment:'Cable' },
+      { id:'dips',           name:'Fondos',                muscle:'chest',     equipment:'Paralelas' },
+      { id:'pull-up',        name:'Dominadas',             muscle:'back',      equipment:'Barra' },
+      { id:'row-barbell',    name:'Remo con Barra',        muscle:'back',      equipment:'Barra' },
+      { id:'lat-pulldown',   name:'Jalón al Pecho',        muscle:'back',      equipment:'Polea' },
+      { id:'seated-row',     name:'Remo en Polea',         muscle:'back',      equipment:'Polea' },
+      { id:'ohp',            name:'Press Militar',         muscle:'shoulders', equipment:'Barra' },
+      { id:'lateral-raise',  name:'Elevaciones Laterales', muscle:'shoulders', equipment:'Mancuernas' },
+      { id:'front-raise',    name:'Elevaciones Frontales', muscle:'shoulders', equipment:'Mancuernas' },
+      { id:'face-pull',      name:'Face Pull',             muscle:'shoulders', equipment:'Cable' },
+      { id:'bicep-curl',     name:'Curl de Bíceps',        muscle:'arms',      equipment:'Barra' },
+      { id:'hammer-curl',    name:'Curl Martillo',         muscle:'arms',      equipment:'Mancuernas' },
+      { id:'tricep-ext',     name:'Extensión Tríceps',     muscle:'arms',      equipment:'Polea' },
+      { id:'skull-crusher',  name:'Skull Crusher',         muscle:'arms',      equipment:'Barra' },
+      { id:'squat',          name:'Sentadilla',            muscle:'legs',      equipment:'Barra' },
+      { id:'deadlift',       name:'Peso Muerto',           muscle:'legs',      equipment:'Barra' },
+      { id:'leg-press',      name:'Prensa de Piernas',     muscle:'legs',      equipment:'Máquina' },
+      { id:'lunges',         name:'Zancadas',              muscle:'legs',      equipment:'Mancuernas' },
+      { id:'leg-curl',       name:'Curl Femoral',          muscle:'legs',      equipment:'Máquina' },
+      { id:'calf-raise',     name:'Elevaciones Gemelos',   muscle:'legs',      equipment:'Máquina' },
+      { id:'plank',          name:'Plancha',               muscle:'core',      equipment:'Sin equipo' },
+      { id:'crunch',         name:'Crunch Abdominal',      muscle:'core',      equipment:'Sin equipo' },
+      { id:'russian-twist',  name:'Russian Twist',         muscle:'core',      equipment:'Sin equipo' },
+      { id:'leg-raise',      name:'Elevación de Piernas',  muscle:'core',      equipment:'Barra' },
+    ];
+
+    let currentMuscle = 'all';
+    let routineExercises = []; // { id, name, muscle, sets: [{reps, weight}] }
+
+    function setMuscle(el, muscle) {
+      document.querySelectorAll('#muscleFilters .chip-sm').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      currentMuscle = muscle;
+      filterExercises();
+    }
+
+    function filterExercises() {
+      const q = document.getElementById('exSearch').value.toLowerCase();
+      const filtered = EXERCISES.filter(ex =>
+        (currentMuscle === 'all' || ex.muscle === currentMuscle) &&
+        (!q || ex.name.toLowerCase().includes(q))
+      );
+      const pool = document.getElementById('exercisePool');
+      if (!filtered.length) {
+        pool.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;padding:1rem;">Sin resultados</div>';
+        return;
+      }
+      pool.innerHTML = filtered.map(ex => `
+        <div class="ex-item" onclick="addExercise('${ex.id}','${ex.name}','${ex.muscle}')">
+          <div>
+            <div class="ex-name">${ex.name}</div>
+            <div class="ex-meta">${ex.equipment} · ${ex.muscle.toUpperCase()}</div>
+          </div>
+          <button class="ex-add-btn">+</button>
+        </div>
+      `).join('');
+    }
+
+    function addExercise(id, name, muscle) {
+      if (routineExercises.find(e => e.id === id)) {
+        window.showNotification('Ejercicio ya añadido', 'warning');
+        return;
+      }
+      routineExercises.push({ id, name, muscle, sets: [{ reps: 10, weight: '' }] });
+      renderRoutine();
+    }
+
+    function addSet(exId) {
+      const ex = routineExercises.find(e => e.id === exId);
+      if (ex) { ex.sets.push({ reps: 10, weight: '' }); renderRoutine(); }
+    }
+
+    function removeExercise(exId) {
+      routineExercises = routineExercises.filter(e => e.id !== exId);
+      renderRoutine();
+    }
+
+    function renderRoutine() {
+      const container = document.getElementById('routineExercises');
+      document.getElementById('exCount').textContent = routineExercises.length + ' ejercicios';
+
+      if (!routineExercises.length) {
+        container.innerHTML = '<div class="empty-routine"><div style="font-size:2rem;margin-bottom:0.5rem;">🏗️</div><div>Añade ejercicios desde la biblioteca</div></div>';
+        return;
+      }
+
+      container.innerHTML = routineExercises.map((ex, ei) => `
+        <div class="routine-exercise">
+          <div class="routine-ex-header">
+            <span class="routine-ex-name">${ex.name}</span>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button type="button" onclick="addSet('${ex.id}')" style="font-size:0.65rem;font-family:'Orbitron',sans-serif;color:var(--neon-blue);background:transparent;border:1px solid rgba(0,243,255,0.3);border-radius:5px;padding:0.15rem 0.45rem;cursor:pointer;">+SERIE</button>
+              <button type="button" class="remove-ex" onclick="removeExercise('${ex.id}')">✕</button>
+            </div>
+          </div>
+          <div class="sets-row">
+            ${ex.sets.map((s, si) => `
+              <div class="set-pill">
+                <span class="set-lbl">S${si+1}</span>
+                <input class="set-input" type="number" value="${s.reps}" placeholder="Reps" min="1"
+                  onchange="updateSet('${ex.id}',${si},'reps',this.value)">
+                <span class="set-lbl">reps</span>
+                <input class="set-input" type="number" value="${s.weight}" placeholder="kg"
+                  onchange="updateSet('${ex.id}',${si},'weight',this.value)">
+                <span class="set-lbl">kg</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateSet(exId, setIdx, field, value) {
+      const ex = routineExercises.find(e => e.id === exId);
+      if (ex && ex.sets[setIdx]) ex.sets[setIdx][field] = value;
+    }
+
+    async function saveRoutine() {
+      const name = document.getElementById('routineName').value.trim();
+      if (!name) { window.showNotification('Escribe un nombre para la rutina', 'warning'); return; }
+      if (!routineExercises.length) { window.showNotification('Añade al menos un ejercicio', 'warning'); return; }
+
+      const day = document.getElementById('routineDay').value;
+      const payload = {
+        name,
+        scheduledDay: day,
+        exercises: routineExercises.map(ex => ({
+          exerciseId: ex.id,
+          name: ex.name,
+          sets: ex.sets.map(s => ({ reps: Number(s.reps), weightKg: s.weight ? Number(s.weight) : null })),
+        })),
+      };
+
+      // Save to localStorage as backup
+      const saved = JSON.parse(localStorage.getItem('waco_routines') || '[]');
+      saved.push({ ...payload, savedAt: new Date().toISOString(), id: Date.now().toString() });
+      localStorage.setItem('waco_routines', JSON.stringify(saved));
+
+      try {
+        await window.api.request('/api/training/plans', { method: 'POST', body: JSON.stringify(payload) });
+      } catch (e) { /* saved locally */ }
+
+      window.showNotification('Rutina guardada correctamente', 'success');
+      routineExercises = [];
+      document.getElementById('routineName').value = '';
+      renderRoutine();
+      loadSavedRoutines();
+    }
+
+    function loadSavedRoutines() {
+      const saved = JSON.parse(localStorage.getItem('waco_routines') || '[]');
+      const container = document.getElementById('savedRoutines');
+      if (!saved.length) {
+        container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;padding:1rem;">No tienes rutinas guardadas aún</div>';
+        return;
+      }
+      container.innerHTML = [...saved].reverse().map(r => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:0.5rem;">
+          <div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.8);font-weight:600;">${r.name}</div>
+            <div style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:'Orbitron',sans-serif;">${(r.exercises||[]).length} EJERCICIOS · ${r.scheduledDay?.toUpperCase() || ''}</div>
+          </div>
+          <button type="button" onclick="deleteRoutine('${r.id}')" style="color:rgba(239,68,68,0.5);background:transparent;border:none;cursor:pointer;font-size:0.75rem;">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteRoutine(id) {
+      let saved = JSON.parse(localStorage.getItem('waco_routines') || '[]');
+      saved = saved.filter(r => r.id !== id);
+      localStorage.setItem('waco_routines', JSON.stringify(saved));
+      loadSavedRoutines();
+    }
+
+    // Init
+    const u = window.api.getCurrentUser();
+    if (u) document.getElementById('navUserName').textContent = (u.name || u.email).split(' ')[0];
+    filterExercises();
+    loadSavedRoutines();
+
+    // ── PDF Export ─────────────────────────────────────────────────────────
+    async function loadJsPDF() {
+      if (window.jspdf) return window.jspdf.jsPDF;
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        s.onload = () => resolve(window.jspdf.jsPDF);
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function exportCurrentToPDF() {
+      if (currentRoutine.length === 0) {
+        alert('Añade ejercicios a la rutina antes de exportar');
+        return;
+      }
+      try {
+        const jsPDF = await loadJsPDF();
+        const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+        const name = document.getElementById('routineName').value || 'Mi Rutina';
+        const user = window.api.getCurrentUser();
+        const now = new Date();
+
+        // Header
+        doc.setFillColor(12,12,26);
+        doc.rect(0,0,210,297,'F');
+        doc.setFillColor(108,99,255);
+        doc.rect(0,0,210,28,'F');
+        doc.setTextColor(255,255,255);
+        doc.setFontSize(20);
+        doc.setFont('helvetica','bold');
+        doc.text('WACOPRO FITNESS', 14, 12);
+        doc.setFontSize(11);
+        doc.setFont('helvetica','normal');
+        doc.text('Rutina de Entrenamiento', 14, 20);
+
+        // Routine name
+        doc.setFillColor(18,18,42);
+        doc.rect(0,28,210,25,'F');
+        doc.setTextColor(108,99,255);
+        doc.setFontSize(16);
+        doc.setFont('helvetica','bold');
+        doc.text(name, 14, 41);
+        doc.setTextColor(150,150,180);
+        doc.setFontSize(9);
+        const meta = `${currentRoutine.length} ejercicios  •  ${user?.name || 'Usuario'}  •  ${now.toLocaleDateString('es',{day:'numeric',month:'long',year:'numeric'})}`;
+        doc.text(meta, 14, 48);
+
+        // Exercises table
+        let y = 65;
+        doc.setTextColor(255,255,255);
+        doc.setFontSize(10);
+        doc.setFont('helvetica','bold');
+        doc.text('EJERCICIO', 14, y-6);
+        doc.text('SERIES', 120, y-6);
+        doc.text('REPS', 148, y-6);
+        doc.text('PESO (kg)', 170, y-6);
+        doc.setDrawColor(108,99,255);
+        doc.line(14, y-2, 196, y-2);
+
+        currentRoutine.forEach((ex, i) => {
+          if (y > 260) { doc.addPage(); y = 30; }
+          doc.setFillColor(i%2===0?20:25, i%2===0?20:25, i%2===0?40:45);
+          doc.rect(12, y-5, 184, 12, 'F');
+          doc.setTextColor(220,220,240);
+          doc.setFont('helvetica','bold');
+          doc.setFontSize(9);
+          doc.text(`${i+1}. ${ex.name}`, 14, y+2);
+          doc.setFont('helvetica','normal');
+          doc.setTextColor(150,150,180);
+          doc.setFontSize(8);
+          doc.text(ex.muscle?.toUpperCase() || '', 14, y+7);
+          doc.setTextColor(0,217,166);
+          doc.setFontSize(10);
+          doc.text(String(ex.sets||3), 122, y+2);
+          doc.text(String(ex.reps||'8-12'), 150, y+2);
+          doc.text(ex.weight ? `${ex.weight}` : '—', 172, y+2);
+          // Tracking rows
+          for (let s=0;s<(ex.sets||3);s++) {
+            y += 13;
+            if (y > 270) { doc.addPage(); y = 30; }
+            doc.setFillColor(15,15,30);
+            doc.rect(20, y-4, 176, 9, 'F');
+            doc.setDrawColor(50,50,80);
+            doc.rect(20, y-4, 176, 9);
+            doc.setTextColor(80,80,120);
+            doc.setFontSize(7);
+            doc.text(`Serie ${s+1}:  Reps: _____   Peso: _____   RIR: _____`, 24, y+2);
+          }
+          y += 16;
+        });
+
+        // Footer
+        doc.setTextColor(60,60,100);
+        doc.setFontSize(7);
+        doc.text('Generado por WacoPro Fitness — wacopro.com', 14, 290);
+
+        doc.save(`${name.replace(/\s+/g,'_')}_WacoPro.pdf`);
+      } catch (e) {
+        console.error('PDF error:', e);
+        alert('Error al generar PDF. Inténtalo de nuevo.');
+      }
+    }
+
+    async function exportRoutinePDF(workoutId, workoutName) {
+      // Export a saved routine by ID
+      try {
+        const routines = await window.api.get('/training/workout-logs');
+        const workout = routines?.data?.find?.(w => w.id === workoutId);
+        if (!workout) { alert('Rutina no encontrada'); return; }
+        // Set as current and export
+        currentRoutine = workout.exercises || [];
+        document.getElementById('routineName').value = workoutName;
+        exportCurrentToPDF();
+      } catch { alert('Error al cargar la rutina'); }
+    }
+    window.exportRoutinePDF = exportRoutinePDF;
+  </script>
+</body>
+</html>

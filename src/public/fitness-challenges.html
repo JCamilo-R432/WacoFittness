@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retos de Fitness — WacoPro</title>
+  <style>
+    :root{--primary:#6c63ff;--secondary:#ff6b6b;--accent:#00d9a6;--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a3e;--text:#e2e8f0;--muted:#718096;--border:rgba(108,99,255,0.2);--glow:0 0 20px rgba(108,99,255,0.4);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+    nav{background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:1.5rem;transition:color .2s;}
+    .nav-links a:hover{color:var(--primary);}
+    .container{max-width:1200px;margin:0 auto;padding:2rem;}
+    h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;margin-bottom:.5rem;}
+    h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .subtitle{color:var(--muted);margin-bottom:2rem;font-size:1.05rem;}
+
+    /* FILTER TABS */
+    .filter-tabs{display:flex;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap;}
+    .ftab{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;cursor:pointer;transition:all .2s;}
+    .ftab.active,.ftab:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+    /* MY CHALLENGES */
+    .my-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;}
+    .my-challenge{background:linear-gradient(135deg,rgba(108,99,255,.12),rgba(0,217,166,.06));border:1px solid var(--border);border-radius:14px;padding:1.1rem;cursor:pointer;transition:transform .2s;}
+    .my-challenge:hover{transform:translateY(-2px);}
+    .my-challenge h4{font-size:.95rem;font-weight:700;margin-bottom:.4rem;}
+    .my-challenge .type-badge{font-size:.72rem;font-weight:700;color:var(--primary);margin-bottom:.6rem;text-transform:uppercase;}
+    .progress-track{height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin:.5rem 0;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width .6s;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);}
+
+    /* CHALLENGE GRID */
+    .challenges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;}
+    .challenge-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden;}
+    .challenge-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(108,99,255,.05),transparent);pointer-events:none;}
+    .challenge-card:hover{transform:translateY(-4px);box-shadow:var(--glow);border-color:var(--primary);}
+    .challenge-type{font-size:.72rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .challenge-icon{font-size:2.5rem;margin-bottom:.75rem;}
+    .challenge-title{font-size:1.1rem;font-weight:800;margin-bottom:.4rem;}
+    .challenge-desc{font-size:.85rem;color:var(--muted);line-height:1.5;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .challenge-meta{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.1rem;}
+    .meta-tag{background:rgba(108,99,255,.1);border:1px solid var(--border);color:var(--muted);font-size:.75rem;padding:.25rem .6rem;border-radius:6px;}
+    .challenge-footer{display:flex;justify-content:space-between;align-items:center;}
+    .participants-count{font-size:.82rem;color:var(--muted);}
+    .join-btn{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.5rem 1.2rem;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .join-btn:hover{opacity:.85;}
+    .join-btn.joined{background:rgba(0,217,166,.15);color:var(--accent);border:1px solid var(--accent);}
+    .prize-badge{position:absolute;top:1rem;right:1rem;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:.7rem;font-weight:800;padding:.25rem .6rem;border-radius:6px;}
+    .days-left{font-size:.75rem;padding:.25rem .6rem;border-radius:6px;}
+    .days-left.urgent{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+    .days-left.normal{background:rgba(0,217,166,.1);color:var(--accent);}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;position:relative;}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.1);border:none;color:var(--text);width:32px;height:32px;border-radius:50%;cursor:pointer;}
+    .modal-hero{height:200px;background:linear-gradient(135deg,rgba(108,99,255,.3),rgba(0,217,166,.15));border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:center;font-size:5rem;}
+    .modal-body{padding:1.5rem;}
+    .modal-body h2{font-size:1.4rem;font-weight:800;margin-bottom:1rem;}
+    .modal-meta{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.25rem;}
+    .meta-chip{background:rgba(108,99,255,.1);border:1px solid var(--border);color:var(--primary);font-size:.78rem;padding:.3rem .7rem;border-radius:999px;}
+    .modal-goal{background:var(--surface2);border-left:3px solid var(--primary);padding:1rem;border-radius:0 10px 10px 0;margin-bottom:1.25rem;font-size:.9rem;line-height:1.6;color:var(--muted);}
+    .leaderboard{margin-bottom:1.5rem;}
+    .leaderboard h4{font-size:.9rem;font-weight:700;margin-bottom:.75rem;}
+    .lb-row{display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:8px;transition:background .2s;}
+    .lb-row:hover{background:rgba(108,99,255,.08);}
+    .lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;background:rgba(108,99,255,.15);color:var(--primary);flex-shrink:0;}
+    .lb-rank.top1{background:rgba(245,158,11,.2);color:#f59e0b;}
+    .lb-rank.top2{background:rgba(156,163,175,.2);color:#9ca3af;}
+    .lb-rank.top3{background:rgba(180,83,9,.2);color:#b45309;}
+    .lb-name{flex:1;font-size:.88rem;font-weight:600;}
+    .lb-progress{font-size:.85rem;color:var(--accent);font-weight:700;}
+    .lb-mini-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:2px;overflow:hidden;}
+    .lb-mini-fill{height:100%;background:var(--primary);border-radius:2px;}
+    .progress-input-wrap{display:flex;gap:.75rem;margin-bottom:1.5rem;}
+    .progress-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.6rem 1rem;border-radius:10px;font-size:.9rem;outline:none;flex:1;}
+    .progress-input:focus{border-color:var(--primary);}
+    .update-btn{background:var(--accent);border:none;color:#000;padding:.6rem 1.2rem;border-radius:10px;font-weight:700;cursor:pointer;font-size:.9rem;}
+    .modal-join-btn{width:100%;padding:.9rem;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;}
+    .modal-join-btn.joined{background:rgba(0,217,166,.15);color:var(--accent);border:2px solid var(--accent);}
+
+    .section-title{font-size:1.05rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+    .section-title::before{content:'';width:4px;height:1.1rem;background:linear-gradient(var(--primary),var(--accent));border-radius:2px;}
+    .loading{text-align:center;padding:3rem;color:var(--muted);}
+    .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .empty{text-align:center;padding:3rem;color:var(--muted);}
+
+    /* TYPE ICONS */
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">⚡ WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/virtual-classes">Clases</a>
+    <a href="/programs">Programas</a>
+    <a href="/progress-tracker">Progreso</a>
+    <a href="/fitness-challenges" style="color:var(--primary)">Retos</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Retos de <span>Fitness</span></h1>
+  <p class="subtitle">Únete a desafíos virtuales, compite con la comunidad y gana premios.</p>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button type="button" class="ftab active" onclick="setFilter('active', this)">🔥 Activos</button>
+    <button type="button" class="ftab" onclick="setFilter('upcoming', this)">🗓 Próximos</button>
+    <button type="button" class="ftab" onclick="setFilter('all', this)">📋 Todos</button>
+    <button type="button" class="ftab" onclick="switchToMy(this)">⭐ Mis retos</button>
+  </div>
+
+  <!-- MY CHALLENGES -->
+  <div id="mySection" style="display:none">
+    <div class="section-title">⭐ Mis retos activos</div>
+    <div class="my-grid" id="myGrid"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- CHALLENGES GRID -->
+  <div class="section-title" id="gridTitle">🏆 Retos disponibles</div>
+  <div class="challenges-grid" id="challengesGrid">
+    <div class="loading"><div class="spinner"></div><p>Cargando retos...</p></div>
+  </div>
+</div>
+
+<!-- CHALLENGE MODAL -->
+<div class="modal-overlay" id="challengeModal">
+  <div class="modal">
+    <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-hero" id="modalHero">🏆</div>
+    <div class="modal-body">
+      <div id="modalBadges" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;"></div>
+      <h2 id="modalTitle"></h2>
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-goal" id="modalGoal"></div>
+
+      <!-- PROGRESS UPDATE (if joined) -->
+      <div id="progressSection" style="display:none">
+        <div class="section-title">Mi progreso</div>
+        <div id="myProgressBar" style="height:10px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden;margin-bottom:.5rem;"><div id="myProgressFill" style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:5px;transition:width .6s;"></div></div>
+        <div id="myProgressLabel" style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;"></div>
+        <div class="progress-input-wrap">
+          <input class="progress-input" id="progressInput" type="number" step="0.1" placeholder="Mi progreso actual..." />
+          <button type="button" class="update-btn" onclick="submitProgress()">Actualizar</button>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="leaderboard" id="leaderboard"></div>
+
+      <button type="button" class="modal-join-btn" id="modalJoinBtn" onclick="handleJoin()">Unirme a este reto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '/api';
+  const token = localStorage.getItem('token');
+  let currentFilter = 'active';
+  let currentChallengeId = null;
+  let currentChallenge = null;
+
+  const TYPE_ICONS = { workout:'🏋️',step:'👟',weight_loss:'🔥',strength:'💪',streak:'🔥',nutrition:'🥗',flexibility:'🤸',default:'🏆' };
+
+  async function api(path, opts = {}) {
+    const r = await fetch(API + path, { headers: { Authorization: `Bearer ${token}`, 'Content-Type':'application/json', ...opts.headers }, ...opts });
+    return r.json();
+  }
+
+  function daysLeft(end) {
+    const d = Math.ceil((new Date(end) - Date.now()) / 86400000);
+    return d;
+  }
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mySection').style.display = 'none';
+    document.getElementById('challengesGrid').style.display = 'grid';
+    document.getElementById('gridTitle').style.display = 'flex';
+    loadChallenges();
+  }
+
+  async function switchToMy(btn) {
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mySection').style.display = 'block';
+    document.getElementById('challengesGrid').style.display = 'none';
+    document.getElementById('gridTitle').style.display = 'none';
+    loadMyChallenges();
+  }
+
+  async function loadChallenges() {
+    const grid = document.getElementById('challengesGrid');
+    grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>';
+    const data = await api(`/fitness-challenges?filter=${currentFilter}`);
+    if (!data.challenges?.length) { grid.innerHTML = '<div class="empty"><p style="font-size:3rem;opacity:.4">🏆</p><p>No hay retos disponibles</p></div>'; return; }
+    grid.innerHTML = data.challenges.map(renderChallengeCard).join('');
+  }
+
+  async function loadMyChallenges() {
+    if (!token) { document.getElementById('myGrid').innerHTML = '<p style="color:var(--muted);font-size:.9rem">Inicia sesión para ver tus retos</p>'; return; }
+    const grid = document.getElementById('myGrid');
+    grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    const data = await api('/fitness-challenges/my');
+    if (!data.challenges?.length) { grid.innerHTML = '<div class="empty"><p style="font-size:3rem;opacity:.4">🏆</p><p>Aún no te has unido a ningún reto</p></div>'; return; }
+    grid.innerHTML = data.challenges.map(e => {
+      const pct = e.challenge.targetValue > 0 ? Math.min(100, (e.progress / e.challenge.targetValue) * 100) : 0;
+      return `<div class="my-challenge" onclick="openModal('${e.challengeId}')">
+        <div class="type-badge">${e.challenge.type?.replace(/_/g,' ')}</div>
+        <h4>${e.challenge.name}</h4>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-info"><span>${e.progress} / ${e.challenge.targetValue} ${e.challenge.unit}</span><span>${Math.round(pct)}%</span></div>
+        ${e.completed ? '<p style="color:var(--accent);font-size:.78rem;margin-top:.4rem">✅ Completado</p>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function renderChallengeCard(c) {
+    const icon = TYPE_ICONS[c.type] || TYPE_ICONS.default;
+    const dl = daysLeft(c.endDate);
+    const urgentClass = dl <= 5 ? 'urgent' : 'normal';
+    return `
+    <div class="challenge-card" onclick="openModal('${c.id}')">
+      ${c.prizeDescription ? '<span class="prize-badge">🏆 Premio</span>' : ''}
+      <div class="challenge-type">${c.type?.replace(/_/g,' ')}</div>
+      <div class="challenge-icon">${icon}</div>
+      <div class="challenge-title">${c.name}</div>
+      <div class="challenge-desc">${c.description || ''}</div>
+      <div class="challenge-meta">
+        <span class="meta-tag">📅 ${new Date(c.startDate).toLocaleDateString('es',{month:'short',day:'numeric'})}</span>
+        <span class="days-left ${urgentClass}">${dl > 0 ? `⏳ ${dl} días restantes` : '🔴 Último día'}</span>
+        <span class="meta-tag">${c.isTeam ? '👥 Equipo' : '👤 Individual'}</span>
+      </div>
+      <div class="challenge-footer">
+        <span class="participants-count">👥 ${c.currentParticipants} participantes</span>
+        <button type="button" class="join-btn ${c.myParticipation ? 'joined' : ''}" onclick="event.stopPropagation();quickJoin('${c.id}', this)">
+          ${c.myParticipation ? '✓ Unido' : 'Unirme'}
+        </button>
+      </div>
+    </div>`;
+  }
+
+  async function openModal(challengeId) {
+    currentChallengeId = challengeId;
+    const { challenge: c } = await api(`/fitness-challenges/${challengeId}`);
+    currentChallenge = c;
+    const icon = TYPE_ICONS[c.type] || TYPE_ICONS.default;
+    document.getElementById('modalHero').textContent = icon;
+    document.getElementById('modalTitle').textContent = c.name;
+    const dl = daysLeft(c.endDate);
+    document.getElementById('modalBadges').innerHTML = `
+      <span style="background:rgba(108,99,255,.15);color:var(--primary);border:1px solid var(--border);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:999px;">${c.type?.replace(/_/g,' ')}</span>
+      <span style="background:${dl <= 5 ? 'rgba(239,68,68,.15)' : 'rgba(0,217,166,.1)'};color:${dl <= 5 ? '#ef4444' : 'var(--accent)'};border:1px solid ${dl <= 5 ? 'rgba(239,68,68,.3)' : 'transparent'};font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:999px;">⏳ ${dl} días</span>
+      ${c.prizeDescription ? '<span style="background:rgba(245,158,11,.15);color:#f59e0b;font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:999px;">🏆 Premio</span>' : ''}`;
+    document.getElementById('modalMeta').innerHTML = `
+      <span class="meta-chip">🎯 Meta: ${c.targetValue} ${c.unit}</span>
+      <span class="meta-chip">📅 ${new Date(c.startDate).toLocaleDateString('es')} – ${new Date(c.endDate).toLocaleDateString('es')}</span>
+      <span class="meta-chip">👥 ${c.currentParticipants} participantes</span>
+      ${c.isTeam ? '<span class="meta-chip">👥 Equipo</span>' : '<span class="meta-chip">👤 Individual</span>'}`;
+    document.getElementById('modalGoal').textContent = c.goal || c.description || '';
+
+    // My progress section
+    const progSection = document.getElementById('progressSection');
+    if (c.myParticipation) {
+      progSection.style.display = 'block';
+      const pct = c.targetValue > 0 ? Math.min(100, (c.myParticipation.progress / c.targetValue) * 100) : 0;
+      document.getElementById('myProgressFill').style.width = pct + '%';
+      document.getElementById('myProgressLabel').textContent = `${c.myParticipation.progress} / ${c.targetValue} ${c.unit} — ${Math.round(pct)}%`;
+      document.getElementById('progressInput').value = c.myParticipation.progress;
+    } else { progSection.style.display = 'none'; }
+
+    // Leaderboard
+    loadLeaderboard(challengeId);
+
+    const btn = document.getElementById('modalJoinBtn');
+    if (c.myParticipation) { btn.textContent = '✓ Ya estás participando'; btn.className = 'modal-join-btn joined'; }
+    else { btn.textContent = 'Unirme a este reto'; btn.className = 'modal-join-btn'; }
+    document.getElementById('challengeModal').classList.add('open');
+  }
+
+  async function loadLeaderboard(challengeId) {
+    const lb = document.getElementById('leaderboard');
+    lb.innerHTML = '<div class="section-title">🏅 Clasificación</div><div class="loading" style="padding:1rem"><div class="spinner" style="width:24px;height:24px;border-width:2px"></div></div>';
+    const { leaderboard } = await api(`/fitness-challenges/${challengeId}/leaderboard?limit=10`);
+    if (!leaderboard?.length) { lb.innerHTML = '<div class="section-title">🏅 Clasificación</div><p style="color:var(--muted);font-size:.85rem">Sé el primero en participar</p>'; return; }
+    const target = currentChallenge?.targetValue || 1;
+    lb.innerHTML = '<div class="section-title">🏅 Clasificación</div>' + leaderboard.map((p, i) => {
+      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      const rankEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
+      const pct = Math.min(100, (p.progress / target) * 100);
+      return `<div class="lb-row">
+        <div class="lb-rank ${rankClass}">${rankEmoji}</div>
+        <div style="flex:1"><div class="lb-name">${p.user?.name || 'Usuario'}</div><div class="lb-mini-bar"><div class="lb-mini-fill" style="width:${pct}%"></div></div></div>
+        <div class="lb-progress">${p.progress} ${currentChallenge?.unit || ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function closeModal() { document.getElementById('challengeModal').classList.remove('open'); }
+
+  async function handleJoin() {
+    if (!token) { alert('Inicia sesión para unirte al reto'); return; }
+    if (currentChallenge?.myParticipation) return;
+    const res = await api(`/fitness-challenges/${currentChallengeId}/join`, { method: 'POST' });
+    if (res.success) {
+      const btn = document.getElementById('modalJoinBtn');
+      btn.textContent = '✓ ¡Te uniste exitosamente!'; btn.className = 'modal-join-btn joined';
+      document.getElementById('progressSection').style.display = 'block';
+      loadChallenges();
+    } else { alert(res.error || 'Error al unirse'); }
+  }
+
+  async function quickJoin(id, btn) {
+    if (!token) { alert('Inicia sesión'); return; }
+    const res = await api(`/fitness-challenges/${id}/join`, { method: 'POST' });
+    if (res.success) { btn.textContent = '✓ Unido'; btn.className = 'join-btn joined'; }
+    else alert(res.error || 'Error');
+  }
+
+  async function submitProgress() {
+    const val = Number(document.getElementById('progressInput').value);
+    if (isNaN(val)) { alert('Ingresa un valor válido'); return; }
+    const res = await api(`/fitness-challenges/${currentChallengeId}/progress`, { method: 'POST', body: JSON.stringify({ progress: val }) });
+    if (res.success) {
+      const target = currentChallenge?.targetValue || 1;
+      const pct = Math.min(100, (val / target) * 100);
+      document.getElementById('myProgressFill').style.width = pct + '%';
+      document.getElementById('myProgressLabel').textContent = `${val} / ${target} ${currentChallenge?.unit || ''} — ${Math.round(pct)}%`;
+      loadLeaderboard(currentChallengeId);
+    } else { alert(res.error || 'Error al actualizar'); }
+  }
+
+  document.getElementById('challengeModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+  loadChallenges();
+</script>
+</body>
+</html>

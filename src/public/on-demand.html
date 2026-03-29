@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Bajo Demanda | WacoPro Fitness</title>
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --surface: #12122a;
+      --surface2: #1a1a35;
+      --primary: #6c63ff;
+      --accent: #00d9a6;
+      --secondary: #ff6b6b;
+      --warning: #ffd93d;
+      --text: #e8e8f0;
+      --text-muted: #6b6b8a;
+      --border: rgba(108,99,255,0.2);
+      --glow: 0 0 20px rgba(108,99,255,0.4);
+      --glow-accent: 0 0 20px rgba(0,217,166,0.4);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* NAV */
+    nav {
+      background: rgba(10,10,26,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: .9rem; transition: color .2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+    .nav-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; padding: .5rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: .85rem; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, rgba(108,99,255,0.15) 0%, rgba(0,217,166,0.08) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+    }
+    .hero h1 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: .5rem; }
+    .hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 540px; margin: 0 auto 1.5rem; }
+    .hero-stats { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    .hero-stat { text-align: center; }
+    .hero-stat .val { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+    .hero-stat .lbl { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* TABS */
+    .tabs-row {
+      display: flex; gap: .5rem; padding: 1.5rem 2rem .5rem;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .tabs-row::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+      padding: .5rem 1.2rem; border-radius: 20px; cursor: pointer; font-size: .85rem;
+      white-space: nowrap; transition: all .2s; display: flex; align-items: center; gap: .4rem;
+    }
+    .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .tab-btn.active { background: linear-gradient(135deg, var(--primary), var(--accent)); border-color: transparent; color: #fff; }
+    .tab-btn .tab-icon { font-size: 1rem; }
+
+    /* MAIN LAYOUT */
+    .main-layout { display: flex; gap: 0; }
+
+    /* SIDEBAR FILTERS */
+    .sidebar {
+      width: 260px; min-width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem;
+      position: sticky; top: 65px; height: calc(100vh - 65px);
+      overflow-y: auto;
+    }
+    .sidebar h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 1rem; }
+    .filter-group { margin-bottom: 1.5rem; }
+    .filter-group label { display: block; font-size: .8rem; color: var(--text-muted); margin-bottom: .4rem; }
+    .filter-group select, .filter-group input {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: .5rem .75rem; border-radius: 8px; font-size: .85rem;
+    }
+    .filter-group select:focus, .filter-group input:focus { outline: none; border-color: var(--primary); }
+    .checkbox-group { display: flex; flex-direction: column; gap: .5rem; }
+    .checkbox-item { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+    .checkbox-item input[type="checkbox"] { accent-color: var(--primary); width: 15px; height: 15px; }
+    .checkbox-item span { font-size: .85rem; color: var(--text-muted); }
+    .checkbox-item:hover span { color: var(--text); }
+    .clear-btn {
+      width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+      padding: .5rem; border-radius: 8px; cursor: pointer; font-size: .8rem; margin-top: .5rem;
+      transition: all .2s;
+    }
+    .clear-btn:hover { border-color: var(--secondary); color: var(--secondary); }
+
+    /* CONTENT AREA */
+    .content { flex: 1; padding: 1.5rem 2rem; min-width: 0; }
+
+    /* SEARCH BAR */
+    .search-bar {
+      display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center;
+    }
+    .search-wrap { flex: 1; position: relative; }
+    .search-wrap input {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: .65rem 1rem .65rem 2.5rem; border-radius: 12px; font-size: .95rem;
+    }
+    .search-wrap input:focus { outline: none; border-color: var(--primary); box-shadow: var(--glow); }
+    .search-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; }
+    .sort-select {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      padding: .65rem 1rem; border-radius: 12px; font-size: .85rem; cursor: pointer;
+    }
+
+    /* RESULTS INFO */
+    .results-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .results-count { font-size: .85rem; color: var(--text-muted); }
+    .results-count span { color: var(--accent); font-weight: 700; }
+    .view-toggle { display: flex; gap: .4rem; }
+    .view-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: .4rem .6rem; border-radius: 6px; cursor: pointer; font-size: .9rem; transition: all .2s; }
+    .view-btn.active { border-color: var(--primary); color: var(--primary); }
+
+    /* RECOMMENDED STRIP */
+    .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+    .section-title span { color: var(--accent); }
+    .horizontal-strip { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .75rem; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; margin-bottom: 2rem; }
+    .horizontal-strip::-webkit-scrollbar { height: 4px; }
+    .horizontal-strip::-webkit-scrollbar-track { background: transparent; }
+    .horizontal-strip::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
+
+    /* VIDEO CARDS */
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
+    .video-grid.list-view { grid-template-columns: 1fr; }
+
+    .video-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; cursor: pointer; transition: all .25s;
+    }
+    .video-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--glow); }
+
+    .card-thumb {
+      position: relative; aspect-ratio: 16/9;
+      background: linear-gradient(135deg, var(--surface2), rgba(108,99,255,0.15));
+      overflow: hidden;
+    }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .card-thumb-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; background: linear-gradient(135deg, var(--surface2), rgba(108,99,255,0.1));
+    }
+    .thumb-duration {
+      position: absolute; bottom: .5rem; right: .5rem;
+      background: rgba(0,0,0,0.8); color: #fff; font-size: .7rem; padding: .2rem .5rem; border-radius: 4px; font-weight: 600;
+    }
+    .thumb-play {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0); transition: background .2s;
+    }
+    .video-card:hover .thumb-play { background: rgba(0,0,0,0.35); }
+    .play-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; opacity: 0; transition: opacity .2s; box-shadow: var(--glow);
+    }
+    .video-card:hover .play-icon { opacity: 1; }
+    .liked-badge {
+      position: absolute; top: .5rem; right: .5rem;
+      background: rgba(255,107,107,0.9); color: #fff; font-size: .75rem; padding: .2rem .5rem; border-radius: 10px;
+    }
+
+    .card-body { padding: .9rem; }
+    .card-body h4 { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .35rem; line-height: 1.3; }
+    .card-meta { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: .5rem; }
+    .badge {
+      font-size: .68rem; padding: .2rem .55rem; border-radius: 8px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+    }
+    .badge-beginner { background: rgba(0,217,166,0.15); color: var(--accent); }
+    .badge-intermediate { background: rgba(255,217,61,0.15); color: var(--warning); }
+    .badge-advanced { background: rgba(255,107,107,0.15); color: var(--secondary); }
+    .badge-category { background: rgba(108,99,255,0.15); color: var(--primary); }
+    .card-instructor { font-size: .78rem; color: var(--text-muted); }
+    .card-stats { display: flex; gap: 1rem; align-items: center; margin-top: .5rem; }
+    .card-stat { display: flex; align-items: center; gap: .3rem; font-size: .75rem; color: var(--text-muted); }
+    .progress-mini { flex: 1; background: var(--surface2); border-radius: 4px; height: 3px; margin-top: .5rem; }
+    .progress-mini-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 4px; }
+
+    /* LIST VIEW CARD */
+    .video-grid.list-view .video-card { display: flex; height: 110px; }
+    .video-grid.list-view .card-thumb { width: 195px; min-width: 195px; aspect-ratio: unset; height: 100%; }
+    .video-grid.list-view .card-body { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+
+    /* SMALL CARD (for strips) */
+    .video-card-sm {
+      min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; cursor: pointer; transition: all .2s;
+    }
+    .video-card-sm:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .video-card-sm .card-thumb { aspect-ratio: 16/9; }
+    .video-card-sm .card-body { padding: .65rem; }
+    .video-card-sm h4 { font-size: .82rem; font-weight: 600; color: var(--text); margin-bottom: .3rem; }
+    .video-card-sm .card-meta { gap: .4rem; }
+
+    /* WATCH HISTORY */
+    .history-wrap { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .75rem; margin-bottom: 2rem; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+    .history-wrap::-webkit-scrollbar { height: 4px; }
+    .history-wrap::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+      backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto;
+      transform: translateY(30px); transition: transform .25s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-video {
+      position: relative; aspect-ratio: 16/9;
+      background: #000; border-radius: 16px 16px 0 0; overflow: hidden;
+    }
+    .modal-video iframe { width: 100%; height: 100%; border: 0; }
+    .modal-video-placeholder {
+      width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: .75rem; background: linear-gradient(135deg, #0d0d25, rgba(108,99,255,0.2));
+    }
+    .modal-video-placeholder .big-play {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+      cursor: pointer; box-shadow: var(--glow); transition: transform .2s;
+    }
+    .modal-video-placeholder .big-play:hover { transform: scale(1.1); }
+    .modal-video-placeholder p { color: var(--text-muted); font-size: .85rem; }
+    .modal-close {
+      position: absolute; top: .75rem; right: .75rem;
+      background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: var(--text);
+      width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center; transition: all .2s;
+    }
+    .modal-close:hover { background: var(--secondary); }
+
+    .modal-body { padding: 1.5rem; }
+    .modal-header { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+    .modal-title { flex: 1; }
+    .modal-title h2 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: .4rem; }
+    .modal-title .modal-meta { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .modal-actions { display: flex; gap: .6rem; flex-direction: column; align-items: flex-end; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none; color: #fff; padding: .6rem 1.4rem; border-radius: 10px;
+      cursor: pointer; font-weight: 700; font-size: .9rem; transition: all .2s;
+    }
+    .btn-primary:hover { box-shadow: var(--glow); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .6; cursor: default; }
+    .btn-outline {
+      background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+      padding: .55rem 1.2rem; border-radius: 10px; cursor: pointer; font-size: .85rem; transition: all .2s;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-like {
+      background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+      padding: .55rem 1rem; border-radius: 10px; cursor: pointer; font-size: .85rem; transition: all .2s;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .btn-like.liked { border-color: var(--secondary); color: var(--secondary); }
+    .btn-like:hover { border-color: var(--secondary); color: var(--secondary); }
+
+    .modal-description { color: var(--text-muted); font-size: .9rem; line-height: 1.6; margin-bottom: 1.2rem; }
+    .modal-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
+    .modal-section h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: .6rem; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .tag {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted);
+      font-size: .75rem; padding: .2rem .6rem; border-radius: 6px;
+    }
+    .progress-bar { background: var(--surface2); border-radius: 8px; height: 8px; margin-bottom: .3rem; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 8px; transition: width .4s; }
+    .progress-label { font-size: .75rem; color: var(--text-muted); }
+    .rating-row { display: flex; align-items: center; gap: .5rem; }
+    .stars { color: var(--warning); font-size: 1rem; letter-spacing: 1px; }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 4rem 2rem; }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: .6; }
+    .empty-state p { color: var(--text-muted); font-size: .95rem; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+      background: var(--surface2); border: 1px solid var(--accent);
+      color: var(--text); padding: .75rem 1.25rem; border-radius: 10px;
+      font-size: .9rem; box-shadow: var(--glow-accent);
+      transform: translateY(100px); opacity: 0; transition: all .3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* WATCH PROGRESS OVERLAY */
+    .watching-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 300;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.5rem;
+    }
+    .watching-overlay.hidden { display: none; }
+    .watching-overlay h3 { color: var(--text); font-size: 1.3rem; font-weight: 700; text-align: center; max-width: 500px; }
+    .watching-overlay .simulated-player {
+      width: 100%; max-width: 700px; aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #0d0d25, rgba(108,99,255,0.2));
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem; border: 1px solid var(--border);
+    }
+    .watching-overlay .simulated-player .play-big { font-size: 4rem; }
+    .watching-overlay .simulated-player p { color: var(--text-muted); font-size: .85rem; }
+    .watching-controls { display: flex; gap: 1rem; }
+    .watch-progress-bar { width: 100%; max-width: 700px; }
+    .watch-bar-bg { background: var(--surface2); border-radius: 8px; height: 6px; }
+    .watch-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 8px; transition: width 1s linear; }
+    .watch-time { display: flex; justify-content: space-between; font-size: .75rem; color: var(--text-muted); margin-top: .3rem; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .hero h1 { font-size: 1.8rem; }
+      .modal-sections { grid-template-columns: 1fr; }
+      .modal-header { flex-direction: column; }
+      .modal-actions { flex-direction: row; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⚡ WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/virtual-classes">Clases</a>
+    <a href="/on-demand" class="active">Videos</a>
+    <a href="/programs">Programas</a>
+    <a href="/coaches">Coaches</a>
+    <a href="/progress-tracker">Progreso</a>
+    <a href="/fitness-challenges">Retos</a>
+  </div>
+  <button type="button" class="nav-btn" onclick="location.href='/profile'">Mi Cuenta</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>📹 Biblioteca de Videos</h1>
+  <p>Accede a cientos de entrenamientos, masterclasses y tutoriales disponibles 24/7 desde cualquier dispositivo.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="val" id="totalVideos">–</div><div class="lbl">Videos</div></div>
+    <div class="hero-stat"><div class="val" id="totalCategories">–</div><div class="lbl">Categorías</div></div>
+    <div class="hero-stat"><div class="val" id="totalWatched">–</div><div class="lbl">Vistos</div></div>
+    <div class="hero-stat"><div class="val" id="totalLiked">–</div><div class="lbl">Favoritos</div></div>
+  </div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="tabs-row" id="categoryTabs">
+  <button type="button" class="tab-btn active" onclick="filterByCategory(null, this)">
+    <span class="tab-icon">🎯</span> Todos
+  </button>
+  <!-- populated dynamically -->
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Filtros</h3>
+
+    <div class="filter-group">
+      <label>Nivel</label>
+      <select id="filterDifficulty" onchange="applyFilters()">
+        <option value="">Todos los niveles</option>
+        <option value="beginner">Principiante</option>
+        <option value="intermediate">Intermedio</option>
+        <option value="advanced">Avanzado</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Duración máxima</label>
+      <select id="filterDuration" onchange="applyFilters()">
+        <option value="">Cualquier duración</option>
+        <option value="15">Hasta 15 min</option>
+        <option value="30">Hasta 30 min</option>
+        <option value="45">Hasta 45 min</option>
+        <option value="60">Hasta 60 min</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Músculo objetivo</label>
+      <select id="filterMuscle" onchange="applyFilters()">
+        <option value="">Todos</option>
+        <option value="chest">Pecho</option>
+        <option value="back">Espalda</option>
+        <option value="legs">Piernas</option>
+        <option value="shoulders">Hombros</option>
+        <option value="arms">Brazos</option>
+        <option value="core">Core/Abdomen</option>
+        <option value="glutes">Glúteos</option>
+        <option value="full_body">Cuerpo completo</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Equipamiento</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" value="none" onchange="applyFilters()"><span>Sin equipamiento</span></label>
+        <label class="checkbox-item"><input type="checkbox" value="dumbbells" onchange="applyFilters()"><span>Mancuernas</span></label>
+        <label class="checkbox-item"><input type="checkbox" value="resistance_bands" onchange="applyFilters()"><span>Bandas elásticas</span></label>
+        <label class="checkbox-item"><input type="checkbox" value="mat" onchange="applyFilters()"><span>Esterilla</span></label>
+        <label class="checkbox-item"><input type="checkbox" value="pull_up_bar" onchange="applyFilters()"><span>Barra dominadas</span></label>
+        <label class="checkbox-item"><input type="checkbox" value="kettlebell" onchange="applyFilters()"><span>Kettlebell</span></label>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label>Solo favoritos</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" id="filterFavorites" onchange="applyFilters()"><span>Mostrar solo likes</span></label>
+      </div>
+    </div>
+
+    <button type="button" class="clear-btn" onclick="clearFilters()">✕ Limpiar filtros</button>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HISTORY STRIP -->
+    <div id="historySection">
+      <div class="section-title">▶ Continúa viendo <span id="historyCount"></span></div>
+      <div class="history-wrap" id="historyStrip">
+        <!-- populated -->
+      </div>
+    </div>
+
+    <!-- RECOMMENDED STRIP -->
+    <div id="recommendedSection" style="display:none;">
+      <div class="section-title">✨ Recomendados para ti</div>
+      <div class="horizontal-strip" id="recommendedStrip">
+        <!-- populated -->
+      </div>
+    </div>
+
+    <!-- SEARCH + SORT -->
+    <div class="search-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar videos, instructores, músculo..." />
+      </div>
+      <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+        <option value="newest">Más recientes</option>
+        <option value="popular">Más populares</option>
+        <option value="liked">Más valorados</option>
+        <option value="duration_asc">Duración: corta</option>
+        <option value="duration_desc">Duración: larga</option>
+      </select>
+    </div>
+
+    <!-- RESULTS INFO -->
+    <div class="results-info">
+      <div class="results-count">Mostrando <span id="resultCount">–</span> videos</div>
+      <div class="view-toggle">
+        <button type="button" class="view-btn active" id="gridViewBtn" onclick="setView('grid')">⊞</button>
+        <button type="button" class="view-btn" id="listViewBtn" onclick="setView('list')">☰</button>
+      </div>
+    </div>
+
+    <!-- VIDEO GRID -->
+    <div id="videoGrid" class="video-grid">
+      <div class="loading"><div class="spinner"></div><p>Cargando biblioteca...</p></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-overlay" id="videoModal" onclick="handleModalClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-video" id="modalVideoArea">
+      <div class="modal-video-placeholder" id="videoPlaceholder">
+        <div class="big-play" onclick="startWatching()">▶</div>
+        <p id="videoPlaceholderText">Clic para reproducir</p>
+      </div>
+      <iframe id="videoIframe" style="display:none;" allowfullscreen></iframe>
+      <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h2 id="modalTitle">–</h2>
+          <div class="modal-meta" id="modalMeta">–</div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-primary" id="watchBtn" onclick="startWatching()">▶ Ver ahora</button>
+          <div style="display:flex;gap:.5rem;">
+            <button type="button" class="btn-like" id="likeBtn" onclick="toggleLike()">♡ <span id="likeCount">0</span></button>
+            <button type="button" class="btn-outline" onclick="closeModal()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+      <div id="watchProgressSection" style="display:none; margin-bottom:1rem;">
+        <div class="progress-bar"><div class="progress-fill" id="modalProgressFill" style="width:0%"></div></div>
+        <div class="progress-label" id="modalProgressLabel">Progreso: 0%</div>
+      </div>
+      <p class="modal-description" id="modalDescription">–</p>
+      <div class="modal-sections">
+        <div class="modal-section">
+          <h4>Grupos musculares</h4>
+          <div class="tag-list" id="muscleTagList">–</div>
+        </div>
+        <div class="modal-section">
+          <h4>Equipamiento</h4>
+          <div class="tag-list" id="equipTagList">–</div>
+        </div>
+        <div class="modal-section">
+          <h4>Estadísticas</h4>
+          <div id="modalStats" style="display:flex;flex-direction:column;gap:.4rem;"></div>
+        </div>
+        <div class="modal-section">
+          <h4>Etiquetas</h4>
+          <div class="tag-list" id="tagList">–</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WATCHING OVERLAY (simulated player) -->
+<div class="watching-overlay hidden" id="watchingOverlay">
+  <h3 id="watchingTitle">Reproduciendo...</h3>
+  <div class="simulated-player">
+    <div class="play-big" id="playerIcon">⏸</div>
+    <p id="playerStatus">Reproduciendo video...</p>
+  </div>
+  <div class="watch-progress-bar">
+    <div class="watch-bar-bg">
+      <div class="watch-bar-fill" id="watchBarFill" style="width:0%"></div>
+    </div>
+    <div class="watch-time"><span id="watchCurrent">0:00</span><span id="watchTotal">0:00</span></div>
+  </div>
+  <div class="watching-controls">
+    <button type="button" class="btn-outline" onclick="togglePlayPause()">⏸ Pausar</button>
+    <button type="button" class="btn-outline" onclick="closeWatching()">✕ Salir</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '/api';
+  let token = localStorage.getItem('token') || '';
+  const headers = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` });
+
+  let allVideos = [];
+  let categories = [];
+  let watchHistory = [];
+  let recommended = [];
+  let activeCategory = null;
+  let currentView = 'grid';
+  let currentVideo = null;
+  let isLiked = false;
+  let searchTimer = null;
+  let watchInterval = null;
+  let watchSeconds = 0;
+  let watchTotal = 0;
+  let isPlaying = false;
+
+  // ── Init ────────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    const si = document.getElementById('searchInput');
+    si.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applyFilters, 400);
+    });
+
+    await Promise.all([loadCategories(), loadVideos(), loadHistory(), loadRecommended()]);
+    updateHeroStats();
+  });
+
+  // ── Data loaders ────────────────────────────────────────────────────────────
+  async function loadCategories() {
+    try {
+      const r = await fetch(`${API}/videos/categories`, { headers: headers() });
+      const d = await r.json();
+      categories = d.categories || d.data || [];
+      renderCategoryTabs();
+      document.getElementById('totalCategories').textContent = categories.length;
+    } catch { /* no-op */ }
+  }
+
+  async function loadVideos() {
+    try {
+      const r = await fetch(`${API}/videos?limit=100`, { headers: headers() });
+      const d = await r.json();
+      allVideos = d.videos || d.data || getMockVideos();
+      document.getElementById('totalVideos').textContent = allVideos.length;
+      renderVideos(allVideos);
+    } catch {
+      allVideos = getMockVideos();
+      document.getElementById('totalVideos').textContent = allVideos.length;
+      renderVideos(allVideos);
+    }
+  }
+
+  async function loadHistory() {
+    try {
+      const r = await fetch(`${API}/videos/history?limit=10`, { headers: headers() });
+      const d = await r.json();
+      watchHistory = d.history || d.data || [];
+      renderHistoryStrip();
+    } catch {
+      watchHistory = [];
+      document.getElementById('historySection').style.display = 'none';
+    }
+  }
+
+  async function loadRecommended() {
+    try {
+      const r = await fetch(`${API}/videos/recommended?limit=8`, { headers: headers() });
+      const d = await r.json();
+      recommended = d.videos || d.data || [];
+      if (recommended.length > 0) {
+        renderRecommendedStrip();
+        document.getElementById('recommendedSection').style.display = '';
+      }
+    } catch { /* no-op */ }
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────────
+  function renderCategoryTabs() {
+    const container = document.getElementById('categoryTabs');
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn';
+      btn.innerHTML = `<span class="tab-icon">${cat.iconName || '📁'}</span> ${cat.name}`;
+      btn.onclick = () => filterByCategory(cat.id, btn);
+      container.appendChild(btn);
+    });
+  }
+
+  function filterByCategory(catId, btn) {
+    activeCategory = catId;
+    document.querySelectorAll('#categoryTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    const difficulty = document.getElementById('filterDifficulty').value;
+    const maxDur = parseInt(document.getElementById('filterDuration').value) || 0;
+    const muscle = document.getElementById('filterMuscle').value;
+    const favOnly = document.getElementById('filterFavorites').checked;
+    const equipChecked = [...document.querySelectorAll('.checkbox-group input[type="checkbox"]:not(#filterFavorites):checked')].map(c => c.value);
+    const sort = document.getElementById('sortSelect').value;
+
+    let filtered = [...allVideos];
+
+    if (activeCategory) filtered = filtered.filter(v => v.categoryId === activeCategory);
+    if (search) filtered = filtered.filter(v =>
+      (v.title || '').toLowerCase().includes(search) ||
+      (v.instructorName || '').toLowerCase().includes(search) ||
+      (v.muscleGroups || []).some(m => m.toLowerCase().includes(search))
+    );
+    if (difficulty) filtered = filtered.filter(v => v.difficulty === difficulty);
+    if (maxDur) filtered = filtered.filter(v => (v.durationSeconds || 0) / 60 <= maxDur);
+    if (muscle) filtered = filtered.filter(v => (v.muscleGroups || []).includes(muscle));
+    if (equipChecked.length) filtered = filtered.filter(v => equipChecked.some(e => (v.equipmentNeeded || []).includes(e)));
+    if (favOnly) filtered = filtered.filter(v => v.liked);
+
+    // Sort
+    if (sort === 'popular') filtered.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+    else if (sort === 'liked') filtered.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+    else if (sort === 'duration_asc') filtered.sort((a, b) => (a.durationSeconds || 0) - (b.durationSeconds || 0));
+    else if (sort === 'duration_desc') filtered.sort((a, b) => (b.durationSeconds || 0) - (a.durationSeconds || 0));
+
+    renderVideos(filtered);
+    document.getElementById('resultCount').textContent = filtered.length;
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterDifficulty').value = '';
+    document.getElementById('filterDuration').value = '';
+    document.getElementById('filterMuscle').value = '';
+    document.getElementById('filterFavorites').checked = false;
+    document.querySelectorAll('.checkbox-group input[type="checkbox"]').forEach(c => c.checked = false);
+    activeCategory = null;
+    document.querySelectorAll('#categoryTabs .tab-btn').forEach((b, i) => { if (i === 0) b.classList.add('active'); else b.classList.remove('active'); });
+    renderVideos(allVideos);
+  }
+
+  function setView(view) {
+    currentView = view;
+    const grid = document.getElementById('videoGrid');
+    const gridBtn = document.getElementById('gridViewBtn');
+    const listBtn = document.getElementById('listViewBtn');
+    if (view === 'grid') {
+      grid.classList.remove('list-view');
+      gridBtn.classList.add('active');
+      listBtn.classList.remove('active');
+    } else {
+      grid.classList.add('list-view');
+      listBtn.classList.add('active');
+      gridBtn.classList.remove('active');
+    }
+  }
+
+  function renderVideos(videos) {
+    const grid = document.getElementById('videoGrid');
+    document.getElementById('resultCount').textContent = videos.length;
+
+    if (!videos.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🎬</div><p>No se encontraron videos con los filtros actuales.</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = videos.map(v => videoCardHTML(v)).join('');
+  }
+
+  function videoCardHTML(v) {
+    const dur = formatDuration(v.durationSeconds || 0);
+    const diffBadge = difficultyBadge(v.difficulty);
+    const watched = v.watchRecord;
+    const pct = watched ? Math.round((watched.watchedSeconds / (v.durationSeconds || 1)) * 100) : 0;
+
+    return `
+      <div class="video-card" onclick="openVideo('${v.id}')">
+        <div class="card-thumb">
+          ${v.thumbnailUrl ? `<img src="${v.thumbnailUrl}" alt="${escHtml(v.title)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <div class="card-thumb-placeholder" style="${v.thumbnailUrl ? 'display:none' : ''}">${v.category?.iconName || '🎬'}</div>
+          <div class="thumb-duration">${dur}</div>
+          <div class="thumb-play"><div class="play-icon">▶</div></div>
+          ${v.liked ? '<div class="liked-badge">♥</div>' : ''}
+        </div>
+        <div class="card-body">
+          <h4>${escHtml(v.title)}</h4>
+          <div class="card-meta">
+            ${diffBadge}
+            ${v.category ? `<span class="badge badge-category">${escHtml(v.category.name)}</span>` : ''}
+          </div>
+          <div class="card-instructor">👤 ${escHtml(v.instructorName || 'WacoPro')}</div>
+          <div class="card-stats">
+            <div class="card-stat">👁 ${(v.viewCount || 0).toLocaleString()}</div>
+            <div class="card-stat">♥ ${(v.likeCount || 0).toLocaleString()}</div>
+            ${v.caloriesBurned ? `<div class="card-stat">🔥 ${v.caloriesBurned} kcal</div>` : ''}
+          </div>
+          ${pct > 0 ? `
+            <div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderHistoryStrip() {
+    const strip = document.getElementById('historyStrip');
+    const section = document.getElementById('historySection');
+    if (!watchHistory.length) { section.style.display = 'none'; return; }
+
+    document.getElementById('historyCount').textContent = `(${watchHistory.length})`;
+    strip.innerHTML = watchHistory.map(h => {
+      const v = h.video || h;
+      const pct = h.totalSeconds ? Math.round((h.watchedSeconds / h.totalSeconds) * 100) : 0;
+      return `
+        <div class="video-card-sm" onclick="openVideo('${v.id || h.videoId}')">
+          <div class="card-thumb">
+            <div class="card-thumb-placeholder">${v.category?.iconName || '▶'}</div>
+            <div class="thumb-duration">${formatDuration(v.durationSeconds || h.totalSeconds || 0)}</div>
+          </div>
+          <div class="card-body">
+            <h4>${escHtml(v.title || 'Video')}</h4>
+            <div class="card-meta">${difficultyBadge(v.difficulty)}</div>
+            <div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderRecommendedStrip() {
+    const strip = document.getElementById('recommendedStrip');
+    strip.innerHTML = recommended.map(v => `
+      <div class="video-card-sm" onclick="openVideo('${v.id}')">
+        <div class="card-thumb">
+          ${v.thumbnailUrl ? `<img src="${v.thumbnailUrl}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : ''}
+          <div class="card-thumb-placeholder">${v.category?.iconName || '✨'}</div>
+          <div class="thumb-duration">${formatDuration(v.durationSeconds || 0)}</div>
+        </div>
+        <div class="card-body">
+          <h4>${escHtml(v.title)}</h4>
+          <div class="card-meta">${difficultyBadge(v.difficulty)}</div>
+          <div class="card-stat" style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem;">👁 ${(v.viewCount||0).toLocaleString()}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Modal ───────────────────────────────────────────────────────────────────
+  async function openVideo(videoId) {
+    const overlay = document.getElementById('videoModal');
+    overlay.classList.add('open');
+    document.getElementById('modalTitle').textContent = 'Cargando...';
+
+    try {
+      const r = await fetch(`${API}/videos/${videoId}`, { headers: headers() });
+      const d = await r.json();
+      currentVideo = d.video || d.data || d;
+      renderModal(currentVideo);
+    } catch {
+      // fallback from cache
+      currentVideo = allVideos.find(v => v.id === videoId) || allVideos[0];
+      if (currentVideo) renderModal(currentVideo);
+    }
+  }
+
+  function renderModal(v) {
+    document.getElementById('modalTitle').textContent = v.title;
+    document.getElementById('modalDescription').textContent = v.description || 'Sin descripción.';
+
+    const diffBadge = difficultyBadge(v.difficulty);
+    document.getElementById('modalMeta').innerHTML = `
+      ${diffBadge}
+      ${v.category ? `<span class="badge badge-category">${escHtml(v.category.name)}</span>` : ''}
+      <span class="badge" style="background:rgba(255,255,255,0.08);color:var(--text-muted);">⏱ ${formatDuration(v.durationSeconds || 0)}</span>
+      ${v.language ? `<span class="badge" style="background:rgba(255,255,255,0.08);color:var(--text-muted);">🌐 ${v.language}</span>` : ''}
+    `;
+
+    document.getElementById('muscleTagList').innerHTML = (v.muscleGroups || []).length
+      ? v.muscleGroups.map(m => `<span class="tag">💪 ${m}</span>`).join('')
+      : '<span style="color:var(--text-muted);font-size:.8rem">N/D</span>';
+
+    document.getElementById('equipTagList').innerHTML = (v.equipmentNeeded || []).length
+      ? v.equipmentNeeded.map(e => `<span class="tag">🏋️ ${e}</span>`).join('')
+      : '<span class="tag">Sin equipamiento</span>';
+
+    document.getElementById('modalStats').innerHTML = `
+      <div class="card-stat">👁 ${(v.viewCount||0).toLocaleString()} vistas</div>
+      <div class="card-stat">♥ ${(v.likeCount||0).toLocaleString()} likes</div>
+      ${v.caloriesBurned ? `<div class="card-stat">🔥 ${v.caloriesBurned} kcal</div>` : ''}
+      <div class="card-stat">👤 ${escHtml(v.instructorName || 'WacoPro')}</div>
+    `;
+
+    document.getElementById('tagList').innerHTML = (v.tags || []).length
+      ? v.tags.map(t => `<span class="tag">#${t}</span>`).join('')
+      : '<span style="color:var(--text-muted);font-size:.8rem">Sin etiquetas</span>';
+
+    // Watch progress
+    const wr = v.watchRecord;
+    if (wr && wr.watchedSeconds > 0) {
+      const pct = Math.round((wr.watchedSeconds / (v.durationSeconds || 1)) * 100);
+      document.getElementById('watchProgressSection').style.display = '';
+      document.getElementById('modalProgressFill').style.width = `${Math.min(pct,100)}%`;
+      document.getElementById('modalProgressLabel').textContent = `Progreso: ${pct}% — Continúa donde lo dejaste`;
+    } else {
+      document.getElementById('watchProgressSection').style.display = 'none';
+    }
+
+    isLiked = v.liked || (wr && wr.liked) || false;
+    const likeBtn = document.getElementById('likeBtn');
+    likeBtn.className = 'btn-like' + (isLiked ? ' liked' : '');
+    likeBtn.innerHTML = `${isLiked ? '♥' : '♡'} <span id="likeCount">${v.likeCount || 0}</span>`;
+
+    watchTotal = v.durationSeconds || 0;
+    document.getElementById('watchBtn').disabled = false;
+    document.getElementById('watchBtn').textContent = wr && wr.watchedSeconds > 0 && !wr.completedAt ? '▶ Continuar' : '▶ Ver ahora';
+  }
+
+  function closeModal() {
+    document.getElementById('videoModal').classList.remove('open');
+    document.getElementById('videoIframe').style.display = 'none';
+    document.getElementById('videoIframe').src = '';
+    document.getElementById('videoPlaceholder').style.display = 'flex';
+    currentVideo = null;
+  }
+
+  function handleModalClick(e) {
+    if (e.target === document.getElementById('videoModal')) closeModal();
+  }
+
+  // ── Watch flow ───────────────────────────────────────────────────────────────
+  function startWatching() {
+    if (!currentVideo) return;
+
+    // If real video URL, use iframe; otherwise simulate
+    if (currentVideo.videoUrl && (currentVideo.videoUrl.includes('vimeo') || currentVideo.videoUrl.includes('youtube') || currentVideo.videoUrl.includes('mux'))) {
+      const iframe = document.getElementById('videoIframe');
+      iframe.src = currentVideo.videoUrl;
+      iframe.style.display = '';
+      document.getElementById('videoPlaceholder').style.display = 'none';
+    } else {
+      // Simulated player overlay
+      closeModal();
+      openWatchingOverlay();
+    }
+  }
+
+  function openWatchingOverlay() {
+    if (!currentVideo) return;
+    const overlay = document.getElementById('watchingOverlay');
+    overlay.classList.remove('hidden');
+    document.getElementById('watchingTitle').textContent = currentVideo.title;
+    document.getElementById('watchTotal').textContent = formatDuration(watchTotal);
+
+    // Get existing progress
+    const wr = currentVideo.watchRecord;
+    watchSeconds = wr ? wr.watchedSeconds : 0;
+    isPlaying = true;
+
+    document.getElementById('watchBarFill').style.width = `${(watchSeconds / watchTotal) * 100}%`;
+    document.getElementById('watchCurrent').textContent = formatDuration(watchSeconds);
+
+    watchInterval = setInterval(tickWatch, 1000);
+  }
+
+  function tickWatch() {
+    if (!isPlaying) return;
+    watchSeconds++;
+    const pct = Math.min((watchSeconds / watchTotal) * 100, 100);
+    document.getElementById('watchBarFill').style.width = `${pct}%`;
+    document.getElementById('watchCurrent').textContent = formatDuration(watchSeconds);
+
+    if (watchSeconds >= watchTotal) {
+      clearInterval(watchInterval);
+      document.getElementById('playerIcon').textContent = '✅';
+      document.getElementById('playerStatus').textContent = 'Video completado!';
+      logWatchTime(watchSeconds);
+      showToast('🎉 ¡Video completado!');
+      return;
+    }
+
+    // Log every 30s
+    if (watchSeconds % 30 === 0) logWatchTime(watchSeconds);
+  }
+
+  function togglePlayPause() {
+    isPlaying = !isPlaying;
+    const btn = document.querySelector('.watching-controls button:first-child');
+    document.getElementById('playerIcon').textContent = isPlaying ? '⏸' : '▶';
+    document.getElementById('playerStatus').textContent = isPlaying ? 'Reproduciendo video...' : 'Pausado';
+    btn.textContent = isPlaying ? '⏸ Pausar' : '▶ Reanudar';
+  }
+
+  function closeWatching() {
+    clearInterval(watchInterval);
+    if (watchSeconds > 0) logWatchTime(watchSeconds);
+    document.getElementById('watchingOverlay').classList.add('hidden');
+    watchSeconds = 0;
+    isPlaying = false;
+  }
+
+  async function logWatchTime(seconds) {
+    if (!currentVideo) return;
+    try {
+      await fetch(`${API}/videos/${currentVideo.id}/watch`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ watchedSeconds: seconds }),
+      });
+      // Update local data
+      const v = allVideos.find(x => x.id === currentVideo.id);
+      if (v) { if (!v.watchRecord) v.watchRecord = {}; v.watchRecord.watchedSeconds = seconds; }
+    } catch { /* no-op */ }
+  }
+
+  async function toggleLike() {
+    if (!currentVideo) return;
+    try {
+      const r = await fetch(`${API}/videos/${currentVideo.id}/like`, { method: 'POST', headers: headers() });
+      const d = await r.json();
+      isLiked = d.liked ?? !isLiked;
+      const newCount = d.likeCount ?? (isLiked ? (currentVideo.likeCount || 0) + 1 : (currentVideo.likeCount || 1) - 1);
+      currentVideo.likeCount = newCount;
+      currentVideo.liked = isLiked;
+      const likeBtn = document.getElementById('likeBtn');
+      likeBtn.className = 'btn-like' + (isLiked ? ' liked' : '');
+      likeBtn.innerHTML = `${isLiked ? '♥' : '♡'} <span id="likeCount">${newCount}</span>`;
+      // Update in list
+      const v = allVideos.find(x => x.id === currentVideo.id);
+      if (v) { v.liked = isLiked; v.likeCount = newCount; }
+      showToast(isLiked ? '♥ Añadido a favoritos' : '♡ Eliminado de favoritos');
+    } catch { showToast('❌ Error al actualizar favorito'); }
+  }
+
+  // ── Hero stats ───────────────────────────────────────────────────────────────
+  function updateHeroStats() {
+    const watched = watchHistory.length;
+    document.getElementById('totalWatched').textContent = watched;
+    const liked = allVideos.filter(v => v.liked).length;
+    document.getElementById('totalLiked').textContent = liked;
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  function formatDuration(seconds) {
+    if (!seconds) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function difficultyBadge(d) {
+    const map = { beginner: ['badge-beginner', 'Principiante'], intermediate: ['badge-intermediate', 'Intermedio'], advanced: ['badge-advanced', 'Avanzado'] };
+    const [cls, label] = map[d] || ['badge-category', d || '?'];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showToast(msg, dur = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), dur);
+  }
+
+  // ── Mock data ────────────────────────────────────────────────────────────────
+  function getMockVideos() {
+    return [
+      { id: 'v1', title: 'HIIT Total Body 30 minutos', instructorName: 'Carlos Mendez', difficulty: 'intermediate', durationSeconds: 1800, viewCount: 15420, likeCount: 892, caloriesBurned: 350, muscleGroups: ['full_body'], equipmentNeeded: ['none'], tags: ['hiit', 'cardio', 'grasa'], category: { name: 'HIIT', iconName: '⚡' }, description: 'Entrenamiento de alta intensidad para quemar grasa y mejorar tu resistencia cardiovascular.' },
+      { id: 'v2', title: 'Yoga Mañanero para Principiantes', instructorName: 'Ana García', difficulty: 'beginner', durationSeconds: 1200, viewCount: 9800, likeCount: 654, caloriesBurned: 120, muscleGroups: ['core', 'full_body'], equipmentNeeded: ['mat'], tags: ['yoga', 'flexibilidad', 'mañana'], category: { name: 'Yoga', iconName: '🧘' }, description: 'Rutina suave de yoga para comenzar el día con energía y calma.' },
+      { id: 'v3', title: 'Fuerza con Mancuernas - Pecho y Espalda', instructorName: 'Miguel Torres', difficulty: 'intermediate', durationSeconds: 2700, viewCount: 12300, likeCount: 741, caloriesBurned: 280, muscleGroups: ['chest', 'back', 'shoulders'], equipmentNeeded: ['dumbbells'], tags: ['fuerza', 'hipertrofia', 'upper'], category: { name: 'Fuerza', iconName: '💪' }, description: 'Sesión de entrenamiento de fuerza enfocada en el tren superior.' },
+      { id: 'v4', title: 'Pilates Core Intenso', instructorName: 'Laura Sánchez', difficulty: 'intermediate', durationSeconds: 1500, viewCount: 7650, likeCount: 423, caloriesBurned: 180, muscleGroups: ['core'], equipmentNeeded: ['mat'], tags: ['pilates', 'core', 'abdomen'], category: { name: 'Pilates', iconName: '🎯' }, description: 'Trabajo profundo de core con técnica Pilates clásica.' },
+      { id: 'v5', title: 'Cardio Dance Funk', instructorName: 'Sofia Reyes', difficulty: 'beginner', durationSeconds: 2400, viewCount: 21000, likeCount: 1250, caloriesBurned: 400, muscleGroups: ['full_body'], equipmentNeeded: ['none'], tags: ['baile', 'cardio', 'divertido'], category: { name: 'Dance', iconName: '💃' }, description: 'Quema calorías bailando al ritmo del funk.' },
+      { id: 'v6', title: 'Sentadillas 100 Reps Challenge', instructorName: 'Carlos Mendez', difficulty: 'advanced', durationSeconds: 900, viewCount: 18500, likeCount: 980, caloriesBurned: 220, muscleGroups: ['legs', 'glutes'], equipmentNeeded: ['none'], tags: ['piernas', 'challenge', 'glúteos'], category: { name: 'HIIT', iconName: '⚡' }, description: 'El reto definitivo de 100 sentadillas en el menor tiempo posible.' },
+      { id: 'v7', title: 'Movilidad y Flexibilidad Total', instructorName: 'Ana García', difficulty: 'beginner', durationSeconds: 3000, viewCount: 8200, likeCount: 567, caloriesBurned: 90, muscleGroups: ['full_body'], equipmentNeeded: ['mat'], tags: ['movilidad', 'recuperación', 'stretching'], category: { name: 'Yoga', iconName: '🧘' }, description: 'Sesión completa de movilidad y estiramientos para recuperación activa.' },
+      { id: 'v8', title: 'Kettlebell Power - 45 minutos', instructorName: 'Miguel Torres', difficulty: 'advanced', durationSeconds: 2700, viewCount: 5600, likeCount: 312, caloriesBurned: 450, muscleGroups: ['full_body'], equipmentNeeded: ['kettlebell'], tags: ['kettlebell', 'potencia', 'fuerza'], category: { name: 'Fuerza', iconName: '💪' }, description: 'Entrenamiento funcional de alta potencia con kettlebell.' },
+    ];
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planes y Precios - WacoPro Fitness</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0F172A; color: #E2E8F0; min-height: 100vh; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(15,23,42,.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .nav-logo { font-size: 22px; font-weight: 800; background: linear-gradient(135deg,#3B82F6,#8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links a { color: #94A3B8; text-decoration: none; margin-left: 28px; font-size: 15px; transition: color .2s; }
+    .nav-links a:hover { color: #fff; }
+    .btn-nav { background: #3B82F6; color: #fff !important; padding: 8px 20px; border-radius: 8px; }
+    .hero { text-align: center; padding: 80px 20px 60px; }
+    .hero h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 900; margin-bottom: 16px; }
+    .hero h1 span { background: linear-gradient(135deg,#3B82F6,#8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 20px; color: #94A3B8; max-width: 600px; margin: 0 auto 32px; }
+    .toggle-billing { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 60px; }
+    .toggle-billing label { color: #94A3B8; font-size: 15px; cursor: pointer; }
+    .toggle { position: relative; display: inline-block; width: 52px; height: 28px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #334155; border-radius: 28px; transition: .3s; }
+    .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+    input:checked + .slider { background: #3B82F6; }
+    input:checked + .slider:before { transform: translateX(24px); }
+    .badge-save { background: #10B981; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; margin-left: 8px; }
+    .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+    .plan-card { background: #1E293B; border: 1px solid #334155; border-radius: 20px; padding: 36px; position: relative; transition: transform .2s, box-shadow .2s; }
+    .plan-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+    .plan-card.featured { border-color: #3B82F6; background: linear-gradient(135deg, #1E3A5F 0%, #1E293B 100%); }
+    .plan-card.featured::before { content: '⭐ Popular'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #3B82F6; color: #fff; font-size: 12px; font-weight: 700; padding: 4px 16px; border-radius: 20px; }
+    .plan-name { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+    .plan-name.free { color: #94A3B8; }
+    .plan-name.pro { color: #3B82F6; }
+    .plan-name.premium { color: #8B5CF6; }
+    .plan-price { font-size: 52px; font-weight: 900; margin-bottom: 4px; }
+    .plan-price sup { font-size: 24px; vertical-align: top; margin-top: 10px; display: inline-block; }
+    .plan-price sub { font-size: 18px; color: #94A3B8; font-weight: 400; }
+    .plan-trial { color: #10B981; font-size: 13px; margin-bottom: 24px; font-weight: 600; }
+    .plan-divider { border: none; border-top: 1px solid #334155; margin: 24px 0; }
+    .plan-features { list-style: none; margin-bottom: 32px; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; font-size: 15px; color: #CBD5E1; }
+    .plan-features li::before { content: '✓'; color: #10B981; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .btn-plan { display: block; width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; text-decoration: none; text-align: center; }
+    .btn-free { background: transparent; border: 2px solid #475569; color: #E2E8F0; }
+    .btn-free:hover { border-color: #94A3B8; }
+    .btn-pro { background: #3B82F6; color: #fff; }
+    .btn-pro:hover { background: #2563EB; transform: scale(1.02); }
+    .btn-premium { background: linear-gradient(135deg, #8B5CF6, #A78BFA); color: #fff; }
+    .btn-premium:hover { transform: scale(1.02); }
+    .faq { max-width: 800px; margin: 0 auto; padding: 0 20px 80px; }
+    .faq h2 { font-size: 32px; font-weight: 800; text-align: center; margin-bottom: 40px; }
+    .faq-item { border: 1px solid #334155; border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+    .faq-question { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 600; user-select: none; }
+    .faq-question:hover { background: #1E293B; }
+    .faq-answer { padding: 0 24px; max-height: 0; overflow: hidden; transition: max-height .3s, padding .3s; color: #94A3B8; line-height: 1.7; }
+    .faq-item.open .faq-answer { max-height: 200px; padding: 0 24px 20px; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-arrow { transition: transform .3s; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #1E293B; border-radius: 20px; padding: 40px; max-width: 420px; width: 90%; text-align: center; }
+    .modal h3 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+    .modal p { color: #94A3B8; margin-bottom: 24px; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #3B82F6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 14px 20px; font-size: 14px; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all .3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: #EF4444; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">💪 WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pricing">Precios</a>
+    <a href="/login" class="btn-nav" id="nav-cta">Comenzar</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>El plan perfecto para tu<br><span>objetivo fitness</span></h1>
+  <p>Desde seguimiento básico hasta coaching con IA. Cancela cuando quieras.</p>
+
+  <div class="toggle-billing">
+    <label>Mensual</label>
+    <label class="toggle">
+      <input type="checkbox" id="billing-toggle">
+      <span class="slider"></span>
+    </label>
+    <label>Anual <span class="badge-save">Ahorra 20%</span></label>
+  </div>
+</section>
+
+<div class="plans" id="plans-container">
+  <!-- Se renderizan con JS -->
+  <div style="text-align:center;padding:40px;grid-column:1/-1;color:#94A3B8;">
+    <div class="spinner"></div>
+    Cargando planes...
+  </div>
+</div>
+
+<section class="faq">
+  <h2>Preguntas frecuentes</h2>
+
+  <div class="faq-item">
+    <div class="faq-question">¿Puedo cancelar en cualquier momento? <span class="faq-arrow">▼</span></div>
+    <div class="faq-answer">Sí, puedes cancelar cuando quieras. Mantendrás acceso hasta el final del período pagado.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-question">¿Cómo funciona el período de prueba? <span class="faq-arrow">▼</span></div>
+    <div class="faq-answer">Pro tiene 7 días gratis y Premium 14 días gratis. No se cobra hasta que termina el trial. Puedes cancelar antes sin costo.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-question">¿Qué métodos de pago aceptan? <span class="faq-arrow">▼</span></div>
+    <div class="faq-answer">Aceptamos tarjetas Visa, Mastercard, American Express, Apple Pay y Google Pay a través de Stripe.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-question">¿Puedo cambiar de plan? <span class="faq-arrow">▼</span></div>
+    <div class="faq-answer">Sí, puedes subir o bajar de plan en cualquier momento desde tu portal de facturación.</div>
+  </div>
+</section>
+
+<!-- Loading modal -->
+<div class="modal-overlay" id="loading-modal">
+  <div class="modal">
+    <div class="spinner"></div>
+    <h3>Redirigiendo a Stripe</h3>
+    <p>Serás redirigido al checkout seguro en un momento...</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('token');
+let isAnnual = false;
+
+// Actualizar nav si está logueado
+if (token) {
+  document.getElementById('nav-cta').textContent = 'Mi Dashboard';
+  document.getElementById('nav-cta').href = '/dashboard';
+}
+
+// Verificar si viene de éxito/cancelación
+const params = new URLSearchParams(location.search);
+if (params.get('success') === 'true') showToast('✅ ¡Suscripción activada!', false);
+if (params.get('canceled') === 'true') showToast('Checkout cancelado', true);
+
+// Toggle facturación
+document.getElementById('billing-toggle').addEventListener('change', (e) => {
+  isAnnual = e.target.checked;
+  renderPlans(window.plansData);
+});
+
+// Cargar planes
+async function loadPlans() {
+  try {
+    const res = await fetch(`${API}/payments/plans`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    window.plansData = data.data;
+    renderPlans(data.data);
+  } catch (err) {
+    document.getElementById('plans-container').innerHTML =
+      `<p style="text-align:center;grid-column:1/-1;color:#EF4444;">Error cargando planes: ${err.message}</p>`;
+  }
+}
+
+function renderPlans(plans) {
+  const container = document.getElementById('plans-container');
+  container.innerHTML = plans.map(plan => {
+    const monthlyPrice = isAnnual ? (plan.priceMonthly * 0.8).toFixed(2) : plan.priceMonthly.toFixed(2);
+    const isFeatured = plan.id === 'pro';
+    const isCurrentPlan = false; // TODO: verificar suscripción actual
+
+    return `
+      <div class="plan-card ${isFeatured ? 'featured' : ''}">
+        <div class="plan-name ${plan.id}">${plan.name}</div>
+        <div class="plan-price">
+          ${plan.price === 0 ? '<sup></sup>Gratis' : `<sup>$</sup>${monthlyPrice}<sub>/mes</sub>`}
+        </div>
+        ${plan.trialDays > 0 ? `<div class="plan-trial">✨ ${plan.trialDays} días gratis</div>` : '<div style="height:20px"></div>'}
+        <hr class="plan-divider">
+        <ul class="plan-features">
+          ${plan.features.map(f => `<li>${f}</li>`).join('')}
+        </ul>
+        ${plan.id === 'free'
+          ? `<a href="${token ? '/dashboard' : '/register'}" class="btn-plan btn-free">
+              ${token ? 'Tu plan actual' : 'Crear cuenta gratis'}
+             </a>`
+          : `<button type="button" class="btn-plan btn-${plan.id}" onclick="startCheckout('${plan.id}')">
+              Empezar ${plan.trialDays > 0 ? `con ${plan.trialDays} días gratis` : 'ahora'}
+             </button>`
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+async function startCheckout(planId) {
+  if (!token) {
+    localStorage.setItem('pendingPlan', planId);
+    window.location.href = '/login?redirect=pricing';
+    return;
+  }
+
+  document.getElementById('loading-modal').classList.add('show');
+
+  try {
+    const res = await fetch(`${API}/payments/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ planId }),
+    });
+    const data = await res.json();
+
+    if (!data.success) throw new Error(data.error);
+    window.location.href = data.data.url;
+  } catch (err) {
+    document.getElementById('loading-modal').classList.remove('show');
+    showToast(`Error: ${err.message}`, true);
+  }
+}
+
+function showToast(msg, isError) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `toast show ${isError ? 'error' : ''}`;
+  setTimeout(() => toast.className = 'toast', 4000);
+}
+
+// FAQ
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    item.classList.toggle('open');
+  });
+});
+
+loadPlans();
+</script>
+</body>
+</html>

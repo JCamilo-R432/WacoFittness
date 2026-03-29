@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programas de Entrenamiento — WacoPro</title>
+  <style>
+    :root { --primary:#6c63ff;--secondary:#ff6b6b;--accent:#00d9a6;--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a3e;--text:#e2e8f0;--muted:#718096;--border:rgba(108,99,255,0.2);--glow:0 0 20px rgba(108,99,255,0.4); }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+    nav{background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:1.5rem;transition:color .2s;}
+    .nav-links a:hover{color:var(--primary);}
+    .hero{padding:3rem 2rem 2rem;max-width:1200px;margin:0 auto;}
+    .hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;line-height:1.2;}
+    .hero h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .hero p{color:var(--muted);margin-top:.75rem;font-size:1.05rem;}
+
+    /* GOAL TABS */
+    .goal-tabs{max-width:1200px;margin:1.5rem auto;padding:0 2rem;display:flex;gap:.5rem;overflow-x:auto;scrollbar-width:none;}
+    .goal-tab{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+    .goal-tab.active,.goal-tab:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+    /* FILTERS */
+    .filters{max-width:1200px;margin:.75rem auto;padding:0 2rem;display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;}
+    .filter-select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.45rem .8rem;border-radius:8px;font-size:.85rem;outline:none;cursor:pointer;}
+    .search-box{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1rem;border-radius:999px;font-size:.9rem;outline:none;width:220px;}
+    .search-box:focus{border-color:var(--primary);}
+
+    /* MY PROGRAMS STRIP */
+    .section{max-width:1200px;margin:0 auto;padding:1.5rem 2rem;}
+    .section-title{font-size:1.1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+    .section-title::before{content:'';width:4px;height:1.2rem;background:linear-gradient(var(--primary),var(--accent));border-radius:2px;}
+
+    .my-strip{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none;}
+    .my-card{min-width:220px;background:linear-gradient(135deg,rgba(108,99,255,.15),rgba(0,217,166,.08));border:1px solid var(--border);border-radius:12px;padding:1rem;flex-shrink:0;cursor:pointer;transition:transform .2s;}
+    .my-card:hover{transform:translateY(-2px);}
+    .my-card h4{font-size:.9rem;font-weight:700;margin-bottom:.5rem;}
+    .progress-bar-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin:.5rem 0;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width .6s ease;}
+    .progress-label{font-size:.75rem;color:var(--muted);}
+
+    /* PROGRAMS GRID */
+    .programs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;}
+    .program-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+    .program-card:hover{transform:translateY(-4px);box-shadow:var(--glow);border-color:var(--primary);}
+    .program-thumb{height:180px;display:flex;align-items:center;justify-content:center;font-size:4rem;position:relative;overflow:hidden;}
+    .program-thumb img{width:100%;height:100%;object-fit:cover;}
+    .program-badge{position:absolute;top:.75rem;left:.75rem;display:flex;gap:.4rem;}
+    .badge{font-size:.7rem;font-weight:800;padding:.25rem .6rem;border-radius:999px;}
+    .badge-free{background:rgba(0,217,166,.2);color:var(--accent);border:1px solid var(--accent);}
+    .badge-diff-beginner{background:rgba(0,217,166,.15);color:var(--accent);}
+    .badge-diff-intermediate{background:rgba(245,158,11,.15);color:#f59e0b;}
+    .badge-diff-advanced{background:rgba(239,68,68,.15);color:#ef4444;}
+    .program-body{padding:1.25rem;}
+    .program-cat{font-size:.75rem;color:var(--primary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;}
+    .program-title{font-size:1.05rem;font-weight:800;margin-bottom:.5rem;}
+    .program-desc{font-size:.82rem;color:var(--muted);margin-bottom:.85rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .program-stats{display:flex;gap:1rem;font-size:.8rem;color:var(--muted);margin-bottom:1rem;}
+    .program-footer{display:flex;justify-content:space-between;align-items:center;}
+    .program-price{font-size:1.1rem;font-weight:800;color:var(--accent);}
+    .program-price.free{color:var(--accent);}
+    .enroll-btn{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.5rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .enroll-btn:hover{opacity:.85;}
+    .enroll-btn.enrolled{background:rgba(0,217,166,.15);color:var(--accent);border:1px solid var(--accent);}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;max-width:680px;width:100%;max-height:88vh;overflow-y:auto;position:relative;}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.1);border:none;color:var(--text);width:32px;height:32px;border-radius:50%;cursor:pointer;}
+    .modal-hero{height:220px;background:linear-gradient(135deg,var(--surface2),rgba(108,99,255,.3));border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:center;font-size:5rem;}
+    .modal-body{padding:1.5rem;}
+    .modal-body h2{font-size:1.5rem;font-weight:800;margin-bottom:.5rem;}
+    .modal-meta{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
+    .meta-chip{background:rgba(108,99,255,.1);border:1px solid var(--border);color:var(--primary);font-size:.78rem;padding:.3rem .7rem;border-radius:999px;}
+    .modal-desc{color:var(--muted);font-size:.9rem;line-height:1.6;margin-bottom:1.25rem;}
+    .weeks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+    .week-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;}
+    .week-card h4{font-size:.85rem;font-weight:700;margin-bottom:.4rem;color:var(--primary);}
+    .week-card p{font-size:.78rem;color:var(--muted);}
+    .modal-enroll-btn{width:100%;padding:.9rem;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;}
+    .modal-enroll-btn.enrolled{background:rgba(0,217,166,.15);color:var(--accent);border:2px solid var(--accent);}
+
+    .loading{text-align:center;padding:4rem;color:var(--muted);}
+    .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .empty{text-align:center;padding:4rem;color:var(--muted);}
+
+    /* GOAL-ICON MAP */
+    .goal-icon{font-size:1rem;margin-right:.3rem;}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">⚡ WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/virtual-classes">Clases</a>
+    <a href="/programs" style="color:var(--primary)">Programas</a>
+    <a href="/on-demand">Videos</a>
+    <a href="/coaches">Coaches</a>
+    <a href="/fitness-challenges">Retos</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Programas de <span>Entrenamiento</span></h1>
+  <p>Programas estructurados de 4 a 12 semanas para alcanzar tus objetivos en casa.</p>
+</div>
+
+<!-- GOAL TABS -->
+<div class="goal-tabs" id="goalTabs">
+  <button type="button" class="goal-tab active" onclick="setGoal('', this)">🌟 Todos</button>
+  <button type="button" class="goal-tab" onclick="setGoal('weight_loss', this)">🔥 Perder Peso</button>
+  <button type="button" class="goal-tab" onclick="setGoal('muscle_building', this)">💪 Ganar Músculo</button>
+  <button type="button" class="goal-tab" onclick="setGoal('strength', this)">🏋️ Fuerza</button>
+  <button type="button" class="goal-tab" onclick="setGoal('endurance', this)">🏃 Resistencia</button>
+  <button type="button" class="goal-tab" onclick="setGoal('flexibility', this)">🤸 Flexibilidad</button>
+  <button type="button" class="goal-tab" onclick="setGoal('hiit', this)">⚡ HIIT</button>
+  <button type="button" class="goal-tab" onclick="setGoal('yoga', this)">🧘 Yoga</button>
+  <button type="button" class="goal-tab" onclick="setGoal('beginner', this)">🌱 Principiante</button>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <input class="search-box" id="searchInput" placeholder="🔍 Buscar programas..." />
+  <select class="filter-select" id="diffFilter" onchange="loadPrograms()">
+    <option value="">Dificultad</option>
+    <option value="beginner">Principiante</option>
+    <option value="intermediate">Intermedio</option>
+    <option value="advanced">Avanzado</option>
+  </select>
+  <select class="filter-select" id="weeksFilter" onchange="loadPrograms()">
+    <option value="">Duración</option>
+    <option value="4">≤ 4 semanas</option>
+    <option value="8">≤ 8 semanas</option>
+    <option value="12">≤ 12 semanas</option>
+  </select>
+  <select class="filter-select" id="freeFilter" onchange="loadPrograms()">
+    <option value="">Precio</option>
+    <option value="true">Solo gratuitos</option>
+    <option value="false">Premium</option>
+  </select>
+</div>
+
+<!-- MY PROGRAMS -->
+<div class="section" id="mySection" style="display:none">
+  <div class="section-title">📊 Mis programas activos</div>
+  <div class="my-strip" id="myStrip"></div>
+</div>
+
+<!-- PROGRAMS GRID -->
+<div class="section">
+  <div class="section-title">📋 Catálogo de programas</div>
+  <div class="programs-grid" id="programsGrid">
+    <div class="loading"><div class="spinner"></div><p>Cargando...</p></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="programModal">
+  <div class="modal">
+    <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-hero" id="modalHero">🏋️</div>
+    <div class="modal-body">
+      <div id="modalBadges" style="display:flex;gap:.5rem;margin-bottom:.75rem;"></div>
+      <h2 id="modalTitle"></h2>
+      <div class="modal-meta" id="modalMeta"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div id="modalWeeks" class="weeks-grid"></div>
+      <button type="button" class="modal-enroll-btn" id="modalEnrollBtn" onclick="handleEnroll()">Comenzar programa</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '/api';
+  const token = localStorage.getItem('token');
+  let currentGoal = '';
+  let currentProgramId = null;
+  let searchTimer;
+
+  const GOAL_ICONS = { weight_loss:'🔥',muscle_building:'💪',strength:'🏋️',endurance:'🏃',flexibility:'🤸',hiit:'⚡',yoga:'🧘',beginner:'🌱',default:'🏅' };
+  const CAT_ICONS = { beginner:'🌱',hiit:'⚡',yoga:'🧘',strength:'🏋️',weight_loss:'🔥',muscle_building:'💪',endurance:'🏃',flexibility:'🤸',default:'🏅' };
+  const DIFF_LABELS = { beginner:'Principiante',intermediate:'Intermedio',advanced:'Avanzado' };
+
+  async function api(path, opts = {}) {
+    const r = await fetch(API + path, { headers: { Authorization: `Bearer ${token}`, 'Content-Type':'application/json', ...opts.headers }, ...opts });
+    return r.json();
+  }
+
+  function setGoal(goal, btn) {
+    currentGoal = goal;
+    document.querySelectorAll('.goal-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadPrograms();
+  }
+
+  function buildParams() {
+    const p = new URLSearchParams();
+    if (currentGoal) p.set('goal', currentGoal);
+    const diff = document.getElementById('diffFilter').value;
+    const weeks = document.getElementById('weeksFilter').value;
+    const free = document.getElementById('freeFilter').value;
+    const q = document.getElementById('searchInput').value.trim();
+    if (diff) p.set('difficulty', diff);
+    if (weeks) p.set('maxWeeks', weeks);
+    if (free) p.set('isFree', free);
+    if (q) p.set('search', q);
+    p.set('limit', '12');
+    return p;
+  }
+
+  async function loadMyPrograms() {
+    if (!token) return;
+    const { enrollments } = await api('/programs/my');
+    if (!enrollments?.length) return;
+    document.getElementById('mySection').style.display = 'block';
+    document.getElementById('myStrip').innerHTML = enrollments.map(e => `
+      <div class="my-card" onclick="openModal('${e.programId}')">
+        <h4>${e.program.name}</h4>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${e.progressPercent}%"></div></div>
+        <div class="progress-label">${Math.round(e.progressPercent)}% completado · Semana ${e.currentWeek}/${e.program.durationWeeks}</div>
+      </div>`).join('');
+  }
+
+  async function loadPrograms() {
+    const grid = document.getElementById('programsGrid');
+    grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>';
+    const data = await api('/programs?' + buildParams());
+    if (!data.programs?.length) { grid.innerHTML = '<div class="empty"><p style="font-size:3rem;opacity:.4">📭</p><p>No hay programas con esos filtros</p></div>'; return; }
+    grid.innerHTML = data.programs.map(renderProgramCard).join('');
+  }
+
+  function renderProgramCard(p) {
+    const icon = CAT_ICONS[p.category] || CAT_ICONS.default;
+    const diff = DIFF_LABELS[p.difficulty] || p.difficulty;
+    return `
+    <div class="program-card" onclick="openModal('${p.id}')">
+      <div class="program-thumb" style="background:linear-gradient(135deg,var(--surface2),rgba(108,99,255,.25));">
+        ${p.thumbnailUrl ? `<img src="${p.thumbnailUrl}" alt="${p.name}" />` : `<span style="font-size:4rem">${icon}</span>`}
+        <div class="program-badge">
+          <span class="badge badge-diff-${p.difficulty}">${diff}</span>
+          ${p.isFree ? '<span class="badge badge-free">GRATIS</span>' : ''}
+        </div>
+      </div>
+      <div class="program-body">
+        <div class="program-cat">${p.category?.replace(/_/g,' ').toUpperCase()}</div>
+        <div class="program-title">${p.name}</div>
+        <div class="program-desc">${p.description || ''}</div>
+        <div class="program-stats">
+          <span>📅 ${p.durationWeeks} semanas</span>
+          <span>🗓 ${p.workoutsPerWeek}x/semana</span>
+          <span>⭐ ${p.rating?.toFixed(1) || '–'}</span>
+          <span>👥 ${p.enrollmentCount}</span>
+        </div>
+        <div class="program-footer">
+          <div class="program-price ${p.isFree ? 'free' : ''}">${p.isFree ? 'GRATIS' : `$${p.price}`}</div>
+          <button type="button" class="enroll-btn" onclick="event.stopPropagation();quickEnroll('${p.id}', this)">Comenzar</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function openModal(programId) {
+    currentProgramId = programId;
+    const { program: p } = await api(`/programs/${programId}`);
+    const icon = CAT_ICONS[p.category] || '🏅';
+    document.getElementById('modalHero').textContent = icon;
+    document.getElementById('modalTitle').textContent = p.name;
+    document.getElementById('modalBadges').innerHTML = `
+      <span class="badge badge-diff-${p.difficulty}">${DIFF_LABELS[p.difficulty]}</span>
+      ${p.isFree ? '<span class="badge badge-free">GRATIS</span>' : `<span class="badge" style="background:rgba(108,99,255,.15);color:var(--primary);border:1px solid var(--border)">$${p.price}</span>`}`;
+    document.getElementById('modalMeta').innerHTML = `
+      <span class="meta-chip">📅 ${p.durationWeeks} semanas</span>
+      <span class="meta-chip">🗓 ${p.workoutsPerWeek}x semana</span>
+      <span class="meta-chip">⭐ ${p.rating?.toFixed(1) || '–'}</span>
+      <span class="meta-chip">👥 ${p.enrollmentCount} inscritos</span>
+      ${p.equipmentNeeded?.length ? `<span class="meta-chip">🏠 ${p.equipmentNeeded.slice(0,2).join(', ')}</span>` : ''}`;
+    document.getElementById('modalDesc').textContent = p.description || '';
+    document.getElementById('modalWeeks').innerHTML = (p.weeks || []).slice(0, 6).map(w => `
+      <div class="week-card">
+        <h4>Semana ${w.weekNumber}${w.theme ? ` — ${w.theme}` : ''}</h4>
+        <p>${w.days?.filter(d => !d.isRestDay).length || 0} entrenamientos · ${w.days?.filter(d => d.isRestDay).length || 0} descansos</p>
+      </div>`).join('');
+    const btn = document.getElementById('modalEnrollBtn');
+    if (p.enrollment) { btn.textContent = '✓ Ya estás inscrito — Continuar'; btn.className = 'modal-enroll-btn enrolled'; }
+    else { btn.textContent = 'Comenzar programa'; btn.className = 'modal-enroll-btn'; }
+    document.getElementById('programModal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('programModal').classList.remove('open'); }
+
+  async function handleEnroll() {
+    if (!token) { alert('Inicia sesión para inscribirte'); return; }
+    const res = await api(`/programs/${currentProgramId}/enroll`, { method: 'POST' });
+    if (res.success) {
+      const btn = document.getElementById('modalEnrollBtn');
+      btn.textContent = '✓ Inscrito exitosamente'; btn.className = 'modal-enroll-btn enrolled';
+      loadMyPrograms(); loadPrograms();
+    } else { alert(res.error || 'Error al inscribirse'); }
+  }
+
+  async function quickEnroll(id, btn) {
+    if (!token) { alert('Inicia sesión'); return; }
+    const res = await api(`/programs/${id}/enroll`, { method: 'POST' });
+    if (res.success) { btn.textContent = '✓ Inscrito'; btn.className = 'enroll-btn enrolled'; }
+  }
+
+  document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimer); searchTimer = setTimeout(loadPrograms, 400);
+  });
+  document.getElementById('programModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+  loadMyPrograms();
+  loadPrograms();
+</script>
+</body>
+</html>

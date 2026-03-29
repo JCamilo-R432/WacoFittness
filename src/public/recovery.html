@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recuperación Avanzada — WacoPro</title>
+  <meta name="description" content="Monitoreo avanzado de recuperación con HRV y métricas de sueño">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+  <script src="/js/app-init.js" defer></script>
+  <style>
+    :root{--primary:#6c63ff;--secondary:#ff6b6b;--accent:#00d9a6;--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a3e;--text:#e2e8f0;--muted:#718096;--border:rgba(108,99,255,0.2);--glow:0 0 20px rgba(108,99,255,0.4);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+    nav{background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:1.5rem;transition:color .2s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--primary);}
+    .btn-logout{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;}
+    .container{max-width:1200px;margin:0 auto;padding:2rem;}
+    h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;margin-bottom:.4rem;}
+    h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .subtitle{color:var(--muted);margin-bottom:2rem;font-size:1rem;}
+    /* SCORE HERO */
+    .score-hero{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:2rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;}
+    .score-circle{width:120px;height:120px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+    .score-circle svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+    .score-value{font-size:2.2rem;font-weight:900;position:relative;z-index:1;}
+    .score-label{font-size:.65rem;font-weight:700;text-transform:uppercase;color:var(--muted);position:relative;z-index:1;}
+    .score-info h2{font-size:1.15rem;font-weight:800;margin-bottom:.4rem;}
+    .score-rec{font-size:.9rem;color:var(--muted);margin-bottom:.75rem;line-height:1.5;}
+    .score-badge{display:inline-block;padding:.35rem 1rem;border-radius:999px;font-size:.82rem;font-weight:700;}
+    .score-great{background:rgba(0,217,166,.15);color:var(--accent);border:1px solid rgba(0,217,166,.3);}
+    .score-good{background:rgba(108,99,255,.15);color:var(--primary);border:1px solid rgba(108,99,255,.3);}
+    .score-moderate{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3);}
+    .score-rest{background:rgba(255,107,107,.15);color:var(--secondary);border:1px solid rgba(255,107,107,.3);}
+    /* METRICS GRID */
+    .metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:2rem;}
+    .metric-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem;transition:border-color .2s;}
+    .metric-card:hover{border-color:var(--primary);}
+    .metric-icon{font-size:1.8rem;margin-bottom:.5rem;}
+    .metric-label{font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;margin-bottom:.25rem;}
+    .metric-value{font-size:1.6rem;font-weight:800;}
+    .metric-sub{font-size:.75rem;color:var(--muted);margin-top:.2rem;}
+    /* CHARTS */
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem;}
+    .chart-title{font-size:.83rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;letter-spacing:.05em;}
+    .mini-bars{display:flex;align-items:flex-end;gap:4px;height:80px;}
+    .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .bar{width:100%;border-radius:4px 4px 0 0;transition:height .6s;min-height:2px;}
+    .bar-label{font-size:.6rem;color:var(--muted);}
+    /* LOG FORM */
+    .log-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem;}
+    .log-section h3{font-size:.9rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;letter-spacing:.05em;}
+    .sliders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem;}
+    .slider-group label{display:flex;justify-content:space-between;font-size:.83rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    .slider-group label span{color:var(--text);font-weight:700;}
+    input[type=range]{width:100%;accent-color:var(--primary);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.2rem;}
+    .form-group label{display:block;font-size:.83rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    .form-group input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);padding:.65rem .9rem;border-radius:10px;font-size:.9rem;outline:none;}
+    .form-group input:focus{border-color:var(--primary);}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.65rem 1.5rem;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .btn-primary:hover{opacity:.85;}
+    /* HISTORY */
+    .history-table{width:100%;border-collapse:collapse;}
+    .history-table th{font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--border);}
+    .history-table td{padding:.6rem .75rem;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.04);}
+    .score-pill{display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface2);border:1px solid var(--accent);color:var(--accent);padding:.75rem 1.5rem;border-radius:12px;font-size:.88rem;font-weight:600;z-index:500;transform:translateX(200%);transition:transform .3s;}
+    .toast.show{transform:translateX(0);}
+    @media(max-width:768px){.charts-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr 1fr;}}
+    @media(max-width:480px){.form-row{grid-template-columns:1fr;}.score-hero{flex-direction:column;text-align:center;}}
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:var(--primary);color:#fff;padding:.5rem 1rem;border-radius:4px;font-weight:700;text-decoration:none;" onfocus="this.style.left='1rem';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Saltar al contenido principal</a>
+
+<nav role="navigation" aria-label="Navegación principal">
+  <a href="/dashboard" class="nav-brand" aria-label="WACOPRO FITNESS - Inicio">WACOPRO FITNESS</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/wearables">Wearables</a>
+    <a href="/recovery" class="active">Recuperación</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <span id="navUser" style="color:var(--muted);font-size:.85rem;"></span>
+    <button class="btn-logout" onclick="logout()">SALIR</button>
+  </div>
+</nav>
+
+<main id="main-content"><div class="container">
+  <h1>💤 Recuperación <span>Avanzada</span></h1>
+  <p class="subtitle">HRV, sueño, fatiga muscular y score de recuperación diario</p>
+
+  <!-- Score Hero -->
+  <div class="score-hero">
+    <div class="score-circle" id="scoreCircle">
+      <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/><circle id="scoreArc" cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 327"/></svg>
+      <span class="score-value" id="scoreValue">—</span>
+      <span class="score-label">SCORE</span>
+    </div>
+    <div class="score-info">
+      <h2 id="scoreTitle">Calculando recuperación...</h2>
+      <p class="score-rec" id="scoreRec">Registra tus métricas de hoy para obtener tu score de recuperación personalizado.</p>
+      <span class="score-badge score-good" id="scoreBadge">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Metrics Row -->
+  <div class="metrics-grid">
+    <div class="metric-card"><div class="metric-icon">💓</div><div class="metric-label">HRV Hoy</div><div class="metric-value" id="metHrv">—</div><div class="metric-sub">ms</div></div>
+    <div class="metric-card"><div class="metric-icon">❤️</div><div class="metric-label">FC Reposo</div><div class="metric-value" id="metHr">—</div><div class="metric-sub">bpm</div></div>
+    <div class="metric-card"><div class="metric-icon">😴</div><div class="metric-label">Sueño</div><div class="metric-value" id="metSleep">—</div><div class="metric-sub">horas</div></div>
+    <div class="metric-card"><div class="metric-icon">⚡</div><div class="metric-label">Energía</div><div class="metric-value" id="metEnergy">—</div><div class="metric-sub">/ 10</div></div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">HRV últimos 7 días</div>
+      <div class="mini-bars" id="hrvChart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Horas de sueño (14 días)</div>
+      <div class="mini-bars" id="sleepChart"></div>
+    </div>
+  </div>
+
+  <!-- Log Form -->
+  <div class="log-section">
+    <h3>Registrar Métricas de Hoy</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>HRV (ms)</label>
+        <input type="number" id="logHrv" placeholder="Ej: 65" min="0" max="200" />
+      </div>
+      <div class="form-group">
+        <label>FC Reposo (bpm)</label>
+        <input type="number" id="logHr" placeholder="Ej: 55" min="30" max="150" />
+      </div>
+      <div class="form-group">
+        <label>Horas Dormido</label>
+        <input type="number" id="logSleep" placeholder="Ej: 7.5" step="0.5" min="0" max="24" />
+      </div>
+    </div>
+    <div class="sliders-grid">
+      <div class="slider-group">
+        <label>Calidad de Sueño <span id="sleepQVal">5</span>/10</label>
+        <input type="range" id="logSleepQ" min="1" max="10" value="5" oninput="document.getElementById('sleepQVal').textContent=this.value" />
+      </div>
+      <div class="slider-group">
+        <label>Nivel de Fatiga <span id="fatigueVal">5</span>/10</label>
+        <input type="range" id="logFatigue" min="1" max="10" value="5" oninput="document.getElementById('fatigueVal').textContent=this.value" />
+      </div>
+      <div class="slider-group">
+        <label>Nivel de Estrés <span id="stressVal">5</span>/10</label>
+        <input type="range" id="logStress" min="1" max="10" value="5" oninput="document.getElementById('stressVal').textContent=this.value" />
+      </div>
+      <div class="slider-group">
+        <label>Dolor Muscular <span id="sorenessVal">5</span>/10</label>
+        <input type="range" id="logSoreness" min="1" max="10" value="5" oninput="document.getElementById('sorenessVal').textContent=this.value" />
+      </div>
+      <div class="slider-group">
+        <label>Nivel de Energía <span id="energyVal">5</span>/10</label>
+        <input type="range" id="logEnergy" min="1" max="10" value="5" oninput="document.getElementById('energyVal').textContent=this.value" />
+      </div>
+    </div>
+    <div style="margin-top:1.2rem;">
+      <button class="btn-primary" onclick="logMetrics()">Guardar Métricas de Hoy</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;">
+    <h3 style="font-size:.9rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;letter-spacing:.05em;">Historial (30 días)</h3>
+    <div style="overflow-x:auto;">
+      <table class="history-table">
+        <thead><tr><th>Fecha</th><th>Score</th><th>HRV</th><th>FC Reposo</th><th>Sueño</th><th>Energía</th><th>Fatiga</th></tr></thead>
+        <tbody id="historyBody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:1rem;">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('token') || sessionStorage.getItem('token');
+if (!token) window.location.href = '/login';
+const headers = { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` };
+
+async function init() {
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers });
+    if (!r.ok) throw new Error();
+    const { data } = await r.json();
+    document.getElementById('navUser').textContent = data.name || data.email;
+  } catch { window.location.href = '/login'; }
+  await Promise.all([loadScore(), loadMetrics(), loadHRV(), loadSleep()]);
+}
+
+async function loadScore() {
+  try {
+    const r = await fetch(`${API}/recovery/score`, { headers });
+    const { data } = await r.json();
+    const s = data.score;
+    document.getElementById('scoreValue').textContent = s;
+    document.getElementById('scoreRec').textContent = data.recommendation;
+    const arc = Math.round((s/100) * 326.7);
+    document.getElementById('scoreArc').setAttribute('stroke-dasharray', `${arc} ${327-arc}`);
+    let cls='score-good', title='Buena Recuperación';
+    if (s>=80){cls='score-great';title='Excelente Recuperación';}
+    else if (s>=60){cls='score-good';title='Buena Recuperación';}
+    else if (s>=40){cls='score-moderate';title='Recuperación Moderada';}
+    else{cls='score-rest';title='Recuperación Baja';}
+    document.getElementById('scoreBadge').className='score-badge '+cls;
+    document.getElementById('scoreBadge').textContent=title;
+    document.getElementById('scoreTitle').textContent=title;
+    document.getElementById('scoreArc').style.stroke = s>=80?'var(--accent)':s>=60?'var(--primary)':s>=40?'#f59e0b':'var(--secondary)';
+    if (data.metric) {
+      document.getElementById('metHrv').textContent = data.metric.hrv ?? '—';
+      document.getElementById('metHr').textContent = data.metric.restingHeartRate ?? '—';
+      document.getElementById('metSleep').textContent = data.metric.sleepHours ?? '—';
+      document.getElementById('metEnergy').textContent = data.metric.energyLevel ?? '—';
+    }
+  } catch {}
+}
+
+async function loadMetrics() {
+  try {
+    const r = await fetch(`${API}/recovery/metrics?days=30`, { headers });
+    const { data } = await r.json();
+    const tbody = document.getElementById('historyBody');
+    if (!data?.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);">Sin datos aún. Registra tus primeras métricas.</td></tr>';return;}
+    tbody.innerHTML = data.map(m => {
+      const s = m.recoveryScore??0;
+      const cls = s>=80?'score-great':s>=60?'score-good':s>=40?'score-moderate':'score-rest';
+      return `<tr>
+        <td>${new Date(m.date).toLocaleDateString('es')}</td>
+        <td><span class="score-pill ${cls}">${s}</span></td>
+        <td>${m.hrv??'—'}</td><td>${m.restingHeartRate??'—'}</td>
+        <td>${m.sleepHours??'—'}h</td><td>${m.energyLevel??'—'}/10</td><td>${m.fatigueLevel??'—'}/10</td>
+      </tr>`;
+    }).join('');
+  } catch {}
+}
+
+async function loadHRV() {
+  try {
+    const r = await fetch(`${API}/recovery/hrv?days=7`, { headers });
+    const { data } = await r.json();
+    const metrics = data?.metrics || [];
+    const chart = document.getElementById('hrvChart');
+    if (!metrics.length){chart.innerHTML='<p style="color:var(--muted);font-size:.8rem;align-self:center;">Sin datos HRV</p>';return;}
+    const max = Math.max(...metrics.map(m=>m.hrv||0),1);
+    chart.innerHTML = metrics.map(m=>`
+      <div class="bar-wrap">
+        <div class="bar" style="height:${Math.round((m.hrv||0)/max*76)}px;background:linear-gradient(180deg,var(--primary),var(--accent));"></div>
+        <div class="bar-label">${new Date(m.date).getDate()}</div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function loadSleep() {
+  try {
+    const r = await fetch(`${API}/recovery/sleep?days=14`, { headers });
+    const { data } = await r.json();
+    const metrics = data?.metrics || [];
+    const chart = document.getElementById('sleepChart');
+    if (!metrics.length){chart.innerHTML='<p style="color:var(--muted);font-size:.8rem;align-self:center;">Sin datos de sueño</p>';return;}
+    chart.innerHTML = metrics.map(m=>`
+      <div class="bar-wrap">
+        <div class="bar" style="height:${Math.round((m.sleepHours||0)/10*76)}px;background:${(m.sleepHours||0)>=7?'linear-gradient(180deg,var(--accent),#00d9a6aa)':'linear-gradient(180deg,var(--secondary),var(--secondary)88)'};"></div>
+        <div class="bar-label">${new Date(m.date).getDate()}</div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function logMetrics() {
+  const body = {
+    hrv: parseFloat(document.getElementById('logHrv').value)||undefined,
+    restingHeartRate: parseInt(document.getElementById('logHr').value)||undefined,
+    sleepHours: parseFloat(document.getElementById('logSleep').value)||undefined,
+    sleepQuality: parseInt(document.getElementById('logSleepQ').value),
+    fatigueLevel: parseInt(document.getElementById('logFatigue').value),
+    stressLevel: parseInt(document.getElementById('logStress').value),
+    muscleSoreness: parseInt(document.getElementById('logSoreness').value),
+    energyLevel: parseInt(document.getElementById('logEnergy').value),
+  };
+  try {
+    const r = await fetch(`${API}/recovery/log`, { method:'POST', headers, body:JSON.stringify(body) });
+    if (!r.ok) throw new Error();
+    showToast('Métricas guardadas. Score actualizado.');
+    await Promise.all([loadScore(), loadMetrics(), loadHRV(), loadSleep()]);
+  } catch { showToast('Error al guardar métricas'); }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+function logout(){localStorage.removeItem('token');sessionStorage.removeItem('token');window.location.href='/login';}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Analytics - WacoPro Fitness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0F172A; color: #E2E8F0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .container { text-align: center; padding: 2rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; color: #3B82F6; }
+    p { color: #64748B; margin-bottom: 1.5rem; }
+    a { color: #3B82F6; text-decoration: none; padding: 0.5rem 1.5rem; border: 1px solid #3B82F6; border-radius: 8px; }
+    a:hover { background: rgba(59,130,246,0.1); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin — Analytics</h1>
+    <p>Esta sección está integrada en el panel de administración principal.</p>
+    <a href="/admin-dashboard">Ir al Admin Dashboard</a>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "name": "WacoPro Fitness",
+  "short_name": "WacoPro",
+  "description": "Tu plataforma de fitness y bienestar - Entrena, come y recupera mejor",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a1a",
+  "theme_color": "#6c63ff",
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "sports"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "Ver resumen del día"
+    },
+    {
+      "name": "Registrar Entreno",
+      "url": "/workout-builder",
+      "description": "Registrar entrenamiento"
+    },
+    {
+      "name": "Nutrición",
+      "url": "/meal-planner",
+      "description": "Ver plan de nutrición"
+    },
+    {
+      "name": "Recovery",
+      "url": "/recovery",
+      "description": "Score de recuperación"
+    }
+  ]
+}

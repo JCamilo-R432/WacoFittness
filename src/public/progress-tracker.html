@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seguimiento de Progreso — WacoPro</title>
+  <style>
+    :root{--primary:#6c63ff;--secondary:#ff6b6b;--accent:#00d9a6;--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a3e;--text:#e2e8f0;--muted:#718096;--border:rgba(108,99,255,0.2);--glow:0 0 20px rgba(108,99,255,0.4);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+    nav{background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;margin-left:1.5rem;transition:color .2s;}
+    .nav-links a:hover{color:var(--primary);}
+    .container{max-width:1200px;margin:0 auto;padding:2rem;}
+    h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;margin-bottom:.5rem;}
+    h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .subtitle{color:var(--muted);margin-bottom:2rem;font-size:1.05rem;}
+
+    /* STAT CARDS */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;text-align:center;transition:transform .2s;}
+    .stat-card:hover{transform:translateY(-2px);}
+    .stat-icon{font-size:1.8rem;margin-bottom:.5rem;}
+    .stat-value{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .stat-label{font-size:.8rem;color:var(--muted);margin-top:.25rem;}
+
+    /* STREAK */
+    .streak-banner{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(108,99,255,.15));border:1px solid rgba(245,158,11,.3);border-radius:16px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;}
+    .streak-fire{font-size:2.5rem;}
+    .streak-info h3{font-size:1.1rem;font-weight:800;color:#f59e0b;}
+    .streak-info p{font-size:.85rem;color:var(--muted);}
+
+    /* TABS */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.5rem;}
+    .tab{background:none;border:none;color:var(--muted);padding:.75rem 1.25rem;cursor:pointer;font-size:.9rem;font-weight:600;border-bottom:2px solid transparent;transition:all .2s;}
+    .tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+    .tab:hover{color:var(--text);}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+
+    /* MEASUREMENTS */
+    .meas-form{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+    .meas-form h3{font-size:1rem;font-weight:700;margin-bottom:1rem;}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;}
+    .form-group{display:flex;flex-direction:column;gap:.3rem;}
+    .form-group label{font-size:.78rem;color:var(--muted);}
+    .form-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.5rem .75rem;border-radius:8px;font-size:.9rem;outline:none;width:100%;}
+    .form-input:focus{border-color:var(--primary);}
+    .save-btn{margin-top:1rem;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.65rem 1.5rem;border-radius:10px;font-weight:700;cursor:pointer;font-size:.9rem;}
+
+    /* MEASUREMENTS LIST */
+    .meas-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+    .meas-table th{text-align:left;padding:.5rem .75rem;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);}
+    .meas-table td{padding:.65rem .75rem;border-bottom:1px solid rgba(108,99,255,.1);}
+    .meas-table tr:hover td{background:rgba(108,99,255,.05);}
+    .delta-pos{color:var(--accent);}
+    .delta-neg{color:var(--secondary);}
+
+    /* CHART PLACEHOLDER */
+    .chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;height:280px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;position:relative;overflow:hidden;}
+    .chart-canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+    /* PHOTOS */
+    .photo-upload-btn{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;padding:.65rem 1.5rem;border-radius:10px;font-weight:700;cursor:pointer;font-size:.9rem;margin-bottom:1.25rem;}
+    .angle-tabs{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .angle-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.35rem .9rem;border-radius:999px;font-size:.82rem;cursor:pointer;transition:all .2s;}
+    .angle-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;}
+    .photo-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;aspect-ratio:3/4;}
+    .photo-card img{width:100%;height:100%;object-fit:cover;}
+    .photo-card-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:.5rem;display:flex;justify-content:space-between;align-items:flex-end;}
+    .photo-date{font-size:.72rem;color:rgba(255,255,255,.8);}
+    .photo-delete{background:rgba(239,68,68,.8);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:.7rem;}
+    .photo-weight{font-size:.7rem;color:var(--accent);}
+    .photo-upload-form{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;display:none;}
+    .photo-upload-form.open{display:block;}
+
+    .loading{text-align:center;padding:3rem;color:var(--muted);}
+    .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .empty{text-align:center;padding:3rem;color:var(--muted);}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">⚡ WacoPro</div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/virtual-classes">Clases</a>
+    <a href="/programs">Programas</a>
+    <a href="/progress-tracker" style="color:var(--primary)">Progreso</a>
+    <a href="/fitness-challenges">Retos</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Mi <span>Progreso</span></h1>
+  <p class="subtitle">Fotos, medidas y estadísticas de tu transformación.</p>
+
+  <!-- STATS -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+
+  <!-- STREAK -->
+  <div class="streak-banner" id="streakBanner" style="display:none">
+    <div class="streak-fire">🔥</div>
+    <div class="streak-info">
+      <h3 id="streakValue">0 días seguidos</h3>
+      <p id="streakSub">Récord: 0 días</p>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button type="button" class="tab active" onclick="switchTab('measurements', this)">📏 Medidas</button>
+    <button type="button" class="tab" onclick="switchTab('photos', this)">📸 Fotos</button>
+    <button type="button" class="tab" onclick="switchTab('chart', this)">📊 Gráficas</button>
+  </div>
+
+  <!-- MEASUREMENTS TAB -->
+  <div class="tab-content active" id="tab-measurements">
+    <div class="meas-form">
+      <h3>Registrar medidas de hoy</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>Peso (kg)</label><input class="form-input" id="m_weight" type="number" step="0.1" placeholder="75.5" /></div>
+        <div class="form-group"><label>Grasa corporal (%)</label><input class="form-input" id="m_bf" type="number" step="0.1" placeholder="18.5" /></div>
+        <div class="form-group"><label>Músculo (%)</label><input class="form-input" id="m_muscle" type="number" step="0.1" placeholder="42" /></div>
+        <div class="form-group"><label>Cintura (cm)</label><input class="form-input" id="m_waist" type="number" step="0.1" placeholder="80" /></div>
+        <div class="form-group"><label>Cadera (cm)</label><input class="form-input" id="m_hips" type="number" step="0.1" placeholder="95" /></div>
+        <div class="form-group"><label>Pecho (cm)</label><input class="form-input" id="m_chest" type="number" step="0.1" placeholder="100" /></div>
+        <div class="form-group"><label>Brazo (cm)</label><input class="form-input" id="m_arm" type="number" step="0.1" placeholder="35" /></div>
+        <div class="form-group"><label>Muslo (cm)</label><input class="form-input" id="m_thigh" type="number" step="0.1" placeholder="55" /></div>
+      </div>
+      <div class="form-group" style="margin-top:.75rem;"><label>Notas</label><input class="form-input" id="m_notes" placeholder="Cómo te sientes hoy..." /></div>
+      <button type="button" class="save-btn" onclick="saveMeasurement()">💾 Guardar medidas</button>
+    </div>
+
+    <div id="measTableWrap"><div class="loading"><div class="spinner"></div><p>Cargando medidas...</p></div></div>
+  </div>
+
+  <!-- PHOTOS TAB -->
+  <div class="tab-content" id="tab-photos">
+    <button type="button" class="photo-upload-btn" onclick="toggleUploadForm()">📷 Subir foto de progreso</button>
+
+    <div class="photo-upload-form" id="uploadForm">
+      <div class="form-grid">
+        <div class="form-group"><label>URL de foto</label><input class="form-input" id="p_url" placeholder="https://..." /></div>
+        <div class="form-group"><label>Ángulo</label>
+          <select class="form-input" id="p_angle">
+            <option value="front">Frente</option><option value="back">Espalda</option>
+            <option value="side_left">Lado izquierdo</option><option value="side_right">Lado derecho</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Peso (kg)</label><input class="form-input" id="p_weight" type="number" step="0.1" /></div>
+        <div class="form-group"><label>Grasa (%)</label><input class="form-input" id="p_bf" type="number" step="0.1" /></div>
+      </div>
+      <div class="form-group" style="margin-top:.75rem;"><label>Notas</label><input class="form-input" id="p_notes" placeholder="Notas opcionales" /></div>
+      <div style="display:flex;gap:.75rem;margin-top:.75rem;">
+        <button type="button" class="save-btn" onclick="savePhoto()">💾 Guardar foto</button>
+        <button type="button" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.6rem 1.2rem;border-radius:10px;cursor:pointer;" onclick="toggleUploadForm()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="angle-tabs">
+      <button type="button" class="angle-btn active" onclick="setAngle('', this)">Todas</button>
+      <button type="button" class="angle-btn" onclick="setAngle('front', this)">Frente</button>
+      <button type="button" class="angle-btn" onclick="setAngle('back', this)">Espalda</button>
+      <button type="button" class="angle-btn" onclick="setAngle('side_left', this)">Lado izq.</button>
+      <button type="button" class="angle-btn" onclick="setAngle('side_right', this)">Lado der.</button>
+    </div>
+
+    <div class="photos-grid" id="photosGrid">
+      <div class="loading"><div class="spinner"></div><p>Cargando fotos...</p></div>
+    </div>
+  </div>
+
+  <!-- CHART TAB -->
+  <div class="tab-content" id="tab-chart">
+    <div class="chart-wrap" id="weightChart">
+      <p style="color:var(--muted);text-align:center;">
+        <span style="font-size:3rem;display:block;margin-bottom:.75rem">📊</span>
+        Registra más medidas para ver tu gráfica de progreso de peso.<br>
+        <span style="font-size:.85rem">Mínimo 2 registros necesarios.</span>
+      </p>
+    </div>
+    <div class="chart-wrap" id="bfChart">
+      <p style="color:var(--muted);text-align:center;">
+        <span style="font-size:3rem;display:block;margin-bottom:.75rem">💪</span>
+        Gráfica de grasa corporal.<br>
+        <span style="font-size:.85rem">Registra tu % de grasa para activar esta gráfica.</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '/api';
+  const token = localStorage.getItem('token');
+  let currentAngle = '';
+
+  async function api(path, opts = {}) {
+    const r = await fetch(API + path, { headers: { Authorization: `Bearer ${token}`, 'Content-Type':'application/json', ...opts.headers }, ...opts });
+    return r.json();
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  async function loadStats() {
+    const [{ stats }, { currentStreak, longestStreak }] = await Promise.all([
+      api('/progress/stats'),
+      api('/progress/streak'),
+    ]);
+
+    const grid = document.getElementById('statsGrid');
+    const wDelta = stats?.weightChange;
+    const bfDelta = stats?.bodyFatChange;
+
+    grid.innerHTML = `
+      <div class="stat-card"><div class="stat-icon">🏋️</div><div class="stat-value">${stats?.workoutCount || 0}</div><div class="stat-label">Entrenamientos completados</div></div>
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value">${stats?.programsCompleted || 0}</div><div class="stat-label">Programas completados</div></div>
+      <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value">${stats?.challengesCompleted || 0}</div><div class="stat-label">Retos ganados</div></div>
+      <div class="stat-card"><div class="stat-icon">📸</div><div class="stat-value">${stats?.photoCount || 0}</div><div class="stat-label">Fotos de progreso</div></div>
+      ${stats?.latestMeasurement?.weightKg ? `<div class="stat-card"><div class="stat-icon">⚖️</div><div class="stat-value">${Number(stats.latestMeasurement.weightKg).toFixed(1)} kg</div><div class="stat-label">Peso actual ${wDelta !== null ? `<span class="${wDelta <= 0 ? 'delta-pos' : 'delta-neg'}">(${wDelta > 0 ? '+' : ''}${wDelta?.toFixed(1)} kg)</span>` : ''}</div></div>` : ''}
+      ${stats?.latestMeasurement?.bodyFatPct ? `<div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-value">${Number(stats.latestMeasurement.bodyFatPct).toFixed(1)}%</div><div class="stat-label">Grasa corporal ${bfDelta !== null ? `<span class="${bfDelta <= 0 ? 'delta-pos' : 'delta-neg'}">(${bfDelta > 0 ? '+' : ''}${bfDelta?.toFixed(1)}%)</span>` : ''}</div></div>` : ''}`;
+
+    if (currentStreak > 0 || longestStreak > 0) {
+      document.getElementById('streakBanner').style.display = 'flex';
+      document.getElementById('streakValue').textContent = `🔥 ${currentStreak} días seguidos`;
+      document.getElementById('streakSub').textContent = `Tu récord: ${longestStreak} días · ¡Sigue así!`;
+    }
+  }
+
+  async function loadMeasurements() {
+    const { measurements } = await api('/progress/measurements?limit=20');
+    const wrap = document.getElementById('measTableWrap');
+    if (!measurements?.length) { wrap.innerHTML = '<div class="empty"><p style="font-size:3rem;opacity:.4">📏</p><p>Aún no has registrado medidas.</p></div>'; return; }
+
+    let prev = null;
+    wrap.innerHTML = `<table class="meas-table">
+      <thead><tr><th>Fecha</th><th>Peso</th><th>Grasa%</th><th>Cintura</th><th>Cadera</th><th>Brazo</th></tr></thead>
+      <tbody>${measurements.map((m, i) => {
+        const row = `<tr>
+          <td>${new Date(m.date).toLocaleDateString('es')}</td>
+          <td>${m.weightKg ? Number(m.weightKg).toFixed(1) + ' kg' : '–'}</td>
+          <td>${m.bodyFatPct ? Number(m.bodyFatPct).toFixed(1) + '%' : '–'}</td>
+          <td>${m.waistCm ? Number(m.waistCm).toFixed(0) + ' cm' : '–'}</td>
+          <td>${m.hipsCm ? Number(m.hipsCm).toFixed(0) + ' cm' : '–'}</td>
+          <td>${m.armCm ? Number(m.armCm).toFixed(0) + ' cm' : '–'}</td>
+        </tr>`;
+        return row;
+      }).join('')}</tbody>
+    </table>`;
+  }
+
+  async function saveMeasurement() {
+    if (!token) { alert('Inicia sesión'); return; }
+    const body = {};
+    const get = id => document.getElementById(id).value;
+    if (get('m_weight')) body.weightKg = Number(get('m_weight'));
+    if (get('m_bf')) body.bodyFatPct = Number(get('m_bf'));
+    if (get('m_muscle')) body.muscleMassPct = Number(get('m_muscle'));
+    if (get('m_waist')) body.waistCm = Number(get('m_waist'));
+    if (get('m_hips')) body.hipsCm = Number(get('m_hips'));
+    if (get('m_chest')) body.chestCm = Number(get('m_chest'));
+    if (get('m_arm')) body.armCm = Number(get('m_arm'));
+    if (get('m_thigh')) body.thighCm = Number(get('m_thigh'));
+    if (get('m_notes')) body.notes = get('m_notes');
+    const res = await api('/progress/measurements', { method: 'POST', body: JSON.stringify(body) });
+    if (res.success) { loadMeasurements(); loadStats(); ['m_weight','m_bf','m_muscle','m_waist','m_hips','m_chest','m_arm','m_thigh','m_notes'].forEach(id => { document.getElementById(id).value = ''; }); }
+    else alert(res.error || 'Error al guardar');
+  }
+
+  async function loadPhotos() {
+    const q = currentAngle ? `?angle=${currentAngle}` : '';
+    const { photos } = await api('/progress/photos' + q);
+    const grid = document.getElementById('photosGrid');
+    if (!photos?.length) { grid.innerHTML = '<div class="empty"><p style="font-size:3rem;opacity:.4">📸</p><p>Aún no tienes fotos. Sube tu primera foto de progreso.</p></div>'; return; }
+    grid.innerHTML = photos.map(p => `
+      <div class="photo-card">
+        <img src="${p.photoUrl}" alt="Progreso ${p.angle}" />
+        <div class="photo-card-overlay">
+          <div><div class="photo-date">${new Date(p.takenAt).toLocaleDateString('es')}</div>${p.weightKg ? `<div class="photo-weight">${Number(p.weightKg).toFixed(1)} kg</div>` : ''}</div>
+          <button type="button" class="photo-delete" onclick="deletePhoto('${p.id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function setAngle(angle, btn) {
+    currentAngle = angle;
+    document.querySelectorAll('.angle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadPhotos();
+  }
+
+  function toggleUploadForm() {
+    document.getElementById('uploadForm').classList.toggle('open');
+  }
+
+  async function savePhoto() {
+    if (!token) { alert('Inicia sesión'); return; }
+    const url = document.getElementById('p_url').value.trim();
+    if (!url) { alert('La URL de la foto es requerida'); return; }
+    const body = {
+      photoUrl: url,
+      angle: document.getElementById('p_angle').value,
+      weightKg: document.getElementById('p_weight').value ? Number(document.getElementById('p_weight').value) : undefined,
+      bodyFatPct: document.getElementById('p_bf').value ? Number(document.getElementById('p_bf').value) : undefined,
+      notes: document.getElementById('p_notes').value,
+    };
+    const res = await api('/progress/photos', { method: 'POST', body: JSON.stringify(body) });
+    if (res.success) { toggleUploadForm(); loadPhotos(); loadStats(); }
+    else alert(res.error || 'Error al guardar');
+  }
+
+  async function deletePhoto(id) {
+    if (!confirm('¿Eliminar esta foto?')) return;
+    const res = await api(`/progress/photos/${id}`, { method: 'DELETE' });
+    if (res.success) { loadPhotos(); loadStats(); }
+  }
+
+  loadStats();
+  loadMeasurements();
+  loadPhotos();
+</script>
+</body>
+</html>
